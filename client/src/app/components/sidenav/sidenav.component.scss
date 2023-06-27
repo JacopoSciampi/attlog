@@ -1,0 +1,26 @@
+@import '../../../assets/style/palette.scss';
+
+$active-gradient: linear-gradient(0deg, #293e5a, #2f4964 100%);
+
+.sidenav {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background: $gradient-dark;
+
+    .menu-item {
+        width: 100%;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        padding-left: $space-large;
+        gap: $space-tiny;
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .menu-item-active {
+        background: $active-gradient;
+    }
+}

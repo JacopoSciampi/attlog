@@ -1,0 +1,28 @@
+<div class="sidenav">
+    <div class="menu-item" [ngClass]="{'menu-item-active': idActive === 'homepage'}"
+        (click)="setMenuItemActive('homepage')">
+        <home-outline-icon></home-outline-icon>
+        Homepage
+    </div>
+    <div class="menu-item" [ngClass]="{'menu-item-active': idActive === 'customers'}"
+        (click)="setMenuItemActive('customers')">
+        <user-outline-icon></user-outline-icon>
+        Clienti
+    </div>
+    <div class="menu-item" [ngClass]="{'menu-item-active': idActive === 'terminal'}"
+        (click)="setMenuItemActive('terminal')">
+        <computer-desktop-outline-icon></computer-desktop-outline-icon>
+        Terminali
+    </div>
+    <div class="menu-item" [ngClass]="{'menu-item-active': idActive === 'stamps'}"
+        (click)="setMenuItemActive('stamps')">
+        <bars-4-outline-icon></bars-4-outline-icon>
+        Timbrature
+    </div>
+
+    <div class="menu-item" [ngClass]="{'menu-item-active': idActive === 'settings'}"
+        (click)="setMenuItemActive('settings')">
+        <cog-6-tooth-outline-icon></cog-6-tooth-outline-icon>
+        Impostazioni
+    </div>
+</div>

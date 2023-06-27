@@ -1,0 +1,38 @@
+@import './palette.scss';
+
+.mdc-data-table__row,
+.mat-mdc-table .mdc-data-table__header-row {
+    background: $gradient-dark !important;
+}
+
+.mdc-data-table__row:last-child .mdc-data-table__cell,
+.mdc-data-table__header-cell {
+    color: $fg !important;
+}
+
+td {
+    color: $fg !important;
+    user-select: text !important;
+}
+
+// range date picker
+.available.in-range {
+    background-color: #f21d1d !important;
+}
+
+.available.off {
+    background-color: #959595 !important;
+}
+
+.md-drppicker,
+.calendar-table {
+    background: #181a1b !important;
+}
+
+.md-drppicker.ltr .calendar.left .calendar-table {
+    border-right: 1px solid !important;
+}
+
+.calendar.right {
+    border-left: 1px solid;
+}

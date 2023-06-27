@@ -1,0 +1,22 @@
+<div class="modal-container">
+    <div class="modal-header">
+        <div class="modal-title">Aggiungi terminale</div>
+        <div class="modal-close">
+            <x-circle-outline-icon class="field-clickable" (click)="closeMe()"></x-circle-outline-icon>
+        </div>
+    </div>
+    <div class="modal-content grid grid-2">
+        <div class="field">
+            <div class="title">IP:Porta Terminale</div>
+            <input type="text" #ip>
+        </div>
+        <div class="field">
+            <div class="title">Cliente</div>
+            <input type="text">
+        </div>
+    </div>
+    <div class="modal-footer">
+        <div class="button">Todo</div>
+        <div class="button" (click)="onTestIp(ip.value)">Test IP</div>
+    </div>
+</div>

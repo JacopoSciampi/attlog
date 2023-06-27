@@ -1,0 +1,15 @@
+<div class="navbar">
+    <div class="title">
+        Rilevazione Presenze
+    </div>
+    <div class="right-bar">
+        <div class="field">
+            <user-outline-icon></user-outline-icon>
+            {{username}}
+        </div>
+        <div class="field clickable" (click)="authService.logout()" matTooltip="Logout">
+            <arrow-right-on-rectangle-outline-icon></arrow-right-on-rectangle-outline-icon>
+            Logout
+        </div>
+    </div>
+</div>

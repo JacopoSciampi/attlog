@@ -1,0 +1,38 @@
+@import './palette.scss';
+
+.modal-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    .modal-header,
+    .modal-footer {
+        height: 45px;
+        display: flex;
+        align-items: center;
+        padding: 0px $space-normal;
+    }
+
+    .modal-title {
+        font-size: 18px;
+        font-family: 'font-bold', Arial, Helvetica, sans-serif;
+    }
+
+    .modal-header {
+        justify-content: space-between;
+        background: $gradient-dark;
+    }
+
+    .modal-footer {
+        background: $gradient-light;
+        justify-content: flex-end;
+        gap: $space-normal;
+    }
+
+    .modal-content {
+        height: calc(100% - 90px);
+        background-color: $bg;
+        overflow-y: auto;
+        padding: $space-normal;
+    }
+}

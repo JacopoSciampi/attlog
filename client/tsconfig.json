@@ -1,0 +1,82 @@
+{
+	"compileOnSave": false,
+	"compilerOptions": {
+		"baseUrl": "./",
+		"outDir": "./dist/out-tsc",
+		"forceConsistentCasingInFileNames": true,
+		"strict": false,
+		"strictNullChecks": false,
+		"noImplicitAny": false,
+		"noImplicitOverride": true,
+		"noPropertyAccessFromIndexSignature": false,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"sourceMap": true,
+		"declaration": false,
+		"downlevelIteration": true,
+		"experimentalDecorators": true,
+		"moduleResolution": "node",
+		"importHelpers": true,
+		"allowSyntheticDefaultImports": true,
+		"target": "ES2022",
+		"module": "ES2022",
+		"useDefineForClassFields": false,
+		"lib": [
+			"ES2022",
+			"dom"
+		],
+		"paths": {
+			"@components/*": [
+				"src/app/components/*"
+			],
+			"@services/*": [
+				"src/app/services/*"
+			],
+			"@models/*": [
+				"src/app/models/*"
+			],
+			"@assets/*": [
+				"src/assets/*"
+			],
+			"@static/*": [
+				"src/app/static/*"
+			],
+			"@enum/*": [
+				"src/app/enum/*"
+			],
+			"@stub/*": [
+				"src/app/stub/*"
+			],
+			"@pipes/*": [
+				"src/app/pipes/*"
+			],
+			"@directives/*": [
+				"src/app/directives/*"
+			],
+			"@ui/*": [
+				"src/app/ui/*"
+			],
+			"@modals/*": [
+				"src/app/modals/*"
+			],
+			"@decorators/*": [
+				"src/app/decorators/*"
+			],
+			"@types/*": [
+				"src/app/types/*"
+			],
+			"@utils/*": [
+				"src/app/utils/*"
+			],
+			"@const/*": [
+				"src/app/const/*"
+			]
+		}
+	},
+	"angularCompilerOptions": {
+		"enableI18nLegacyMessageIdFormat": false,
+		"strictInjectionParameters": false,
+		"strictInputAccessModifiers": false,
+		"strictTemplates": false
+	}
+}

@@ -1,0 +1,13 @@
+<ng-container *ngIf="!initDone">
+    <router-outlet></router-outlet>
+</ng-container>
+<ng-container *ngIf="initDone">
+    <app-navbar *ngIf="initDone"></app-navbar>
+    <div class="ro">
+        <app-sidenav></app-sidenav>
+        <div class="content">
+            <router-outlet></router-outlet>
+            <app-footer></app-footer>
+        </div>
+    </div>
+</ng-container>

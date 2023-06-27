@@ -1,0 +1,24 @@
+<div class="modal-container">
+    <div class="modal-header">
+        <div class="modal-title">Aggiungi cliente</div>
+        <div class="modal-close">
+            <x-circle-outline-icon class="field-clickable" (click)="closeMe()"></x-circle-outline-icon>
+        </div>
+    </div>
+    <div class="modal-content">
+        <form class="grid grid-2" [formGroup]="form">
+            <div class="field">
+                <div class="title">Nome cliente</div>
+                <input type="text" formControlName="name">
+            </div>
+            <div class="field">
+                <div class="title">Indirizzo email</div>
+                <input type="text" formControlName="mail">
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <div class="button" [ngClass]="canSendRequest ? 'button-primary' : 'button-disabled'"
+            (click)="canSendRequest && onSaveCustomer()">Salva</div>
+    </div>
+</div>

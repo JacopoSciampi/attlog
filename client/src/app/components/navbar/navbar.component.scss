@@ -1,0 +1,32 @@
+@import '../../../assets/style/palette.scss';
+
+.navbar {
+    height: 100%;
+    display: flex;
+
+    .title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: $sidebar-w;
+        background-color: $dark;
+        font-family: "font-bold", Arial, Helvetica, sans-serif;
+    }
+
+    .right-bar {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 0px $space-large;
+        background: $gradient-dark;
+        flex: 1;
+        box-shadow: 0px 2px 37px 4px rgba(0, 0, 0, 0.62);
+        gap: $space-normal;
+
+        .field {
+            display: flex;
+            align-items: center;
+            gap: $space-less;
+        }
+    }
+}

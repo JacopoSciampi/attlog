@@ -1,0 +1,35 @@
+@import './mixin.scss';
+
+$bg: hsl(200, 6%, 10%);
+$fg: hsl(65, 43%, 95%);
+$primary: hsl(8, 80%, 56%);
+$secondary: hsl(207, 54%, 51%);
+$disabled-bg: hsl(0, 0%, 46%);
+$disabled-fg: hsl(0, 0%, 64%);
+
+$btn-primary: __dynamicColor__($secondary, 9, -13, -19);
+
+$dark: #101b2e;
+$gradient-dark: linear-gradient(0deg, #131b2d, #1a2b44 100%);
+$gradient-light: linear-gradient(0deg, #18273d, #304d70 100%);
+
+$modal-bg: __dynamicColor__($bg, 0, 0, 6);
+$primary-light: __dynamicColor__($primary, 0, 1, 5);
+$secondary-light: __dynamicColor__($secondary, 0, 1, 5);
+
+
+$space-less: 4px;
+$space-tiny: 8px;
+$space-normal: 16px;
+$space-large: 32px;
+$space-huge: 64px;
+
+$radius: 4px;
+
+$width-menu: 300px;
+$width-game-item: 1600px;
+$width-navbar: 48px;
+
+$sidebar-w: 300px;
+$-navbar: 50px;
+$-footer: 30px;

@@ -1,0 +1,15 @@
+@function __toAlpha__($color, $alpha) {
+    $h: hue($color);
+    $s: saturation($color);
+    $l: lightness($color);
+
+    @return hsla($h, $s, $l, $alpha);
+}
+
+@function __dynamicColor__($color, $h, $s, $l) {
+    $_h: hue($color)+$h;
+    $_s: saturation($color)+$s;
+    $_l: lightness($color)+$l;
+
+    @return hsla($_h, $_s, $_l);
+}
