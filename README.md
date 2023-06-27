@@ -14,7 +14,7 @@ KC:
 
 General: 
 
-/v3/ -> private token, never share
 /v1/ -> KC token
-
-cors -> enable only for localhost/fe when deployed &&&& SAME ORIGIN
+FE Cloks-> add filter for customerName / online
+        -> add terminal modal
+        -> edit row -> change infos (not the SN or state)

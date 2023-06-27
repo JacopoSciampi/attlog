@@ -131,6 +131,10 @@ class JekoPgInit {
                         j();
                     }
 
+                    data?.rows?.forEach(item => {
+                        item['online'] = new Date().getTime() - +item.c_last_timestamp < 60000;
+                    });
+
                     r(data);
                 });
         });

@@ -60,7 +60,6 @@ export class TerminalComponent implements OnInit {
             .subscribe({
                 next: (data) => {
                     data?.data?.forEach(item => {
-                        item.online = new Date().getTime() - +item.c_last_timestamp < 60000;
                         item.tooltip = `Ultimo check: ${_.transform(new Date(+item.c_last_timestamp), "short")}`
                     });
 
