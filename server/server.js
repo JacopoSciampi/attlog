@@ -2,22 +2,31 @@ const JekoPgInit = require('./pg');
 const fastify = require('fastify')({ logger: true })
 const pgAdapter = new JekoPgInit();
 
+const internal_token = "uQOpixuDj/YtSlXjayO-dNBcsd2fKx14OBqMOmHikiUUXi6Zhg2UxufCQDg7ic=y/yn6i2VSV9K2EMxcGYpzrQSgDNgbbBBaWlc4Xlhc2mOhNAPAF?Y929cAUHXEj6GL5jzxhASk4Z6u?s/gdEjGXjP/PpQqDZvelyGnbhrZocCyYRxy!P5WXS!eu053XhUJV5zLl121glT?g54HPVX2kvvkyqENk1tWl3E/Otz-ErK7SItzubR59ElypGOPwm?f";
+
 fastify.register(require('@fastify/cors'), {
     origin: (origin, cb) => {
-        cb(null, true)
-        return;
+        if (!origin) {
+            cb(null, true)
+            return;
+        }
 
-        const hostname = new URL(origin).hostname
-        if (hostname === "localhost") {
+
+        if (new URL(origin).hostname === "localhost") {
             cb(null, true)
             return
         }
         cb(new Error("Not allowed"), false)
     }
 }).then(() => {
-    let userList = [];
-
     fastify.post('/v3/terminal/log/add', (request, reply) => {
+        const tkn = request.headers["x-token-ref"];
+
+        if (!tkn || tkn !== internal_token) {
+            reply.status(401).message({ msg: "Unauthorized" });
+            return;
+        }
+
         try {
             pgAdapter.addLogIfNotExist(request.body.sn, request.body.log).then(data => {
                 reply.status(200).send({ msg: "ok" });
@@ -34,8 +43,32 @@ fastify.register(require('@fastify/cors'), {
         }
     });
 
+    fastify.post('/v3/terminal/online', (request, reply) => {
+        const tkn = request.headers["x-token-ref"];
+
+        if (!tkn || tkn !== internal_token) {
+            reply.status(401).message({ msg: "Unauthorized" });
+            return;
+        }
+
+        const sn = request.body.sn;
+
+        if (sn) {
+            pgAdapter.updateClockTimestamp(sn).then(() => {
+                reply.status(200).send({ msg: `Clock ${sn} status updated` });
+                return;
+            }).catch(() => {
+                reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
+                return;
+            })
+        } else {
+            reply.status(500).send({ msg: "no serial number sent" });
+        }
+
+    });
+
     fastify.get('/', (request, reply) => {
-        reply.status(200).send({ a: "lol" });
+        reply.status(301).send({ message: "Unauthorized" });
     })
 
     fastify.get('/v1/customer/list', (request, reply) => {
@@ -98,8 +131,17 @@ fastify.register(require('@fastify/cors'), {
         });
     });
 
+    fastify.get('/v1/clocks', (request, reply) => {
+        const customerName = request.headers['x-customer-name'] || "";
 
-
+        pgAdapter.getClocks(customerName).then(data => {
+            reply.status(200).send({ data: data?.rows || [] });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
+            return;
+        });
+    });
 
     const start = async () => {
         try {

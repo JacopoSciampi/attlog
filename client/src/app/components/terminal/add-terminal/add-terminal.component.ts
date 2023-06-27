@@ -30,19 +30,4 @@ export class AddTerminalModalComponent {
     public closeMe(update?: boolean): void {
         this.dialogRef.close(update);
     }
-
-    public onTestIp(address: string): void {
-        let take = true;
-        this._service.testConnection(address).pipe(
-            takeWhile(() => take),
-            finalize(() => take = false)
-        ).subscribe({
-            next: () => {
-                this._toastService.generic("Risultato test", "Il terminale è online");
-            },
-            error: () => {
-                this._toastService.errorGeneric("Risultato test", "Il terminale è offline");
-            }
-        });
-    }
 }

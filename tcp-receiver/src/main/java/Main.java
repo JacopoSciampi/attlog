@@ -9,13 +9,16 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-
-public class main {
+public class Main {
     private static Set<String> clientSN = new HashSet<>();
+    private static String token_ref = "uQOpixuDj/YtSlXjayO-dNBcsd2fKx14OBqMOmHikiUUXi6Zhg2UxufCQDg7ic=y/yn6i2VSV9K2EMxcGYpzrQSgDNgbbBBaWlc4Xlhc2mOhNAPAF?Y929cAUHXEj6GL5jzxhASk4Z6u?s/gdEjGXjP/PpQqDZvelyGnbhrZocCyYRxy!P5WXS!eu053XhUJV5zLl121glT?g54HPVX2kvvkyqENk1tWl3E/Otz-ErK7SItzubR59ElypGOPwm?f";
 
     //C:385:INFO
 
     public static void main(String[] args) throws UnknownHostException {
+
+        //int port = 7777;
+        //InetAddress addr = InetAddress.getByName("192.168.0.112");
 
         int port = 3500;
         InetAddress addr = InetAddress.getByName("10.0.0.11");
@@ -59,14 +62,40 @@ public class main {
             cdataProcess(bReceive, socket);
         } else if (strReceive.contains("getrequest?")) {
             //getrequestProcess(bReceive, socket);
-
-            //QUERYATTLOG StartTime=%s\tEndTime=%s
+            sendDataInGet(bReceive);
             //sendDataToDevice("200 OK", "C:385:INFO", socket);
-            //sendDataToDevice("200 OK", "DATA DEL_USER PIN=2", socket);
-            sendDataToDevice("200 OK", "C:385:INFO", socket);
         } else if (strReceive.contains("devicecmd?")) {
             devicecmdProcess(bReceive, socket);
         }
+    }
+
+
+
+    private static void sendDataInGet(byte[] bReceive)  throws IOException {
+        String sBuffer = new String(bReceive, Charset.forName("US-ASCII"));
+
+        String machineSN = sBuffer.substring(sBuffer.indexOf("SN=") + 3);
+        String SN = "";
+        getNumber(machineSN, SN); // Get Serial Number of iclock Device
+
+        int attIndex = sBuffer.indexOf("\r\n\r\n", 1);
+        String attStr = sBuffer.substring(attIndex + 4);
+
+        URL url = new URL("http://localhost:8081/v3/terminal/online");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setRequestProperty("x-token-ref", token_ref);
+        String requestBody = "{\"sn\":\"" + machineSN.split("&")[0] + "\"}";
+
+        con.setDoOutput(true);
+        DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
+        outputStream.writeBytes(requestBody);
+        outputStream.flush();
+        outputStream.close();
+
+        int responseCode = con.getResponseCode();
+        System.out.println("update online request status: " + responseCode);
     }
 
     private static void  devicecmdProcess(byte[] bReceive, Socket remoteSocket) {
@@ -96,13 +125,13 @@ public class main {
             clientSN.add(SN);
         }
 
-            String strDevInfo = getValueByNameInPushHeader(sBuffer, "INFO");
-            if (strDevInfo == null || strDevInfo.isEmpty()) {
-                cmdString = "OK";
-            } else {
-                //updateDeviceInfo(device, strDevInfo);
-                cmdString = "OK";
-            }
+        String strDevInfo = getValueByNameInPushHeader(sBuffer, "INFO");
+        if (strDevInfo == null || strDevInfo.isEmpty()) {
+            cmdString = "OK";
+        } else {
+            //updateDeviceInfo(device, strDevInfo);
+            cmdString = "OK";
+        }
 
         sendDataToDevice(ReplyCode, cmdString, remoteSocket);
         try {
@@ -238,7 +267,7 @@ public class main {
         }
     }
 
-     private static void attLog(String sBuffer) throws IOException {
+    private static void attLog(String sBuffer) throws IOException {
         String machineSN = sBuffer.substring(sBuffer.indexOf("SN=") + 3);
         String SN = "";
         getNumber(machineSN, SN); // Get Serial Number of iclock Device
@@ -254,6 +283,7 @@ public class main {
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty("Content-Type", "application/json");
+        con.setRequestProperty("x-token-ref", token_ref);
         String requestBody = "{\"sn\":\"" + machineSN.split("&")[0] + "\",\"log\":\"" + attStr.replaceAll("\\t", "-").replaceAll("\\n", "") + "\"}";
 
 
@@ -263,8 +293,8 @@ public class main {
         outputStream.flush();
         outputStream.close();
 
-         int responseCode = con.getResponseCode();
-         System.out.println("addlog request status: " + responseCode);
+        int responseCode = con.getResponseCode();
+        System.out.println("addlog request status: " + responseCode);
     }
 
     private static void getNumber(String sBuffer, String numberStr) {

@@ -28,9 +28,6 @@ import { NgHeroiconsModule } from "@dimaslz/ng-heroicons";
         NgHeroiconsModule,
         MatDatepickerModule,
         NgxDaterangepickerMd,
-    ],
-    providers: [
-        StampService
     ]
 })
 export class StampsComponent implements OnInit {

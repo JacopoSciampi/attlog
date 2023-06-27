@@ -4,14 +4,13 @@
 
 CREATE TABLE IF NOT EXISTS public.clocks
 (
+    c_id SERIAL NOT NULL,
     c_sn character varying(150) COLLATE pg_catalog."default" NOT NULL,
     c_name character varying(150) COLLATE pg_catalog."default" NOT NULL,
     c_model character varying(150) COLLATE pg_catalog."default" NOT NULL,
-    c_status character varying(150) COLLATE pg_catalog."default" NOT NULL,
-    c_ip_address character varying(500) COLLATE pg_catalog."default" NOT NULL,
-    c_port character varying(10) COLLATE pg_catalog."default" NOT NULL,
+    c_last_timestamp character varying(150) COLLATE pg_catalog."default" NOT NULL,
     "fk_customer_id" bigint NOT NULL,
-    CONSTRAINT clocks_pkey PRIMARY KEY (c_sn)
+    CONSTRAINT clocks_pkey PRIMARY KEY (c_id)
 )
 
 TABLESPACE pg_default;

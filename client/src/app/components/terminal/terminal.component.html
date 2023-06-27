@@ -8,21 +8,34 @@
                 </th>
                 <td mat-cell *matCellDef="let element"></td>
             </ng-container>
-            <ng-container matColumnDef="terminalSN">
-                <th mat-header-cell *matHeaderCellDef> ID Terminale </th>
-                <td mat-cell *matCellDef="let element"> {{element.terminalSN}} </td>
+            <ng-container matColumnDef="c_sn">
+                <th mat-header-cell *matHeaderCellDef> Terminale </th>
+                <td mat-cell *matCellDef="let element"> {{element.c_sn}} </td>
             </ng-container>
-            <ng-container matColumnDef="terminalIP">
-                <th mat-header-cell *matHeaderCellDef> IP Terminale </th>
-                <td mat-cell *matCellDef="let element"> {{element.terminalIP}} </td>
+            <ng-container matColumnDef="c_name">
+                <th mat-header-cell *matHeaderCellDef> Nome </th>
+                <td mat-cell *matCellDef="let element"> {{element.c_name}} </td>
             </ng-container>
-            <ng-container matColumnDef="customer">
-                <th mat-header-cell *matHeaderCellDef> Nome cliente </th>
-                <td mat-cell *matCellDef="let element"> {{element.customer}} </td>
+            <ng-container matColumnDef="c_model">
+                <th mat-header-cell *matHeaderCellDef> Modello </th>
+                <td mat-cell *matCellDef="let element"> {{element.c_model}} </td>
+            </ng-container>
+            <ng-container matColumnDef="customer_name">
+                <th mat-header-cell *matHeaderCellDef> Cliente </th>
+                <td mat-cell *matCellDef="let element"> {{element.customer_name}} </td>
             </ng-container>
             <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef> Stato </th>
-                <td mat-cell *matCellDef="let element"> {{element.status}} </td>
+                <td mat-cell *matCellDef="let element">
+                    <span [matTooltip]="element.tooltip">
+                        <ng-container *ngIf="element.online">
+                            <signal-outline-icon svgStyle="stroke: #35f325;"></signal-outline-icon>
+                        </ng-container>
+                        <ng-container *ngIf="!element.online">
+                            <signal-slash-outline-icon svgStyle="stroke: #be2a2a;"></signal-slash-outline-icon>
+                        </ng-container>
+                    </span>
+                </td>
             </ng-container>
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>

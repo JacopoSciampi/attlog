@@ -118,6 +118,37 @@ class JekoPgInit {
         });
     }
 
+    getClocks(customerName) {
+        return new Promise((r, j) => {
+            pool.query(`SELECT c.c_id, c.c_sn, c.c_name, c.c_model, c.c_last_timestamp, cu.c_name AS customer_name
+            FROM public.clocks c
+            LEFT JOIN public.customers cu ON c.fk_customer_id = cu.customer_id
+            WHERE cu.c_name LIKE '${customerName}%'
+            ORDER BY c.c_sn ASC;`,
+                (err, data) => {
+                    if (err) {
+                        console.log(err);
+                        j();
+                    }
+
+                    r(data);
+                });
+        });
+    }
+
+    updateClockTimestamp(sn) {
+        return new Promise((r, j) => {
+            pool.query(`UPDATE clocks SET c_last_timestamp = '${new Date().getTime()}' WHERE clocks.c_sn  = '${sn}'`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                r();
+            });
+        });
+    }
+
     addLogIfNotExist(sn, data) {
         // const userId_date = _f[0].split(/-(.*)/).filter(e => !!e);
         // const otherData = _f[1].split('-').filter(e => !!e);
