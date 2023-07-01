@@ -14,7 +14,3 @@ $-filter-container-h: 80px;
 .table-container {
     height: calc(100% - ($-filter-container-h + 16px)) !important;
 }
-
-.toggle {
-    position: absolute;
-}

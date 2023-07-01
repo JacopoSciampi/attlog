@@ -16,8 +16,6 @@ General:
 
 /v1/ -> KC token
 FE Cloks-> add filter for customerName / online
-        -> add terminal modal
-        -> edit row -> change infos (not the SN or state)
 
 Relazione timbratura <-> cliente -> in timbratori aggiungi cliente (DB as relation)
 

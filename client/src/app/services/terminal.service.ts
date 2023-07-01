@@ -11,10 +11,11 @@ export class TerminalService {
         private _http: HttpClient
     ) { }
 
-    public getTerminalList(customerName: string): Observable<TerminalList> {
+    public getTerminalList(customerName: string, status: string): Observable<TerminalList> {
         return this._http.get<TerminalList>(`${BE_PATH.basePath}clocks`, {
             headers: {
-                "x-customer-name": customerName || ""
+                "x-customer-name": customerName || "",
+                "x-status": status || ""
             }
         });
     }

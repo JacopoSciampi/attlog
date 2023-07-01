@@ -1,4 +1,25 @@
 <div class="routed-page">
+    <div class="filter-container">
+        <div class="field">
+            <div class="title">Cliente</div>
+            <input type="text" [(ngModel)]="f_customer_name">
+        </div>
+        <div class="field f-field">
+            <div class="title">Stato</div>
+            <mat-select [(ngModel)]="f_status">
+                <mat-option *ngFor="let status of statusList" [value]="status">
+                    {{status}}
+                </mat-option>
+            </mat-select>
+        </div>
+        <div class="field-button-list">
+            <div class="title">Filtri</div>
+            <div class="button-list">
+                <div class="button button-primary" (click)="onFilterApplyClicked()">Applica</div>
+                <div class="button button-secondary" (click)="onFilterResetClicked()">Reset</div>
+            </div>
+        </div>
+    </div>
     <div class="table-container">
         <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
             <ng-container matColumnDef="_actions">

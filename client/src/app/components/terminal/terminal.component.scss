@@ -9,3 +9,23 @@
     align-items: center;
     gap: $space-tiny;
 }
+
+.f-field {
+    min-width: 150px;
+}
+
+
+$-filter-container-h: 80px;
+
+.filter-container {
+    display: flex;
+    align-items: center;
+    gap: $space-normal;
+    height: $-filter-container-h;
+    padding: 0px $space-normal;
+    background: $gradient-dark;
+}
+
+.table-container {
+    height: calc(100% - ($-filter-container-h + 16px)) !important;
+}

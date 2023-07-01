@@ -133,8 +133,9 @@ fastify.register(require('@fastify/cors'), {
 
     fastify.get('/v1/clocks', (request, reply) => {
         const customerName = request.headers['x-customer-name'] || "";
+        const status = request.headers['x-status'] || "";
 
-        pgAdapter.getClocks(customerName).then(data => {
+        pgAdapter.getClocks(customerName, status).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
         }).catch((e) => {
             console.log(e);

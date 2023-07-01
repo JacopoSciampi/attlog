@@ -118,7 +118,9 @@ class JekoPgInit {
         });
     }
 
-    getClocks(customerName) {
+    getClocks(customerName, status) {
+        let mustFilterStatus = status !== "Tutti";
+
         return new Promise((r, j) => {
             pool.query(`SELECT c.c_id, c.c_sn, c.c_name, c.c_model, c.c_last_timestamp, cu.c_name AS customer_name
             FROM public.clocks c
@@ -134,6 +136,10 @@ class JekoPgInit {
                     data?.rows?.forEach(item => {
                         item['online'] = new Date().getTime() - +item.c_last_timestamp < 60000;
                     });
+
+                    if (mustFilterStatus && data?.rows) {
+                        data.rows = data.rows.filter(e => e.online === (status === 'Online' ? true : false));
+                    }
 
                     r(data);
                 });

@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
 
 import { NgHeroiconsModule } from "@dimaslz/ng-heroicons";
 import { AddTerminalModalComponent } from './add-terminal/add-terminal.component';
@@ -14,6 +15,7 @@ import { finalize, takeWhile } from 'rxjs';
 import { ToastService } from '@services/toast.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DeleteTerminal } from './delete-terminal/delete-terminal.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-terminal',
@@ -23,7 +25,10 @@ import { DeleteTerminal } from './delete-terminal/delete-terminal.component';
     imports: [
         RouterModule,
         CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
         MatTableModule,
+        MatSelectModule,
         MatDialogModule,
         MatTooltipModule,
         NgHeroiconsModule,
@@ -33,6 +38,9 @@ export class TerminalComponent implements OnInit {
     public isLoading = true;
     public displayedColumns = ["_actions", "c_sn", "c_name", "c_model", "customer_name", "status"];
     public dataSource!: MatTableDataSource<TerminalListDetails>;
+    public f_customer_name!: string;
+    public f_status = "Tutti";
+    public statusList = ["Online", "Offline", "Tutti"];
 
     constructor(
         private _router: Router,
@@ -49,12 +57,23 @@ export class TerminalComponent implements OnInit {
         }, 60000);
     }
 
-    private _getData(customerName?: string): void {
+    public onFilterApplyClicked(): void {
+        this._getData();
+    }
+
+    public onFilterResetClicked(): void {
+        this.f_status = "Tutti";
+        this.f_customer_name = "";
+
+        this._getData();
+    }
+
+    private _getData(): void {
         this.isLoading = true;
         let take = true;
         const _ = new DatePipe('it-IT');
 
-        this._terminalService.getTerminalList(customerName).pipe(
+        this._terminalService.getTerminalList(this.f_customer_name, this.f_status).pipe(
             takeWhile(() => take),
             finalize(() => take = false)
         )
