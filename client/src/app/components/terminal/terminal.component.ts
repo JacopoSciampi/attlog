@@ -16,6 +16,8 @@ import { ToastService } from '@services/toast.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DeleteTerminal } from './delete-terminal/delete-terminal.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CustomerListDetails } from '@models/customer.model';
+import { CustomerService } from '@services/customer.service';
 
 @Component({
     selector: 'app-terminal',
@@ -35,26 +37,44 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     ]
 })
 export class TerminalComponent implements OnInit {
+    public isInError = false;
     public isLoading = true;
     public displayedColumns = ["_actions", "c_sn", "c_name", "c_model", "customer_name", "status"];
     public dataSource!: MatTableDataSource<TerminalListDetails>;
     public f_customer_name!: string;
     public f_status = "Tutti";
     public statusList = ["Online", "Offline", "Tutti"];
+    public customerList: CustomerListDetails[] = [];
 
     constructor(
         private _router: Router,
         private _toastService: ToastService,
+        private _c: CustomerService,
         private _terminalService: TerminalService,
         private _dialog: MatDialog
     ) { }
 
     public ngOnInit(): void {
-        this._getData();
+        this.isLoading = true;
+        let take = true;
+        this._c.getCustomerList().pipe(
+            takeWhile(() => take),
+            finalize(() => take = false)
+        ).subscribe({
+            next: (data) => {
+                this.customerList = data.data;
+                this._getData();
 
-        setInterval(() => {
-            this._getData();
-        }, 60000);
+                setInterval(() => {
+                    this._getData();
+                }, 60000);
+            }, error: (err) => {
+                this.isInError = true;
+                this.isLoading = false;
+                this._toastService.errorGeneric(err.error.title, err.error.message)
+            }
+        });
+
     }
 
     public onFilterApplyClicked(): void {
