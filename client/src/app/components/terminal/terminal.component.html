@@ -32,7 +32,12 @@
                             <signal-outline-icon svgStyle="stroke: #35f325;"></signal-outline-icon>
                         </ng-container>
                         <ng-container *ngIf="!element.online">
-                            <signal-slash-outline-icon svgStyle="stroke: #be2a2a;"></signal-slash-outline-icon>
+                            <ng-container *ngIf="element.c_last_timestamp === '-1'">
+                                <signal-slash-outline-icon svgStyle="stroke: #000;"></signal-slash-outline-icon>
+                            </ng-container>
+                            <ng-container *ngIf="element.c_last_timestamp !== '-1'">
+                                <signal-slash-outline-icon svgStyle="stroke: #be2a2a;"></signal-slash-outline-icon>
+                            </ng-container>
                         </ng-container>
                     </span>
                 </td>

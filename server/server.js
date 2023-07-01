@@ -1,5 +1,6 @@
 const JekoPgInit = require('./pg');
-const fastify = require('fastify')({ logger: true })
+const fastify = require('fastify')({ logger: true });
+const jwt_decode = require('jwt-decode');
 const pgAdapter = new JekoPgInit();
 
 const internal_token = "uQOpixuDj/YtSlXjayO-dNBcsd2fKx14OBqMOmHikiUUXi6Zhg2UxufCQDg7ic=y/yn6i2VSV9K2EMxcGYpzrQSgDNgbbBBaWlc4Xlhc2mOhNAPAF?Y929cAUHXEj6GL5jzxhASk4Z6u?s/gdEjGXjP/PpQqDZvelyGnbhrZocCyYRxy!P5WXS!eu053XhUJV5zLl121glT?g54HPVX2kvvkyqENk1tWl3E/Otz-ErK7SItzubR59ElypGOPwm?f";
@@ -11,13 +12,12 @@ fastify.register(require('@fastify/cors'), {
             return;
         }
 
-
         if (new URL(origin).hostname === "localhost") {
             cb(null, true)
             return
         }
         cb(new Error("Not allowed"), false)
-    }
+    },
 }).then(() => {
     fastify.post('/v3/terminal/log/add', (request, reply) => {
         const tkn = request.headers["x-token-ref"];
@@ -139,6 +139,16 @@ fastify.register(require('@fastify/cors'), {
         }).catch((e) => {
             console.log(e);
             reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
+            return;
+        });
+    });
+
+    fastify.post('/v1/clocks', (request, reply) => {
+        pgAdapter.addClock(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name).then(data => {
+            reply.status(200).send({ data: data?.rows || [] });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: e?.message || "Si è verificato un errore" });
             return;
         });
     });

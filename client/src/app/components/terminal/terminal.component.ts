@@ -60,7 +60,7 @@ export class TerminalComponent implements OnInit {
             .subscribe({
                 next: (data) => {
                     data?.data?.forEach(item => {
-                        item.tooltip = `Ultimo check: ${_.transform(new Date(+item.c_last_timestamp), "short")}`
+                        item.tooltip = item.c_last_timestamp === "-1" ? 'Connessione mai stabilita' : `Ultimo check: ${_.transform(new Date(+item.c_last_timestamp), "short")}`
                     });
 
                     this.dataSource = new MatTableDataSource(data.data);
@@ -74,11 +74,11 @@ export class TerminalComponent implements OnInit {
 
     public onAddTerminal(): void {
         this._dialog.open(AddTerminalModalComponent, {
-            height: MODAL_SIZE.LARGE,
+            height: MODAL_SIZE.HALFER,
             width: MODAL_SIZE.HALF,
         }).afterClosed().subscribe({
-            next: () => {
-
+            next: (update) => {
+                update && this._getData();
             }
         });
     }

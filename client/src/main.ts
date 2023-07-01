@@ -1,7 +1,7 @@
 import { RouterModule } from '@angular/router';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import { importProvidersFrom } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
