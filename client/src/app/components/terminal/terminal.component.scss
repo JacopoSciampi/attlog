@@ -1,3 +1,11 @@
+@import '../../../assets/style/palette.scss';
+
 .offline {
     stroke: #be2a2a !important;
+}
+
+.icon-list {
+    display: flex;
+    align-items: center;
+    gap: $space-tiny;
 }

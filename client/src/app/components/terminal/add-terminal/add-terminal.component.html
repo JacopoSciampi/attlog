@@ -1,30 +1,57 @@
-<div class="modal-container">
+<div class="modal-container" *ngIf="!isLoading">
     <div class="modal-header">
-        <div class="modal-title">Aggiungi terminale</div>
+        <div class="modal-title">
+            <ng-container *ngIf="data">
+                Modifica terminale
+            </ng-container>
+            <ng-container *ngIf="!data">
+                Aggiungi terminale
+            </ng-container>
+        </div>
         <div class="modal-close">
-            <x-circle-outline-icon class="field-clickable" (click)="closeMe()"></x-circle-outline-icon>
+            <x-circle-outline-icon class="clickable" (click)="closeMe()"></x-circle-outline-icon>
         </div>
     </div>
     <form class="modal-content grid grid-2" [formGroup]="form">
-        <div class="field">
-            <div class="title">SN Terminale</div>
-            <input type="text" formControlName="c_sn">
-        </div>
-        <div class="field">
-            <div class="title">Nome terminale</div>
-            <input type="text" formControlName="c_name">
-        </div>
-        <div class="field">
-            <div class="title">Modello terminale</div>
-            <input type="text" formControlName="c_model">
-        </div>
-        <div class="field">
-            <div class="title">Cliente</div>
-            <input type="text" formControlName="fk_customer_name">
-        </div>
+        <ng-container *ngIf="isInError">
+            Errore nel recuperare la lista clienti.
+        </ng-container>
+        <ng-container *ngIf="!isInError">
+            <div class="field">
+                <div class="title">SN Terminale</div>
+                <input type="text" formControlName="c_sn">
+            </div>
+            <div class="field">
+                <div class="title">Nome terminale</div>
+                <input type="text" formControlName="c_name">
+            </div>
+            <div class="field">
+                <div class="title">Modello terminale</div>
+                <input type="text" formControlName="c_model">
+            </div>
+            <div class="field">
+                <div class="title">Cliente</div>
+                <mat-select [(ngModel)]="selectedCustomer" formControlName="c_fk_cst"
+                    (selectionChange)="onCustomerSelectionChanged()">
+                    <mat-option *ngFor="let food of customerList" [value]="food.customer_name">
+                        {{food.customer_name}}
+                    </mat-option>
+                </mat-select>
+            </div>
+
+        </ng-container>
     </form>
     <div class="modal-footer">
-        <div class="button" (click)="form.valid && onCreateTerminal()"
-            [ngClass]="[form.valid ? 'button-primary': 'button-disabled']">Aggiungi terminale</div>
+        <ng-container *ngIf="!isInError">
+            <ng-container *ngIf="data">
+                <div class="button" (click)="canSendRequest && onUpdateTerminal()"
+                    [ngClass]="[canSendRequest ? 'button-primary': 'button-disabled']">Aggiorna terminale</div>
+            </ng-container>
+            <ng-container *ngIf="!data">
+                <div class="button" (click)="canSendRequest && onCreateTerminal()"
+                    [ngClass]="[canSendRequest ? 'button-primary': 'button-disabled']">Aggiungi terminale</div>
+            </ng-container>
+
+        </ng-container>
     </div>
 </div>

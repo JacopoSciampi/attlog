@@ -20,11 +20,28 @@ export class TerminalService {
     }
 
     public addTerminal(c_sn: string, c_name: string, c_model: string, fk_customer_name: string) {
+        return this._http.put(`${BE_PATH.basePath}clocks`, {
+            "c_sn": c_sn,
+            "c_name": c_name,
+            "c_model": c_model,
+            "fk_customer_name": fk_customer_name,
+        })
+    }
+
+    public updateTerminal(c_sn: string, c_name: string, c_model: string, fk_customer_name: string) {
         return this._http.post(`${BE_PATH.basePath}clocks`, {
             "c_sn": c_sn,
             "c_name": c_name,
             "c_model": c_model,
             "fk_customer_name": fk_customer_name,
         })
+    }
+
+    public deleteTerminal(c_sn: string) {
+        return this._http.delete(`${BE_PATH.basePath}clocks`, {
+            headers: {
+                "c_sn": c_sn,
+            }
+        });
     }
 }

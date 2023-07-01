@@ -13,6 +13,7 @@ import { TerminalListDetails } from '@models/terminal.model';
 import { finalize, takeWhile } from 'rxjs';
 import { ToastService } from '@services/toast.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { DeleteTerminal } from './delete-terminal/delete-terminal.component';
 
 @Component({
     selector: 'app-terminal',
@@ -70,6 +71,38 @@ export class TerminalComponent implements OnInit {
                     this._toastService.errorGeneric(err.error.title, err.error.message)
                 }
             });
+    }
+
+    public onDeleteTerminal(clock: TerminalListDetails): void {
+        this._dialog.open(DeleteTerminal, {
+            height: MODAL_SIZE.HALFER,
+            width: MODAL_SIZE.HALF,
+            data: {
+                c_sn: clock.c_sn,
+                c_name: clock.customer_name
+            }
+        }).afterClosed().subscribe({
+            next: (update) => {
+                update && this._getData();
+            }
+        });
+    }
+
+    public onEditClock(clock: TerminalListDetails): void {
+        this._dialog.open(AddTerminalModalComponent, {
+            height: MODAL_SIZE.HALFER,
+            width: MODAL_SIZE.HALF,
+            data: {
+                c_sn: clock.c_sn,
+                c_name: clock.c_name,
+                c_model: clock.c_model,
+                fk_customer_name: clock.customer_name
+            }
+        }).afterClosed().subscribe({
+            next: (update) => {
+                update && this._getData();
+            }
+        });
     }
 
     public onAddTerminal(): void {

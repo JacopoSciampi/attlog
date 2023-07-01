@@ -143,8 +143,34 @@ fastify.register(require('@fastify/cors'), {
         });
     });
 
-    fastify.post('/v1/clocks', (request, reply) => {
+    fastify.put('/v1/clocks', (request, reply) => {
         pgAdapter.addClock(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name).then(data => {
+            reply.status(200).send({ data: data?.rows || [] });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: e?.message || "Si è verificato un errore" });
+            return;
+        });
+    });
+
+    fastify.post('/v1/clocks', (request, reply) => {
+        pgAdapter.updateClockInfo(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name).then(data => {
+            reply.status(200).send({ data: data?.rows || [] });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: e?.message || "Si è verificato un errore" });
+            return;
+        });
+    });
+
+
+
+
+
+    fastify.delete('/v1/clocks', (request, reply) => {
+        const clock_sn = request.headers['c_sn'] || "";
+
+        pgAdapter.deleteClock(clock_sn).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
         }).catch((e) => {
             console.log(e);

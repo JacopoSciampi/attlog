@@ -140,6 +140,47 @@ class JekoPgInit {
         });
     }
 
+    deleteClock(c_sn) {
+        return new Promise((r, j) => {
+            pool.query(`DELETE FROM public.clocks WHERE clocks.c_sn = '${c_sn}'`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                r();
+            });
+        });
+    }
+
+    updateClockInfo(c_sn, c_name, c_model, fk_customer_name) {
+        return new Promise((r, j) => {
+            pool.query(`SELECT * FROM public.customers WHERE customers.c_name = '${fk_customer_name}'`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                if (!data?.rowCount) {
+                    j({ message: `Cliente ${fk_customer_name} non trovato` });
+                    return;
+                }
+
+                const customerId = data.rows[0].customer_id;
+                pool.query(`UPDATE clocks SET c_name = '${c_name}', c_model = '${c_model}', fk_customer_id = '${customerId}'  WHERE clocks.c_sn  = '${c_sn}'`, (err, data) => {
+                    if (err) {
+                        console.log(err);
+                        j();
+                    }
+
+                    r();
+                });
+
+            });
+
+        });
+    }
+
     addClock(c_sn, c_name, c_model, fk_customer_name) {
         return new Promise((r, j) => {
             pool.query(`SELECT * FROM public.customers WHERE customers.c_name = '${fk_customer_name}'`, (err, data) => {

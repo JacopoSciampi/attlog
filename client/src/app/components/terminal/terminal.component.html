@@ -6,7 +6,14 @@
                     <plus-circle-outline-icon class="field clickable"
                         (click)="onAddTerminal()"></plus-circle-outline-icon>
                 </th>
-                <td mat-cell *matCellDef="let element"></td>
+                <td mat-cell *matCellDef="let element">
+                    <div class="icon-list">
+                        <archive-box-x-mark-outline-icon class="field clickable"
+                            (click)="onDeleteTerminal(element)"></archive-box-x-mark-outline-icon>
+                        <pencil-outline-icon class="field clickable"
+                            (click)="onEditClock(element)"></pencil-outline-icon>
+                    </div>
+                </td>
             </ng-container>
             <ng-container matColumnDef="c_sn">
                 <th mat-header-cell *matHeaderCellDef> Terminale </th>

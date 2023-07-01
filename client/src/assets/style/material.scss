@@ -40,3 +40,16 @@ td {
 .mat-mdc-table .mat-mdc-header-cell {
     font-family: 'font-bold', Arial, Helvetica, sans-serif;
 }
+
+.mat-mdc-select {
+    background-color: #fff !important;
+    border-radius: 2px;
+    max-height: 27px;
+    padding: 0px $space-less;
+}
+
+.mat-mdc-select-min-line {
+    font-family: 'font-regular', Arial, Helvetica, sans-serif !important;
+    color: $bg !important;
+    font-size: 13px !important;
+}

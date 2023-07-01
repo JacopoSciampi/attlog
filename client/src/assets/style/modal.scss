@@ -35,4 +35,12 @@
         overflow-y: auto;
         padding: $space-normal;
     }
+
+    .modal-content-flex-v-center {
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        gap: $space-normal;
+    }
 }
