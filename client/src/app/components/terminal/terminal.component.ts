@@ -39,7 +39,7 @@ import { CustomerService } from '@services/customer.service';
 export class TerminalComponent implements OnInit {
     public isInError = false;
     public isLoading = true;
-    public displayedColumns = ["_actions", "c_sn", "c_name", "c_model", "customer_name", "status"];
+    public displayedColumns = ["_actions", "c_sn", "c_name", "c_model", "c_note", "customer_name", "status"];
     public dataSource!: MatTableDataSource<TerminalListDetails>;
     public f_customer_name!: string;
     public f_status = "Tutti";

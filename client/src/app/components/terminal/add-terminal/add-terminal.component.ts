@@ -49,6 +49,7 @@ export class AddTerminalModalComponent implements OnInit {
             c_name: string;
             c_model: string;
             fk_customer_name: string;
+            c_desc: string;
         }
     ) {
 
@@ -67,6 +68,7 @@ export class AddTerminalModalComponent implements OnInit {
                     'c_sn': [{ value: this.data?.c_sn || '', disabled: this.data }, Validators.required],
                     'c_name': [this.data?.c_name || '', Validators.required],
                     'c_model': [this.data?.c_model || '', Validators.required],
+                    'c_desc': [this.data?.c_desc || '', Validators.required],
                     'c_fk_cst': ['_']
                 });
 
@@ -101,6 +103,7 @@ export class AddTerminalModalComponent implements OnInit {
             this.form.controls['c_name'].value,
             this.form.controls['c_model'].value,
             this.selectedCustomer,
+            this.form.controls['c_desc'].value,
         ).pipe(
             takeWhile(() => take),
             finalize(() => take = false)
@@ -122,6 +125,7 @@ export class AddTerminalModalComponent implements OnInit {
             this.form.controls['c_name'].value,
             this.form.controls['c_model'].value,
             this.selectedCustomer,
+            this.form.controls['c_desc'].value,
         ).pipe(
             takeWhile(() => take),
             finalize(() => take = false)

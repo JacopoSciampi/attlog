@@ -13,14 +13,27 @@ export class StampService {
         private _http: HttpClient
     ) { }
 
-    public getStampList(sn: string, userId: string, startDate: string, endDate: string): Observable<StampList> {
+    public getStampList(sn: string, userId: string, startDate: string, endDate: string, customerName: string): Observable<StampList> {
         return this._http.get<StampList>(`${BE_PATH.basePath}attlog`, {
             headers: {
                 'x-sn': sn || "",
                 'x-user-id': userId || "",
                 'x-start-date': startDate || "",
-                'x-end-date': endDate || ""
+                'x-end-date': endDate || "",
+                'x-customer-name': customerName || ""
             }
+        });
+    }
+
+    public downloadStamps(sn: string, userId: string, startDate: string, endDate: string, customerName: string) {
+        return this._http.post<BlobPart>(`${BE_PATH.basePath}attlog/download`, {
+            'sn': sn || "",
+            'userId': userId || "",
+            'startDate': startDate || "",
+            'endDate': endDate || "",
+            'customerName': customerName || ""
+        }, {
+            observe: 'response'
         });
     }
 }

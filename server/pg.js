@@ -1,4 +1,5 @@
 const pg = require('pg');
+
 pool = new pg.Client({
     user: process.env.DB_USER || "keycloak",
     password: process.env.DB_PASS || "xUc5rUj!ZISPos0$&iyaGe7riChAkL",
@@ -93,15 +94,65 @@ class JekoPgInit {
         });
     }
 
-    getLogs(sn, userId, startDate, endDate) {
+    downloadLogs(sn, userId, startDate, endDate, customerName) {
         return new Promise((r, j) => {
-            let query = `SELECT * FROM public.attlogs WHERE attlogs.attlog_terminal_sn LIKE '${sn}%' AND attlogs.attlog_user_id LIKE '${userId}%'`;
+            let query = `SELECT attlogs.*, clocks.c_name AS clock_name, COALESCE(customers.c_name, '-') AS customer_name
+            FROM public.attlogs
+            LEFT JOIN public.clocks ON attlogs.attlog_terminal_sn = clocks.c_sn
+            LEFT JOIN public.customers ON clocks.fk_customer_id = customers.customer_id
+            WHERE attlogs.attlog_terminal_sn LIKE '${sn}%' AND attlogs.attlog_user_id LIKE '${userId}%'`;
+
+            if (customerName) {
+                query += ` AND customers.c_name LIKE '${customerName}%'`;
+            }
 
             if (startDate && endDate) {
                 query += ` AND attlogs.attlog_date BETWEEN '${startDate}' AND '${endDate}'`;
             }
 
-            query += ' ORDER BY attlog_terminal_sn ASC';
+            query += ' ORDER BY customer_name ASC';
+            pool.query(query, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                data?.rows?.forEach(log => {
+                    log.attlog_reason_code = reasonCode[log.attlog_reason_code];
+                    log.attlog_access_type = accessType[log.attlog_access_type];
+                });
+
+                let toReturn = '';
+
+                data?.rows?.forEach(i => {
+                    Object.entries(i).forEach(([key, value]) => {
+                        toReturn += `${key}: ${value} -`;
+                    });
+                    toReturn += '\n';
+                });
+
+                r(toReturn);
+            });
+        });
+    }
+
+    getLogs(sn, userId, startDate, endDate, customerName) {
+        return new Promise((r, j) => {
+            let query = `SELECT attlogs.*, clocks.c_name AS clock_name, COALESCE(customers.c_name, '-') AS customer_name
+            FROM public.attlogs
+            LEFT JOIN public.clocks ON attlogs.attlog_terminal_sn = clocks.c_sn
+            LEFT JOIN public.customers ON clocks.fk_customer_id = customers.customer_id
+            WHERE attlogs.attlog_terminal_sn LIKE '${sn}%' AND attlogs.attlog_user_id LIKE '${userId}%'`;
+
+            if (customerName) {
+                query += ` AND customers.c_name LIKE '${customerName}%'`;
+            }
+
+            if (startDate && endDate) {
+                query += ` AND attlogs.attlog_date BETWEEN '${startDate}' AND '${endDate}'`;
+            }
+
+            query += ' ORDER BY customer_name ASC';
             pool.query(query, (err, data) => {
                 if (err) {
                     console.log(err);
@@ -122,7 +173,7 @@ class JekoPgInit {
         let mustFilterStatus = status !== "Tutti";
 
         return new Promise((r, j) => {
-            pool.query(`SELECT c.c_id, c.c_sn, c.c_name, c.c_model, c.c_last_timestamp, cu.c_name AS customer_name
+            pool.query(`SELECT c.c_id, c.c_sn, c.c_name, c.c_model, c.c_note, c.c_last_timestamp, cu.c_name AS customer_name
             FROM public.clocks c
             LEFT JOIN public.customers cu ON c.fk_customer_id = cu.customer_id
             WHERE cu.c_name LIKE '${customerName}%'
@@ -159,7 +210,7 @@ class JekoPgInit {
         });
     }
 
-    updateClockInfo(c_sn, c_name, c_model, fk_customer_name) {
+    updateClockInfo(c_sn, c_name, c_model, fk_customer_name, c_note) {
         return new Promise((r, j) => {
             pool.query(`SELECT * FROM public.customers WHERE customers.c_name = '${fk_customer_name}'`, (err, data) => {
                 if (err) {
@@ -173,7 +224,7 @@ class JekoPgInit {
                 }
 
                 const customerId = data.rows[0].customer_id;
-                pool.query(`UPDATE clocks SET c_name = '${c_name}', c_model = '${c_model}', fk_customer_id = '${customerId}'  WHERE clocks.c_sn  = '${c_sn}'`, (err, data) => {
+                pool.query(`UPDATE clocks SET c_name = '${c_name}', c_model = '${c_model}', fk_customer_id = '${customerId}', c_note = '${c_note}'  WHERE clocks.c_sn  = '${c_sn}'`, (err, data) => {
                     if (err) {
                         console.log(err);
                         j();
@@ -187,7 +238,7 @@ class JekoPgInit {
         });
     }
 
-    addClock(c_sn, c_name, c_model, fk_customer_name) {
+    addClock(c_sn, c_name, c_model, fk_customer_name, c_note) {
         return new Promise((r, j) => {
             pool.query(`SELECT * FROM public.customers WHERE customers.c_name = '${fk_customer_name}'`, (err, data) => {
                 if (err) {
@@ -215,8 +266,8 @@ class JekoPgInit {
 
                     const timeStamp = "-1";
                     pool.query(
-                        `INSERT INTO "clocks" ("c_sn", "c_name", "c_model", "c_last_timestamp", "fk_customer_id")
-                    VALUES ($1, $2, $3, $4, $5)`, [c_sn, c_name, c_model, timeStamp, customerId]).then(() => {
+                        `INSERT INTO "clocks" ("c_sn", "c_name", "c_model", "c_last_timestamp", "fk_customer_id", "c_note")
+                    VALUES ($1, $2, $3, $4, $5, $6)`, [c_sn, c_name, c_model, timeStamp, customerId, c_note]).then(() => {
                             r()
                         }).catch((err) => {
                             console.log(err);

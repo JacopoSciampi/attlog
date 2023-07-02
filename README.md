@@ -14,9 +14,6 @@ KC:
 
 General: 
 
-/v1/ -> KC token
-FE Cloks-> add filter for customerName / online
-
 Relazione timbratura <-> cliente -> in timbratori aggiungi cliente (DB as relation)
 
 Timbrature: once FTP 

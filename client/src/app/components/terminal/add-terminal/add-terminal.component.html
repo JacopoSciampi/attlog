@@ -30,6 +30,10 @@
                 <input type="text" formControlName="c_model">
             </div>
             <div class="field">
+                <div class="title">Descrizione terminale</div>
+                <input type="text" formControlName="c_desc">
+            </div>
+            <div class="field">
                 <div class="title">Cliente</div>
                 <mat-select [(ngModel)]="selectedCustomer" formControlName="c_fk_cst"
                     (selectionChange)="onCustomerSelectionChanged()">

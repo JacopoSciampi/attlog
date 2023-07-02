@@ -116,13 +116,30 @@ fastify.register(require('@fastify/cors'), {
         }
     });
 
+    fastify.post('/v1/attlog/download', (request, reply) => {
+        const sn = request.body.sn || "";
+        const userId = request.body.userId || "";
+        const startDate = request.body.startDate || "";
+        const endDate = request.body.endDate || "";
+        const customerName = request.body.customerName || "";
+
+        pgAdapter.downloadLogs(sn, userId, startDate, endDate, customerName).then(data => {
+            reply.status(200).send({ data: data || '' });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
+            return;
+        });
+    });
+
     fastify.get('/v1/attlog', (request, reply) => {
         const sn = request.headers['x-sn'] || "";
         const userId = request.headers['x-user-id'] || "";
         const startDate = request.headers['x-start-date'] || "";
         const endDate = request.headers['x-end-date'] || "";
+        const customerName = request.headers['x-customer-name'] || "";
 
-        pgAdapter.getLogs(sn, userId, startDate, endDate).then(data => {
+        pgAdapter.getLogs(sn, userId, startDate, endDate, customerName).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
         }).catch((e) => {
             console.log(e);
@@ -145,7 +162,7 @@ fastify.register(require('@fastify/cors'), {
     });
 
     fastify.put('/v1/clocks', (request, reply) => {
-        pgAdapter.addClock(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name).then(data => {
+        pgAdapter.addClock(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name, request.body.c_note).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
         }).catch((e) => {
             console.log(e);
@@ -155,7 +172,7 @@ fastify.register(require('@fastify/cors'), {
     });
 
     fastify.post('/v1/clocks', (request, reply) => {
-        pgAdapter.updateClockInfo(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name).then(data => {
+        pgAdapter.updateClockInfo(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name, request.body.c_note).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
         }).catch((e) => {
             console.log(e);
