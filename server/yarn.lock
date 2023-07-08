@@ -380,6 +380,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"node-os-utils@npm:^1.3.7":
+  version: 1.3.7
+  resolution: "node-os-utils@npm:1.3.7"
+  checksum: 4059d74def168e2ffcd28e879731fd68f6e9b1e623804224e34bf0ca3c8968070e9e2cbc0cb57d80dd05d27552495a65c865b93ae5f54e61389e5af0b92ee818
+  languageName: node
+  linkType: hard
+
 "node-zklib@npm:^1.0.0, node-zklib@npm:^1.3.0":
   version: 1.3.0
   resolution: "node-zklib@npm:1.3.0"
@@ -695,6 +702,7 @@ __metadata:
     fastify: ^4.18.0
     fastify-cors: ^6.1.0
     jwt-decode: ^3.1.2
+    node-os-utils: ^1.3.7
     node-zklib: ^1.3.0
     pg: ^8.11.0
     ws: ^8.13.0

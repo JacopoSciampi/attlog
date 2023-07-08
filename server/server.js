@@ -3,10 +3,19 @@ const fastify = require('fastify')({ logger: true });
 const jwt_decode = require('jwt-decode');
 const pgAdapter = new JekoPgInit();
 
+var osu = require('node-os-utils');
+const __cpu = osu.cpu;
+const __mem = osu.mem;
+
+const uptime = new Date().getTime();
+let queryFromClocks = 0;
+let queryToDatabase = 0;
+
 const internal_token = "uQOpixuDj/YtSlXjayO-dNBcsd2fKx14OBqMOmHikiUUXi6Zhg2UxufCQDg7ic=y/yn6i2VSV9K2EMxcGYpzrQSgDNgbbBBaWlc4Xlhc2mOhNAPAF?Y929cAUHXEj6GL5jzxhASk4Z6u?s/gdEjGXjP/PpQqDZvelyGnbhrZocCyYRxy!P5WXS!eu053XhUJV5zLl121glT?g54HPVX2kvvkyqENk1tWl3E/Otz-ErK7SItzubR59ElypGOPwm?f";
 
 function validatePrismaToken(token, reply) {
     try {
+        queryToDatabase++;
         return jwt_decode(token);
     } catch {
         reply.status(500).send({ message: 'Invalid token sent from the client' });
@@ -30,6 +39,7 @@ fastify.register(require('@fastify/cors'), {
 }).then(() => {
     fastify.post('/v3/terminal/log/add', (request, reply) => {
         const tkn = request.headers["x-token-ref"];
+        queryFromClocks++;
 
         if (!tkn || tkn !== internal_token) {
             reply.status(401).message({ msg: "Unauthorized" });
@@ -54,6 +64,7 @@ fastify.register(require('@fastify/cors'), {
 
     fastify.post('/v3/terminal/online', (request, reply) => {
         const tkn = request.headers["x-token-ref"];
+        queryFromClocks++;
 
         if (!tkn || tkn !== internal_token) {
             reply.status(401).message({ msg: "Unauthorized" });
@@ -79,6 +90,46 @@ fastify.register(require('@fastify/cors'), {
     fastify.get('/', (request, reply) => {
         reply.status(301).send({ message: "Unauthorized" });
     })
+
+    fastify.get('/v1/metrics', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
+        try {
+            Promise.all([
+                __mem.info(),
+                __cpu.usage(),
+                pgAdapter.getMetrics()
+            ])
+                .then(info => {
+                    reply.status(200).send({
+                        data: {
+                            cpu: {
+                                usage: info[1]
+                            },
+                            memory: {
+                                used: info[0].usedMemPercentage,
+                                free: info[0].freeMemPercentage
+                            },
+                            db: {
+                                totalCustomers: info[2].total_customers,
+                                totalClocks: info[2].total_clocks,
+                                totalAttlogs: info[2].total_attlogs
+                            },
+                            uptime: uptime,
+                            queryFromClocks: queryFromClocks,
+                            queryToDatabase: queryToDatabase
+                        }
+                    });
+                    return;
+                })
+        } catch {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
+            return;
+        }
+    });
 
     fastify.get('/v1/customer/list', (request, reply) => {
         if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {

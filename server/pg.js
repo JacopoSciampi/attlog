@@ -374,6 +374,22 @@ class JekoPgInit {
                 });
         });
     }
+
+    getMetrics() {
+        return new Promise((r, j) => {
+            pool.query(`SELECT
+            (SELECT COUNT(*) FROM customers) AS total_customers,
+            (SELECT COUNT(*) FROM clocks) AS total_clocks,
+            (SELECT COUNT(*) FROM attlogs) AS total_attlogs;`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                r(data.rows[0]);
+            });
+        });
+    }
 }
 
 module.exports = JekoPgInit

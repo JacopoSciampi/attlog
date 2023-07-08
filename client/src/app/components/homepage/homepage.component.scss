@@ -1,0 +1,47 @@
+@import '../../../assets/style/palette.scss';
+
+.card-list {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: $space-normal;
+    flex-wrap: wrap;
+
+    .card {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid;
+        border-radius: $radius;
+        height: fit-content;
+
+        .title {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: $space-tiny $space-normal;
+            font-family: 'font-bold';
+            background-color: $bg;
+            font-size: 18px;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: $space-normal;
+            background-color: $bg-alpha;
+            padding: $space-tiny;
+
+            .card-item {
+                display: flex;
+                align-items: center;
+                width: 100%;
+
+                .key {
+                    flex: 1;
+                    padding-right: $space-normal;
+                }
+            }
+
+        }
+    }
+}
