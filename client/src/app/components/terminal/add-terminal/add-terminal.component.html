@@ -17,26 +17,36 @@
             Errore nel recuperare la lista clienti.
         </ng-container>
         <ng-container *ngIf="!isInError">
-            <div class="field">
+            <div class="field field-grid">
                 <div class="title">SN Terminale</div>
                 <input type="text" formControlName="c_sn">
             </div>
-            <div class="field">
+            <div class="field field-grid">
                 <div class="title">Nome terminale</div>
                 <input type="text" formControlName="c_name">
             </div>
-            <div class="field">
+            <div class="field field-grid">
                 <div class="title">Modello terminale</div>
                 <input type="text" formControlName="c_model">
             </div>
-            <div class="field">
-                <div class="title">Descrizione terminale</div>
+            <div class="field field-grid">
+                <div class="title">Note</div>
+                <input type="text" formControlName="c_note">
+            </div>
+            <div class="field field-grid">
+                <div class="title">Descrizione</div>
                 <input type="text" formControlName="c_desc">
             </div>
-            <div class="field">
+            <div class="field field-grid">
+                <div class="title">Ubicazione</div>
+                <input type="text" formControlName="c_location">
+            </div>
+            <div class="field field-grid">
                 <div class="title">Cliente</div>
                 <mat-select [(ngModel)]="selectedCustomer" formControlName="c_fk_cst"
                     (selectionChange)="onCustomerSelectionChanged()">
+                    <input class="filterSearch" placeholder="Cerca cliente"
+                        (keyup)="onCustomerListFilter($event.target.value)">
                     <mat-option *ngFor="let food of customerList" [value]="food.customer_name">
                         {{food.customer_name}}
                     </mat-option>

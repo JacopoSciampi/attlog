@@ -2,36 +2,36 @@ import { CommonModule } from "@angular/common";
 import { Component, Inject } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { NgHeroiconsModule } from "@dimaslz/ng-heroicons";
-import { TerminalService } from "@services/terminal.service";
+import { CustomerService } from "@services/customer.service";
 import { ToastService } from "@services/toast.service";
 import { takeWhile, finalize } from 'rxjs';
 
 @Component({
-    selector: 'app-delete-terminal',
-    templateUrl: './delete-terminal.component.html',
-    styleUrls: ['./delete-terminal.component.scss'],
+    selector: 'app-delete-customer',
+    templateUrl: './delete-customer.component.html',
+    styleUrls: ['./delete-customer.component.scss'],
     standalone: true,
     imports: [
         CommonModule,
         NgHeroiconsModule,
     ],
-    providers: [TerminalService]
+    providers: [CustomerService]
 })
-export class DeleteTerminal {
+export class DeleteCustomer {
     public showConfirm = false;
     public canDelete = true;
 
     constructor(
-        public dialogRef: MatDialogRef<DeleteTerminal>,
-        private _service: TerminalService,
+        public dialogRef: MatDialogRef<DeleteCustomer>,
+        private _service: CustomerService,
         private _toastService: ToastService,
         @Inject(MAT_DIALOG_DATA) public data: {
-            c_sn: string;
-            c_name: string;
+            customer_id: string;
+            cu_code: string;
         }
     ) { }
 
-    public onDeleteTerminal(): void {
+    public onDeleteCustomer(): void {
         if (!this.showConfirm) {
             this.showConfirm = true;
             this.canDelete = false;
@@ -43,12 +43,12 @@ export class DeleteTerminal {
         }
 
         let take = true;
-        this._service.deleteTerminal(this.data.c_sn).pipe(
+        this._service.deleteCustomer(this.data.customer_id, this.data.cu_code).pipe(
             takeWhile(() => take),
             finalize(() => take = false)
         ).subscribe({
             next: () => {
-                this._toastService.generic("Terminale cancellato", "Operazione avvenuta con successo");
+                this._toastService.generic("Cliente eliminato", "Operazione avvenuta con successo");
                 this.closeMe(true);
             }, error: (err) => {
                 this._toastService.errorGeneric(err.error.title, err.error.message)

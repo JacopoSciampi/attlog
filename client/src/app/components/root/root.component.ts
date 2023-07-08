@@ -7,6 +7,7 @@ import { NavbarComponent } from '@components/navbar/navbar.component';
 import { SidenavComponent } from '@components/sidenav/sidenav.component';
 
 import { AuthService } from '@services/auth.service';
+import { ConstClass } from '@static/const.class';
 
 @Component({
     selector: 'app-root',
@@ -34,6 +35,7 @@ export class RootComponent implements OnInit {
 
     public ngOnInit(): void {
         this._auth.__init__().then(() => {
+            ConstClass.token = this._auth.oAuthService.getAccessToken();
             this.initDone = true;
             this._router.navigate(['homepage']);
         });

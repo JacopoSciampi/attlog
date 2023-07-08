@@ -5,6 +5,15 @@ const pgAdapter = new JekoPgInit();
 
 const internal_token = "uQOpixuDj/YtSlXjayO-dNBcsd2fKx14OBqMOmHikiUUXi6Zhg2UxufCQDg7ic=y/yn6i2VSV9K2EMxcGYpzrQSgDNgbbBBaWlc4Xlhc2mOhNAPAF?Y929cAUHXEj6GL5jzxhASk4Z6u?s/gdEjGXjP/PpQqDZvelyGnbhrZocCyYRxy!P5WXS!eu053XhUJV5zLl121glT?g54HPVX2kvvkyqENk1tWl3E/Otz-ErK7SItzubR59ElypGOPwm?f";
 
+function validatePrismaToken(token, reply) {
+    try {
+        return jwt_decode(token);
+    } catch {
+        reply.status(500).send({ message: 'Invalid token sent from the client' });
+        return false;
+    }
+}
+
 fastify.register(require('@fastify/cors'), {
     origin: (origin, cb) => {
         if (!origin) {
@@ -72,6 +81,10 @@ fastify.register(require('@fastify/cors'), {
     })
 
     fastify.get('/v1/customer/list', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
         try {
             pgAdapter.getCustomerList().then(data => {
                 reply.status(200).send({ data: data || [] });
@@ -89,6 +102,25 @@ fastify.register(require('@fastify/cors'), {
     });
 
     fastify.post('/v1/customer/add', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
+        pgAdapter.updateCustomerInfo(request.body.customer_id, request.body.cu_code, request.body.cu_note, request.body.name, request.body.mail).then(data => {
+            reply.status(200).send({ data: data?.rows || [] });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: e?.message || "Si è verificato un errore" });
+            return;
+        });
+
+    });
+
+    fastify.put('/v1/customer/add', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
         try {
             pgAdapter.getCustomerDetailByName(request.body.name).then(data => {
                 if (data) {
@@ -96,7 +128,7 @@ fastify.register(require('@fastify/cors'), {
                     return;
                 }
 
-                pgAdapter.createCustomer(request.body.name, request.body.mail).then(() => {
+                pgAdapter.createCustomer(request.body.name, request.body.mail, request.body.cu_code, request.body.cu_note).then(() => {
                     reply.status(200).send({ title: "Successo", message: "Cliente aggiunto" });
                     return;
                 }).catch(() => {
@@ -116,7 +148,28 @@ fastify.register(require('@fastify/cors'), {
         }
     });
 
+    fastify.delete('/v1/customer', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
+        const customer_id = request.headers['customer_id'] || "";
+        const cu_code = request.headers['cu_code'] || "";
+
+        pgAdapter.deleteCustomer(customer_id, cu_code).then(data => {
+            reply.status(200).send({ data: data?.rows || [] });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: e?.message || "Si è verificato un errore" });
+            return;
+        });
+    });
+
     fastify.post('/v1/attlog/download', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
         const sn = request.body.sn || "";
         const userId = request.body.userId || "";
         const startDate = request.body.startDate || "";
@@ -133,6 +186,10 @@ fastify.register(require('@fastify/cors'), {
     });
 
     fastify.get('/v1/attlog', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
         const sn = request.headers['x-sn'] || "";
         const userId = request.headers['x-user-id'] || "";
         const startDate = request.headers['x-start-date'] || "";
@@ -149,6 +206,10 @@ fastify.register(require('@fastify/cors'), {
     });
 
     fastify.get('/v1/clocks', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
         const customerName = request.headers['x-customer-name'] || "";
         const status = request.headers['x-status'] || "";
 
@@ -162,7 +223,11 @@ fastify.register(require('@fastify/cors'), {
     });
 
     fastify.put('/v1/clocks', (request, reply) => {
-        pgAdapter.addClock(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name, request.body.c_note).then(data => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
+        pgAdapter.addClock(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name, request.body.c_note, request.body.c_desc, request.body.c_location).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
         }).catch((e) => {
             console.log(e);
@@ -172,7 +237,11 @@ fastify.register(require('@fastify/cors'), {
     });
 
     fastify.post('/v1/clocks', (request, reply) => {
-        pgAdapter.updateClockInfo(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name, request.body.c_note).then(data => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
+        pgAdapter.updateClockInfo(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name, request.body.c_note, request.body.c_desc, request.body.c_location).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
         }).catch((e) => {
             console.log(e);
@@ -181,11 +250,11 @@ fastify.register(require('@fastify/cors'), {
         });
     });
 
-
-
-
-
     fastify.delete('/v1/clocks', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
         const clock_sn = request.headers['c_sn'] || "";
 
         pgAdapter.deleteClock(clock_sn).then(data => {

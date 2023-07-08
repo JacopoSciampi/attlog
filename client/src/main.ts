@@ -1,7 +1,7 @@
 import { RouterModule } from '@angular/router';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import { importProvidersFrom } from '@angular/core';
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule, HttpInterceptor } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -25,6 +25,7 @@ import { NgxDaterangepickerMd } from 'ngx-daterangepicker-material';
 
 import localeIt from '@angular/common/locales/it';
 import * as it from 'dayjs/locale/it';
+import { Interceptor } from '@services/interceptor.service';
 registerLocaleData(localeIt);
 const locale = it;
 
@@ -36,6 +37,7 @@ bootstrapApplication(RootComponent, {
     providers: [
         { provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { disableClose: true, hasBackdrop: false } },
         { provide: OAuthStorage, useFactory: storageFactory },
+        { provide: HTTP_INTERCEPTORS, useClass: Interceptor, multi: true },
         ToastService,
         AuthService,
         StampService,

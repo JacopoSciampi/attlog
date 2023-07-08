@@ -4,9 +4,16 @@
             <ng-container matColumnDef="_actions">
                 <th mat-header-cell *matHeaderCellDef>
                     <plus-circle-outline-icon class="field clickable"
-                        (click)="onAddTerminal()"></plus-circle-outline-icon>
+                        (click)="onAddCustomer()"></plus-circle-outline-icon>
                 </th>
-                <td mat-cell *matCellDef="let element"></td>
+                <td mat-cell *matCellDef="let element">
+                    <div class="icon-list">
+                        <archive-box-x-mark-outline-icon class="field clickable"
+                            (click)="onDeleteCustomer(element)"></archive-box-x-mark-outline-icon>
+                        <pencil-outline-icon class="field clickable"
+                            (click)="onEditCustomer(element)"></pencil-outline-icon>
+                    </div>
+                </td>
             </ng-container>
             <ng-container matColumnDef="name">
                 <th mat-header-cell *matHeaderCellDef> Nome </th>
@@ -15,6 +22,14 @@
             <ng-container matColumnDef="email">
                 <th mat-header-cell *matHeaderCellDef> Email </th>
                 <td mat-cell *matCellDef="let element"> {{element.customer_email}} </td>
+            </ng-container>
+            <ng-container matColumnDef="cu_code">
+                <th mat-header-cell *matHeaderCellDef> Codice cliente </th>
+                <td mat-cell *matCellDef="let element"> {{element.cu_code}} </td>
+            </ng-container>
+            <ng-container matColumnDef="cu_note">
+                <th mat-header-cell *matHeaderCellDef> Note </th>
+                <td mat-cell *matCellDef="let element"> {{element.cu_note}} </td>
             </ng-container>
             <ng-container matColumnDef="total_clocks">
                 <th mat-header-cell *matHeaderCellDef> N. Timbratori </th>

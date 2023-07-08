@@ -1,8 +1,8 @@
-import { Component } from "@angular/core";
+import { Component, Inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
 
-import { MatDialogRef } from "@angular/material/dialog";
+import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { MatButtonModule } from '@angular/material/button';
 
 import { finalize, takeWhile } from "rxjs";
@@ -35,11 +35,20 @@ export class AddCustomerModalComponent {
         private _fb: FormBuilder,
         public dialogRef: MatDialogRef<AddCustomerModalComponent>,
         private _service: CustomerService,
-        private _toastService: ToastService
+        private _toastService: ToastService,
+        @Inject(MAT_DIALOG_DATA) public data: {
+            customer_id: string;
+            customer_name: string;
+            customer_email: string;
+            customer_code: string;
+            customer_note: string;
+        }
     ) {
         this.form = this._fb.group({
-            "name": ['', Validators.required],
-            "mail": ['', Validators.email],
+            "name": [this.data?.customer_name || '', Validators.required],
+            "mail": [this.data?.customer_email || '', Validators.email],
+            "cu_code": [this.data?.customer_code || '', Validators.required],
+            "cu_note": [this.data?.customer_note || '', Validators.required],
         });
 
         Object.keys(this.form.controls).forEach(key => {
@@ -55,7 +64,13 @@ export class AddCustomerModalComponent {
         if (this.canSendRequest) {
             if (this.form.controls["mail"].valid) {
                 let take = true;
-                this._service.createCustomer(this.form.controls["name"].value, this.form.controls["mail"].value).pipe(
+                this._service[!!this.data ? 'updateCustomer' : 'createCustomer'](
+                    this.data.customer_id,
+                    this.form.controls["name"].value,
+                    this.form.controls["mail"].value,
+                    this.form.controls["cu_code"].value,
+                    this.form.controls["cu_note"].value
+                ).pipe(
                     takeWhile(() => take),
                     finalize(() => take = false)
                 ).subscribe({

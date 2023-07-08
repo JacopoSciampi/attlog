@@ -1,7 +1,7 @@
 <div class="modal-container">
     <div class="modal-header">
         <div class="modal-title">
-            Eliminazione terminale
+            Cancellazione cliente
         </div>
         <div class="modal-close">
             <x-circle-outline-icon class="clickable" (click)="closeMe()"></x-circle-outline-icon>
@@ -9,10 +9,10 @@
     </div>
     <form class="modal-content modal-content-flex-v-center">
         <div>
-            SN Terminale: {{data.c_sn}}
+            ID Cliente: {{data.customer_id}}
         </div>
         <div>
-            Cliente: {{data.c_name}}
+            Codice cliente: {{data.cu_code}}
         </div>
         <div class="bold">
             Attenzione! L'operazione è irreversibile.
@@ -23,6 +23,6 @@
     </form>
     <div class="modal-footer">
         <div class="button" [ngClass]="canDelete ? 'button-primary' : 'button-disabled'"
-            (click)="canDelete && onDeleteTerminal()">Conferma eliminazione</div>
+            (click)="canDelete && onDeleteCustomer()">Conferma eliminazione</div>
     </div>
 </div>

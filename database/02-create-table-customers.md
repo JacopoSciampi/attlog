@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS public.customers
     customer_id SERIAL NOT NULL,
     c_name character varying(50) COLLATE pg_catalog."default" NOT NULL,
     c_email character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    cu_code character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    cu_note character varying(100) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT customers_pkey PRIMARY KEY (customer_id)
 )
 

@@ -8,6 +8,8 @@ export interface TerminalListDetails {
     c_model: string;
     c_name: string;
     c_sn: string;
+    c_note: string;
+    c_desc: string;
     customer_name: string;
 
     online?: boolean;

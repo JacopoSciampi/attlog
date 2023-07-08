@@ -35,6 +35,7 @@ export class AddTerminalModalComponent implements OnInit {
     public isInError = false;
 
     public customerList: CustomerListDetails[] = [];
+    private _initCustomerList: CustomerListDetails[] = [];
     public selectedCustomer!: string;
     public canSendRequest = false;
 
@@ -49,7 +50,9 @@ export class AddTerminalModalComponent implements OnInit {
             c_name: string;
             c_model: string;
             fk_customer_name: string;
+            c_note: string;
             c_desc: string;
+            c_location: string;
         }
     ) {
 
@@ -64,11 +67,15 @@ export class AddTerminalModalComponent implements OnInit {
         ).subscribe({
             next: (data) => {
                 this.customerList = data.data;
+                this._initCustomerList = JSON.parse(JSON.stringify(data.data));
+
                 this.form = this._fb.group({
                     'c_sn': [{ value: this.data?.c_sn || '', disabled: this.data }, Validators.required],
                     'c_name': [this.data?.c_name || '', Validators.required],
                     'c_model': [this.data?.c_model || '', Validators.required],
+                    'c_note': [this.data?.c_note || '', Validators.required],
                     'c_desc': [this.data?.c_desc || '', Validators.required],
+                    'c_location': [this.data?.c_location || '', Validators.required],
                     'c_fk_cst': ['_']
                 });
 
@@ -103,7 +110,9 @@ export class AddTerminalModalComponent implements OnInit {
             this.form.controls['c_name'].value,
             this.form.controls['c_model'].value,
             this.selectedCustomer,
+            this.form.controls['c_note'].value,
             this.form.controls['c_desc'].value,
+            this.form.controls['c_location'].value,
         ).pipe(
             takeWhile(() => take),
             finalize(() => take = false)
@@ -118,6 +127,10 @@ export class AddTerminalModalComponent implements OnInit {
         });
     }
 
+    public onCustomerListFilter(name: string): void {
+        this.customerList = this._initCustomerList.filter(i => i.customer_name.indexOf(name) !== -1);
+    }
+
     public onCreateTerminal(): void {
         let take = true;
         this._service.addTerminal(
@@ -125,7 +138,9 @@ export class AddTerminalModalComponent implements OnInit {
             this.form.controls['c_name'].value,
             this.form.controls['c_model'].value,
             this.selectedCustomer,
+            this.form.controls['c_note'].value,
             this.form.controls['c_desc'].value,
+            this.form.controls['c_location'].value,
         ).pipe(
             takeWhile(() => take),
             finalize(() => take = false)

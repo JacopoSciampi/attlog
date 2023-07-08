@@ -4,6 +4,14 @@
     stroke: #be2a2a !important;
 }
 
+input.filterSearch {
+    width: 100%;
+    border: none;
+    padding: 0px 16px;
+    margin-bottom: 8px;
+    font-family: 'font-regular';
+}
+
 .icon-list {
     display: flex;
     align-items: center;
@@ -16,6 +24,16 @@
 
 .f-field-long {
     flex: 1;
+}
+
+.td-div-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.th-div-center {
+    text-align: center;
 }
 
 

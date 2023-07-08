@@ -39,12 +39,13 @@ import { CustomerService } from '@services/customer.service';
 export class TerminalComponent implements OnInit {
     public isInError = false;
     public isLoading = true;
-    public displayedColumns = ["_actions", "c_sn", "c_name", "c_model", "c_note", "customer_name", "status"];
+    public displayedColumns = ["_actions", "c_sn", "c_name", "c_model", "c_note", "c_desc", "c_location", "customer_name", "status"];
     public dataSource!: MatTableDataSource<TerminalListDetails>;
     public f_customer_name!: string;
     public f_status = "Tutti";
     public statusList = ["Online", "Offline", "Tutti"];
     public customerList: CustomerListDetails[] = [];
+    public _initCustomerList: CustomerListDetails[] = [];
 
     constructor(
         private _router: Router,
@@ -63,6 +64,8 @@ export class TerminalComponent implements OnInit {
         ).subscribe({
             next: (data) => {
                 this.customerList = data.data;
+                this._initCustomerList = JSON.parse(JSON.stringify(data.data));
+
                 this._getData();
 
                 setInterval(() => {
@@ -74,7 +77,10 @@ export class TerminalComponent implements OnInit {
                 this._toastService.errorGeneric(err.error.title, err.error.message)
             }
         });
+    }
 
+    public onCustomerListFilter(name: string): void {
+        this.customerList = this._initCustomerList.filter(i => i.customer_name.indexOf(name) !== -1);
     }
 
     public onFilterApplyClicked(): void {
@@ -135,6 +141,8 @@ export class TerminalComponent implements OnInit {
                 c_sn: clock.c_sn,
                 c_name: clock.c_name,
                 c_model: clock.c_model,
+                c_note: clock.c_note,
+                c_desc: clock.c_desc,
                 fk_customer_name: clock.customer_name
             }
         }).afterClosed().subscribe({

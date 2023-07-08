@@ -7,13 +7,21 @@
     </div>
     <div class="modal-content">
         <form class="grid grid-2" [formGroup]="form">
-            <div class="field">
+            <div class="field field-grid">
                 <div class="title">Nome cliente</div>
                 <input type="text" formControlName="name">
             </div>
-            <div class="field">
+            <div class="field field-grid">
                 <div class="title">Indirizzo email</div>
                 <input type="text" formControlName="mail">
+            </div>
+            <div class="field field-grid">
+                <div class="title">Codice cliente</div>
+                <input type="text" formControlName="cu_code">
+            </div>
+            <div class="field field-grid">
+                <div class="title">Note</div>
+                <input type="text" formControlName="cu_note">
             </div>
         </form>
     </div>
