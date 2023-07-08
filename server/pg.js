@@ -58,16 +58,17 @@ class JekoPgInit {
         });
     }
 
-    getCustomerList() {
+    getCustomerList(name, email) {
         return new Promise((r, j) => {
             pool.query(`
-                SELECT c.customer_id, c.cu_code, c.cu_note, c.c_name AS customer_name, c.c_email AS customer_email, COALESCE(cl.total_clocks, 0) AS total_clocks
-                FROM customers c
-                LEFT JOIN (
-                    SELECT fk_customer_id, COUNT(*) AS total_clocks
-                    FROM clocks
-                    GROUP BY fk_customer_id
-                ) cl ON c.customer_id = cl.fk_customer_id;
+            SELECT c.customer_id, c.cu_code, c.cu_note, c.c_name AS customer_name, c.c_email AS customer_email, COALESCE(cl.total_clocks, 0) AS total_clocks
+            FROM customers c
+            LEFT JOIN (
+                SELECT fk_customer_id, COUNT(*) AS total_clocks
+                FROM clocks
+                GROUP BY fk_customer_id
+            ) cl ON c.customer_id = cl.fk_customer_id
+            WHERE c.c_name LIKE '%${name}%' AND c.c_email LIKE '%${email}%';
             `, (err, data) => {
                 if (err) {
                     console.log(err);

@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 
 import { finalize, takeWhile } from 'rxjs';
@@ -39,20 +39,26 @@ export class StampsComponent implements OnInit {
     public displayedColumns = ["attlog_terminal_sn", "attlog_user_id", "customer_name", "attlog_date", "clock_location", "attlog_time", "attlog_access_type", "attlog_reason_code"];
     public dataSource!: MatTableDataSource<StampListDetails>;
     public f_customer_name!: string;
+    public f_terminalSN!: string;
     public f_clock_location!: string;
     public f_date;
 
-    @ViewChild('f_terminalSN') f_terminalSN!: ElementRef<HTMLInputElement>;
     @ViewChild('f_userId') f_userId!: ElementRef<HTMLInputElement>;
     @ViewChild(DaterangepickerDirective, { static: false }) pickerDirective: DaterangepickerDirective;
 
     constructor(
         private _stampService: StampService,
         private _toastService: ToastService,
+        private _ar: ActivatedRoute,
         private _router: Router,
     ) { }
 
     public ngOnInit(): void {
+        if (this._ar.snapshot.params.clockSn !== "all") {
+            this.f_terminalSN = this._ar.snapshot.params.clockSn;
+            this.onFilterApplyClicked();
+            return;
+        }
         this._getData();
     }
 
@@ -95,8 +101,8 @@ export class StampsComponent implements OnInit {
             endDate = _.transform(endDate, "yyyy/MM/dd");
         }
 
-        if (this.f_terminalSN.nativeElement.value || this.f_userId.nativeElement.value || startDate || endDate || this.f_customer_name || this.f_clock_location) {
-            this._getData(this.f_terminalSN.nativeElement.value, this.f_userId.nativeElement.value, startDate, endDate, this.f_customer_name, this.f_clock_location);
+        if (this.f_terminalSN || this.f_userId.nativeElement.value || startDate || endDate || this.f_customer_name || this.f_clock_location) {
+            this._getData(this.f_terminalSN, this.f_userId?.nativeElement?.value, startDate, endDate, this.f_customer_name, this.f_clock_location);
         }
     }
 
@@ -112,7 +118,7 @@ export class StampsComponent implements OnInit {
             endDate = _.transform(endDate, "yyyy/MM/dd");
         }
 
-        this._stampService.downloadStamps(this.f_terminalSN.nativeElement.value, this.f_userId.nativeElement.value, startDate, endDate, this.f_customer_name).pipe(
+        this._stampService.downloadStamps(this.f_terminalSN, this.f_userId.nativeElement.value, startDate, endDate, this.f_customer_name).pipe(
             takeWhile(() => take),
             finalize(() => take = false)
         ).subscribe({
@@ -126,7 +132,7 @@ export class StampsComponent implements OnInit {
 
     public onFilterResetClicked(): void {
         this.f_userId.nativeElement.value = '';
-        this.f_terminalSN.nativeElement.value = '';
+        this.f_terminalSN = '';
         this.f_customer_name = '';
         this.f_clock_location = '';
         this.pickerDirective.clear();

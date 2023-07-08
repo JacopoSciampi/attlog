@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from "@angular/core";
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -51,14 +51,18 @@ export class TerminalComponent implements OnInit {
         private _router: Router,
         private _toastService: ToastService,
         private _c: CustomerService,
+        private _ar: ActivatedRoute,
         private _terminalService: TerminalService,
         private _dialog: MatDialog
     ) { }
 
     public ngOnInit(): void {
+        if (this._ar.snapshot.params.name !== "all") {
+            this.f_customer_name = this._ar.snapshot.params.name;
+        }
         this.isLoading = true;
         let take = true;
-        this._c.getCustomerList().pipe(
+        this._c.getCustomerList(this.f_customer_name).pipe(
             takeWhile(() => take),
             finalize(() => take = false)
         ).subscribe({
@@ -77,6 +81,10 @@ export class TerminalComponent implements OnInit {
                 this._toastService.errorGeneric(err.error.title, err.error.message)
             }
         });
+    }
+
+    public onNavigate(route: string): void {
+        this._router.navigate([route]);
     }
 
     public onCustomerListFilter(name: string): void {

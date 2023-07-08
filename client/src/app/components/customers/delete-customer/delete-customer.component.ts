@@ -28,6 +28,7 @@ export class DeleteCustomer {
         @Inject(MAT_DIALOG_DATA) public data: {
             customer_id: string;
             cu_code: string;
+            customer_name: string;
         }
     ) { }
 

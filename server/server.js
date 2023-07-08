@@ -85,8 +85,11 @@ fastify.register(require('@fastify/cors'), {
             return;
         }
 
+        const name = request.headers['x-name'] || "";
+        const email = request.headers['x-email'] || "";
+
         try {
-            pgAdapter.getCustomerList().then(data => {
+            pgAdapter.getCustomerList(name, email).then(data => {
                 reply.status(200).send({ data: data || [] });
                 return;
             }).catch(() => {

@@ -1,4 +1,21 @@
 <div class="routed-page">
+    <div class="filter-container">
+        <div class="field">
+            <div class="title">Nome</div>
+            <input type="text" [(ngModel)]="f_name">
+        </div>
+        <div class="field">
+            <div class="title">Email</div>
+            <input type="text" [(ngModel)]="f_email">
+        </div>
+        <div class="field-button-list">
+            <div class="title">Filtri</div>
+            <div class="button-list">
+                <div class="button button-primary" (click)="onFilterApplyClicked()">Applica</div>
+                <div class="button button-secondary" (click)="onFilterResetClicked()">Reset</div>
+            </div>
+        </div>
+    </div>
     <div class="table-container">
         <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
             <ng-container matColumnDef="_actions">
@@ -8,10 +25,13 @@
                 </th>
                 <td mat-cell *matCellDef="let element">
                     <div class="icon-list">
-                        <archive-box-x-mark-outline-icon class="field clickable"
+                        <archive-box-x-mark-outline-icon class="field clickable" matTooltip="Cancella cliente"
                             (click)="onDeleteCustomer(element)"></archive-box-x-mark-outline-icon>
-                        <pencil-outline-icon class="field clickable"
+                        <pencil-outline-icon class="field clickable" matTooltip="Modifica informazioni cliente"
                             (click)="onEditCustomer(element)"></pencil-outline-icon>
+                        <computer-desktop-outline-icon class="field clickable"
+                            matTooltip="Visualizza terminali del cliente"
+                            (click)="onNavigate('terminal/' + element.customer_name)"></computer-desktop-outline-icon>
                     </div>
                 </td>
             </ng-container>

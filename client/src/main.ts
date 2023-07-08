@@ -51,7 +51,7 @@ bootstrapApplication(RootComponent, {
                 displayFormat: 'DD/MM/YYYY'
             }),
             OAuthModule.forRoot(),
-            RouterModule.forRoot(routes, { onSameUrlNavigation: 'reload', initialNavigation: 'enabledNonBlocking' }),
+            RouterModule.forRoot(routes),
             CommonModule,
             BrowserModule,
             BrowserAnimationsModule,

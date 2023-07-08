@@ -39,10 +39,12 @@
                     </th>
                     <td mat-cell *matCellDef="let element">
                         <div class="icon-list">
-                            <archive-box-x-mark-outline-icon class="field clickable"
+                            <archive-box-x-mark-outline-icon class="field clickable" matTooltip="Elimina terminale"
                                 (click)="onDeleteTerminal(element)"></archive-box-x-mark-outline-icon>
-                            <pencil-outline-icon class="field clickable"
+                            <pencil-outline-icon class="field clickable" matTooltip="Modifica informazioni terminale"
                                 (click)="onEditClock(element)"></pencil-outline-icon>
+                            <bars-4-outline-icon class="field clickable" matTooltip="Visualizza timbrature terminale"
+                                (click)="onNavigate('stamps/' + element.c_sn)"></bars-4-outline-icon>
                         </div>
                     </td>
                 </ng-container>

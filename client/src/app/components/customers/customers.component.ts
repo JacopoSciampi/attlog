@@ -8,8 +8,10 @@ import { AddCustomerModalComponent } from './add-customer/add-customer-modal.com
 import { MODAL_SIZE } from '@enum/modal.enum';
 import { CustomerService } from '@services/customer.service';
 import { ToastService } from '@services/toast.service';
-import { CustomerList, CustomerListDetails } from '@models/customer.model';
+import { CustomerListDetails } from '@models/customer.model';
 import { DeleteCustomer } from './delete-customer/delete-customer.component';
+import { FormsModule } from '@angular/forms';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-customers',
@@ -19,7 +21,9 @@ import { DeleteCustomer } from './delete-customer/delete-customer.component';
     imports: [
         RouterModule,
         CommonModule,
+        FormsModule,
         MatTableModule,
+        MatTooltipModule,
         MatDialogModule,
         NgHeroiconsModule,
     ]
@@ -28,6 +32,8 @@ export class CustomersComponent implements OnInit {
     public isLoading = true;
     public displayedColumns = ["_actions", "name", "email", "cu_code", "cu_note", "total_clocks"];
     public dataSource!: MatTableDataSource<CustomerListDetails>;
+    public f_name!: string;
+    public f_email!: string;
 
     constructor(
         private _router: Router,
@@ -40,8 +46,12 @@ export class CustomersComponent implements OnInit {
         this._upsertTableData();
     }
 
+    public onNavigate(route: string): void {
+        this._router.navigate([route]);
+    }
+
     private _upsertTableData(): void {
-        this._service.getCustomerList().subscribe({
+        this._service.getCustomerList(this.f_name, this.f_email).subscribe({
             next: (data) => {
                 this.dataSource = new MatTableDataSource(data.data);
                 this.isLoading = false;
@@ -87,6 +97,7 @@ export class CustomersComponent implements OnInit {
             width: MODAL_SIZE.HALF,
             data: {
                 customer_id: item.customer_id,
+                customer_name: item.customer_name,
                 cu_code: item.cu_code
             }
         }).afterClosed().subscribe({
@@ -94,6 +105,17 @@ export class CustomersComponent implements OnInit {
                 update && this._upsertTableData();
             }
         });
+    }
+
+    public onFilterApplyClicked(): void {
+        this._upsertTableData();
+    }
+
+    public onFilterResetClicked(): void {
+        this.f_email = '';
+        this.f_name = '';
+
+        this._upsertTableData();
     }
 }
 

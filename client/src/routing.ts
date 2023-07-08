@@ -22,12 +22,12 @@ export const routes: Routes = [{
     canActivate: [canActivateRoute]
 },
 {
-    path: 'terminal',
+    path: 'terminal/:name',
     component: TerminalComponent,
     canActivate: [canActivateRoute]
 },
 {
-    path: 'stamps',
+    path: 'stamps/:clockSn',
     component: StampsComponent,
     canActivate: [canActivateRoute]
 },

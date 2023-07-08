@@ -13,8 +13,13 @@ export class CustomerService {
         private _http: HttpClient
     ) { }
 
-    public getCustomerList(): Observable<CustomerList> {
-        return this._http.get<CustomerList>(`${BE_PATH.basePath}customer/list`);
+    public getCustomerList(name?: string, email?: string): Observable<CustomerList> {
+        return this._http.get<CustomerList>(`${BE_PATH.basePath}customer/list`, {
+            headers: {
+                'x-name': name || '',
+                'x-email': email || ''
+            }
+        });
     }
 
     public createCustomer(name: string, mail: string, cu_code: string, cu_note: string): Observable<GenericHttpResponse> {
