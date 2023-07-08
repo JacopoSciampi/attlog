@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
@@ -36,7 +36,7 @@ import { CustomerService } from '@services/customer.service';
         NgHeroiconsModule,
     ]
 })
-export class TerminalComponent implements OnInit {
+export class TerminalComponent implements OnInit, OnDestroy {
     public isInError = false;
     public isLoading = true;
     public displayedColumns = ["_actions", "c_sn", "c_name", "c_model", "c_note", "c_desc", "c_location", "customer_name", "status"];
@@ -46,6 +46,8 @@ export class TerminalComponent implements OnInit {
     public statusList = ["Online", "Offline", "Tutti"];
     public customerList: CustomerListDetails[] = [];
     public _initCustomerList: CustomerListDetails[] = [];
+
+    private _int;
 
     constructor(
         private _router: Router,
@@ -72,7 +74,7 @@ export class TerminalComponent implements OnInit {
 
                 this._getData();
 
-                setInterval(() => {
+                this._int = setInterval(() => {
                     this._getData();
                 }, 60000);
             }, error: (err) => {
@@ -81,6 +83,10 @@ export class TerminalComponent implements OnInit {
                 this._toastService.errorGeneric(err.error.title, err.error.message)
             }
         });
+    }
+
+    public ngOnDestroy(): void {
+        clearInterval(this._int);
     }
 
     public onNavigate(route: string): void {
