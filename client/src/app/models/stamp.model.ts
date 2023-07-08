@@ -11,4 +11,5 @@ export interface StampListDetails {
     attlog_time: string;
     attlog_user_id: string;
     customer_name: string;
+    clock_location: string;
 }

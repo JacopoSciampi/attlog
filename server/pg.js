@@ -176,9 +176,9 @@ class JekoPgInit {
         });
     }
 
-    getLogs(sn, userId, startDate, endDate, customerName) {
+    getLogs(sn, userId, startDate, endDate, customerName, clockLocation) {
         return new Promise((r, j) => {
-            let query = `SELECT attlogs.*, clocks.c_name AS clock_name, COALESCE(customers.c_name, '-') AS customer_name
+            let query = `SELECT attlogs.*, clocks.c_name AS clock_name, clocks.c_location AS clock_location, COALESCE(customers.c_name, '-') AS customer_name
             FROM public.attlogs
             LEFT JOIN public.clocks ON attlogs.attlog_terminal_sn = clocks.c_sn
             LEFT JOIN public.customers ON clocks.fk_customer_id = customers.customer_id
@@ -190,6 +190,10 @@ class JekoPgInit {
 
             if (startDate && endDate) {
                 query += ` AND attlogs.attlog_date BETWEEN '${startDate}' AND '${endDate}'`;
+            }
+
+            if (clockLocation) {
+                query += ` AND clocks.c_location LIKE '%${clockLocation}%'`;
             }
 
             query += ' ORDER BY customer_name ASC';

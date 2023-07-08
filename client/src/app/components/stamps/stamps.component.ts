@@ -36,14 +36,15 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 })
 export class StampsComponent implements OnInit {
     public isLoading = true;
-    public displayedColumns = ["attlog_terminal_sn", "attlog_user_id", "customer_name", "attlog_date", "attlog_time", "attlog_access_type", "attlog_reason_code"];
+    public displayedColumns = ["attlog_terminal_sn", "attlog_user_id", "customer_name", "attlog_date", "clock_location", "attlog_time", "attlog_access_type", "attlog_reason_code"];
     public dataSource!: MatTableDataSource<StampListDetails>;
     public f_customer_name!: string;
+    public f_clock_location!: string;
+    public f_date;
 
     @ViewChild('f_terminalSN') f_terminalSN!: ElementRef<HTMLInputElement>;
     @ViewChild('f_userId') f_userId!: ElementRef<HTMLInputElement>;
     @ViewChild(DaterangepickerDirective, { static: false }) pickerDirective: DaterangepickerDirective;
-    public f_date;
 
     constructor(
         private _stampService: StampService,
@@ -55,11 +56,11 @@ export class StampsComponent implements OnInit {
         this._getData();
     }
 
-    private _getData(sn?: string, userId?: string, startDate?: string, endDate?: string, f_customer_name?: string): void {
+    private _getData(sn?: string, userId?: string, startDate?: string, endDate?: string, f_customer_name?: string, f_clock_location?: string): void {
         this.isLoading = true;
         let take = true;
 
-        this._stampService.getStampList(sn, userId, startDate, endDate, f_customer_name).pipe(
+        this._stampService.getStampList(sn, userId, startDate, endDate, f_customer_name, f_clock_location).pipe(
             takeWhile(() => take),
             finalize(() => take = false)
         ).subscribe({
@@ -94,8 +95,8 @@ export class StampsComponent implements OnInit {
             endDate = _.transform(endDate, "yyyy/MM/dd");
         }
 
-        if (this.f_terminalSN.nativeElement.value || this.f_userId.nativeElement.value || startDate || endDate || this.f_customer_name) {
-            this._getData(this.f_terminalSN.nativeElement.value, this.f_userId.nativeElement.value, startDate, endDate, this.f_customer_name);
+        if (this.f_terminalSN.nativeElement.value || this.f_userId.nativeElement.value || startDate || endDate || this.f_customer_name || this.f_clock_location) {
+            this._getData(this.f_terminalSN.nativeElement.value, this.f_userId.nativeElement.value, startDate, endDate, this.f_customer_name, this.f_clock_location);
         }
     }
 
@@ -127,6 +128,7 @@ export class StampsComponent implements OnInit {
         this.f_userId.nativeElement.value = '';
         this.f_terminalSN.nativeElement.value = '';
         this.f_customer_name = '';
+        this.f_clock_location = '';
         this.pickerDirective.clear();
 
         this._getData();
