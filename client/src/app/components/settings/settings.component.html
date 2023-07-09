@@ -1,3 +1,156 @@
 <div class="routed-page">
-    <div>SETTINGS TODO</div>
+    <ng-container *ngIf="isGettingData">
+        Caricamento impostazioni...
+    </ng-container>
+    <ng-container *ngIf="!isGettingData">
+        <div class="card-list">
+            <div class="card">
+                <div class="title">Notifiche email</div>
+                <div class="content">
+                    <div class="card-item">
+                        <div class="key">Server SMTP</div>
+                        <div class="value">
+                            <input type="text" [(ngModel)]="email.address">
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="key">Porta</div>
+                        <div class="value">
+                            <input type="text" [(ngModel)]="email.port">
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="key">Utente</div>
+                        <div class="value">
+                            <input type="text" [(ngModel)]="email.user">
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="key">Password</div>
+                        <div class="value">
+                            <input type="text" [(ngModel)]="email.password">
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="key">Mittente</div>
+                        <div class="value">
+                            <input type="text" [(ngModel)]="email.sender">
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="key" [matTooltip]="'Separare ogni indirizzo con un ;'">Destinatari</div>
+                        <div class="value">
+                            <input type="text" [(ngModel)]="email.receiverList">
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="key" [matTooltip]="'Separare ogni indirizzo con un ;'">Offline dopo (m)</div>
+                        <div class="value">
+                            <input type="text" [(ngModel)]="email.offlineAfter">
+                        </div>
+                    </div>
+                    <div class="card-item card-item-button">
+                        <div class="card-button">
+                            <div class="button button-primary">Salva</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="title">FTP</div>
+                <div class="content">
+                    <div class="card-item">
+                        <div class="key">Server IP</div>
+                        <div class="value">
+                            <input type="text" [(ngModel)]="ftp.ip">
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="key">Porta</div>
+                        <div class="value">
+                            <input type="text" [(ngModel)]="ftp.port">
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="key">Utente</div>
+                        <div class="value">
+                            <input type="text" [(ngModel)]="ftp.user">
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="key">Password</div>
+                        <div class="value">
+                            <input type="text" [(ngModel)]="ftp.password">
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="key">Cartella</div>
+                        <div class="value">
+                            <input type="text" [(ngModel)]="ftp.folder">
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="key">Invia timbrature ogni (s)</div>
+                        <div class="value">
+                            <input type="text" [(ngModel)]="ftp.sendEvery">
+                        </div>
+                    </div>
+                    <div class="card-item card-item-button">
+                        <div class="card-button">
+                            <div class="button button-primary">Salva</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="title">Timbratori</div>
+                <div class="content">
+                    <div class="card-item">
+                        <div class="key">Nome file</div>
+                        <div class="value">
+                            <input type="text" [(ngModel)]="stamp.filename">
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="legend">
+                            <div>A = Anno</div>
+                            <div>M = Mese</div>
+                            <div>G = Giorno</div>
+                            <div>H = Ore</div>
+                            <div>N = Minuti</div>
+                            <div>S = Secondi</div>
+                            <div>C = Cliente</div>
+                            <div>I = Impianto</div>
+                            <div>T = Timbratori</div>
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="key">Formato file</div>
+                        <div class="value">
+                            <input type="text" [(ngModel)]="stamp.fileFormat">
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="legend">
+                            <div>T = Numero disp.</div>
+                            <div>A = AnnoM = Mese</div>
+                            <div>G = Giorno</div>
+                            <div>H = Ore</div>
+                            <div>N = Minuti</div>
+                            <div>B = Badge</div>
+                            <div>V = Verso</div>
+                            <div>C = Causale</div>
+                            <div>K = Categoria</div>
+                            <div>F = Cliente</div>
+                        </div>
+                    </div>
+                    <div class="card-item card-item-button">
+                        <div class="card-button">
+                            <div class="button button-primary">Salva</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
 </div>

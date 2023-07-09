@@ -8,6 +8,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main {
     private static Set<String> clientSN = new HashSet<>();
@@ -63,7 +65,7 @@ public class Main {
         } else if (strReceive.contains("getrequest?")) {
             //getrequestProcess(bReceive, socket);
             sendDataInGet(bReceive);
-            //sendDataToDevice("200 OK", "C:385:INFO", socket);
+            sendDataToDevice("200 OK", "C:385:INFO", socket);
         } else if (strReceive.contains("devicecmd?")) {
             devicecmdProcess(bReceive, socket);
         }
@@ -81,12 +83,23 @@ public class Main {
         int attIndex = sBuffer.indexOf("\r\n\r\n", 1);
         String attStr = sBuffer.substring(attIndex + 4);
 
+        String pattern = "SN=(\\d+)";
+        Pattern regex = Pattern.compile(pattern);
+        Matcher matcher = regex.matcher(sBuffer);
+        String snValue = "";
+
+        if (matcher.find()) {
+             snValue = matcher.group(1);
+        } else {
+            System.out.println("SN parameter not found.");
+        }
+
         URL url = new URL("http://localhost:8081/v3/terminal/online");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty("Content-Type", "application/json");
         con.setRequestProperty("x-token-ref", token_ref);
-        String requestBody = "{\"sn\":\"" + machineSN.split("&")[0] + "\"}";
+        String requestBody = "{\"sn\":\"" + snValue + "\"}";
 
         con.setDoOutput(true);
         DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());

@@ -6,8 +6,12 @@ import { Observable } from "rxjs";
 @Injectable()
 export class Interceptor implements HttpInterceptor {
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+        if (!ConstClass.token) {
+            return next.handle(req);
+        }
+
         const authReq = req.clone({
-            headers: req.headers.set('x-prisma-token', ConstClass.token || '')
+            headers: req.headers.set('x-prisma-token', ConstClass.token)
         });
 
         return next.handle(authReq);
