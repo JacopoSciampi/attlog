@@ -84,7 +84,31 @@ fastify.register(require('@fastify/cors'), {
         } else {
             reply.status(500).send({ msg: "no serial number sent" });
         }
+    });
 
+    fastify.post('/v3/terminal/ip', (request, reply) => {
+        const tkn = request.headers["x-token-ref"];
+        queryFromClocks++;
+
+        if (!tkn || tkn !== internal_token) {
+            reply.status(401).message({ msg: "Unauthorized" });
+            return;
+        }
+
+        const ip = request.body.ip;
+        const sn = request.body.sn;
+
+        if (sn && ip) {
+            pgAdapter.updateClockLocalIp(sn, ip).then(() => {
+                reply.status(200).send({ msg: `Clock ${sn} status updated` });
+                return;
+            }).catch(() => {
+                reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
+                return;
+            })
+        } else {
+            reply.status(500).send({ msg: "no serial number or IP sent" });
+        }
     });
 
     fastify.get('/', (request, reply) => {

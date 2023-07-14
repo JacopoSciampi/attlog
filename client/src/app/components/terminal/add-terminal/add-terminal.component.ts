@@ -127,8 +127,8 @@ export class AddTerminalModalComponent implements OnInit {
         });
     }
 
-    public onCustomerListFilter(name: string): void {
-        this.customerList = this._initCustomerList.filter(i => i.customer_name.indexOf(name) !== -1);
+    public onCustomerListFilter(value: any): void {
+        this.customerList = this._initCustomerList.filter(i => i.customer_name.indexOf(value.value) !== -1);
     }
 
     public onCreateTerminal(): void {

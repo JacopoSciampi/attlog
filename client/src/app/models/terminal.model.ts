@@ -11,6 +11,7 @@ export interface TerminalListDetails {
     c_note: string;
     c_desc: string;
     customer_name: string;
+    c_local_ip: string;
 
     online?: boolean;
     tooltip?: string;

@@ -218,7 +218,7 @@ class JekoPgInit {
         let mustFilterStatus = status !== "Tutti";
 
         return new Promise((r, j) => {
-            pool.query(`SELECT c.c_id, c.c_sn, c.c_name, c.c_model, c.c_note, c.c_desc, c.c_location, c.c_last_timestamp, cu.c_name AS customer_name
+            pool.query(`SELECT c.c_id, c.c_sn, c.c_name, c.c_local_ip, c.c_model, c.c_note, c.c_desc, c.c_location, c.c_last_timestamp, cu.c_name AS customer_name
             FROM public.clocks c
             LEFT JOIN public.customers cu ON c.fk_customer_id = cu.customer_id
             WHERE cu.c_name LIKE '${customerName}%'
@@ -311,8 +311,8 @@ class JekoPgInit {
 
                     const timeStamp = "-1";
                     pool.query(
-                        `INSERT INTO "clocks" ("c_sn", "c_name", "c_model", "c_last_timestamp", "fk_customer_id", "c_note", "c_desc", "c_location")
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [c_sn, c_name, c_model, timeStamp, customerId, c_note, c_desc, c_location]).then(() => {
+                        `INSERT INTO "clocks" ("c_sn", "c_name", "c_model", "c_last_timestamp", "fk_customer_id", "c_note", "c_desc", "c_location", "c_local_ip")
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, [c_sn, c_name, c_model, timeStamp, customerId, c_note, c_desc, c_location, '']).then(() => {
                             r()
                         }).catch((err) => {
                             console.log(err);
@@ -327,6 +327,19 @@ class JekoPgInit {
     updateClockTimestamp(sn) {
         return new Promise((r, j) => {
             pool.query(`UPDATE clocks SET c_last_timestamp = '${new Date().getTime()}' WHERE clocks.c_sn  = '${sn}'`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                r();
+            });
+        });
+    }
+
+    updateClockLocalIp(sn, c_local_ip) {
+        return new Promise((r, j) => {
+            pool.query(`UPDATE clocks SET c_local_ip = '${c_local_ip}' WHERE clocks.c_sn  = '${sn}'`, (err, data) => {
                 if (err) {
                     console.log(err);
                     j();

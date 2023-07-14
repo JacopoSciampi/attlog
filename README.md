@@ -20,8 +20,6 @@ Java:
 
 General: 
     -> Add spinner when loading stuff
-    -> Edit client modal -> titolo sbagliato
-    -> Stamps page -> filter customer -> a select con search
     -> Add/Edit cliente -> modello terminale -> select a search (la lista modelli va messa a DB)
 
 Timbrature: once FTP  | custom page with pwd

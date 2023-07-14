@@ -46,9 +46,9 @@
                 <mat-select [(ngModel)]="selectedCustomer" formControlName="c_fk_cst"
                     (selectionChange)="onCustomerSelectionChanged()">
                     <input class="filterSearch" placeholder="Cerca cliente"
-                        (keyup)="onCustomerListFilter($event.target.value)">
-                    <mat-option *ngFor="let food of customerList" [value]="food.customer_name">
-                        {{food.customer_name}}
+                        (keyup)="onCustomerListFilter($event.target)">
+                    <mat-option *ngFor="let item of customerList" [value]="item.customer_name">
+                        {{item.customer_name}}
                     </mat-option>
                 </mat-select>
             </div>

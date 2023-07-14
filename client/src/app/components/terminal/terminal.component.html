@@ -8,7 +8,7 @@
                 <div class="title">Cliente</div>
                 <mat-select [(ngModel)]="f_customer_name">
                     <input class="filterSearch" placeholder="Cerca cliente"
-                        (keyup)="onCustomerListFilter($event.target.value)">
+                        (keyup)="onCustomerListFilter($event.target)">
                     <mat-option *ngFor="let c of customerList" [value]="c.customer_name">
                         {{c.customer_name}}
                     </mat-option>
@@ -72,10 +72,13 @@
                     <th mat-header-cell *matHeaderCellDef> Ubicazione </th>
                     <td mat-cell *matCellDef="let element"> {{element.c_location || "-"}} </td>
                 </ng-container>
-
                 <ng-container matColumnDef="customer_name">
                     <th mat-header-cell *matHeaderCellDef> Cliente </th>
                     <td mat-cell *matCellDef="let element"> {{element.customer_name}} </td>
+                </ng-container>
+                <ng-container matColumnDef="c_local_ip">
+                    <th mat-header-cell *matHeaderCellDef> IP Locale </th>
+                    <td mat-cell *matCellDef="let element"> {{element.c_local_ip}} </td>
                 </ng-container>
                 <ng-container matColumnDef="status">
                     <th class="th-div-center" mat-header-cell *matHeaderCellDef> Stato </th>

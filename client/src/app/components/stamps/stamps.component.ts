@@ -17,6 +17,9 @@ import { DaterangepickerDirective, NgxDaterangepickerMd } from "ngx-daterangepic
 import { FormsModule } from "@angular/forms";
 import { NgHeroiconsModule } from "@dimaslz/ng-heroicons";
 import { MatTooltipModule } from "@angular/material/tooltip";
+import { CustomerListDetails } from "@models/customer.model";
+import { CustomerService } from "@services/customer.service";
+import { MatSelectModule } from "@angular/material/select";
 
 @Component({
     selector: 'app-stamps',
@@ -30,6 +33,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
         MatTableModule,
         MatTooltipModule,
         NgHeroiconsModule,
+        MatSelectModule,
         MatDatepickerModule,
         NgxDaterangepickerMd,
     ]
@@ -42,6 +46,8 @@ export class StampsComponent implements OnInit {
     public f_terminalSN!: string;
     public f_clock_location!: string;
     public f_date;
+    public customerList: CustomerListDetails[] = [];
+    public _initCustomerList: CustomerListDetails[] = [];
 
     @ViewChild('f_userId') f_userId!: ElementRef<HTMLInputElement>;
     @ViewChild(DaterangepickerDirective, { static: false }) pickerDirective: DaterangepickerDirective;
@@ -49,17 +55,33 @@ export class StampsComponent implements OnInit {
     constructor(
         private _stampService: StampService,
         private _toastService: ToastService,
+        private _c: CustomerService,
         private _ar: ActivatedRoute,
         private _router: Router,
     ) { }
 
     public ngOnInit(): void {
-        if (this._ar.snapshot.params.clockSn !== "all") {
-            this.f_terminalSN = this._ar.snapshot.params.clockSn;
-            this.onFilterApplyClicked();
-            return;
-        }
-        this._getData();
+        this.isLoading = true;
+        let take = true;
+        this._c.getCustomerList(this.f_customer_name).pipe(
+            takeWhile(() => take),
+            finalize(() => take = false)
+        ).subscribe({
+            next: (data) => {
+                this.customerList = data.data;
+                this._initCustomerList = JSON.parse(JSON.stringify(data.data));
+
+                if (this._ar.snapshot.params.clockSn !== "all") {
+                    this.f_terminalSN = this._ar.snapshot.params.clockSn;
+                    this.onFilterApplyClicked();
+                    return;
+                }
+                this._getData();
+            }, error: (err) => {
+                this.isLoading = false;
+                this._toastService.errorGeneric(err.error.title, err.error.message)
+            }
+        });
     }
 
     private _getData(sn?: string, userId?: string, startDate?: string, endDate?: string, f_customer_name?: string, f_clock_location?: string): void {
@@ -83,6 +105,10 @@ export class StampsComponent implements OnInit {
     public formatDate(date: string): string {
         const _ = new DatePipe('it-IT');
         return _.transform(date, 'shortDate');
+    }
+
+    public onCustomerListFilter(value: any): void {
+        this.customerList = this._initCustomerList.filter(i => i.customer_name.indexOf(value.value) !== -1);
     }
 
     public onDateKeypressed(event): void {

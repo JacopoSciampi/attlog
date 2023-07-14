@@ -22,7 +22,7 @@ public class Main {
         //int port = 7777;
         //InetAddress addr = InetAddress.getByName("192.168.0.112");
 
-        int port = 3500;
+        int port = 56566;
         InetAddress addr = InetAddress.getByName("10.0.0.11");
 
         try (ServerSocket serverSocket = new ServerSocket(port, 50, addr)) {
@@ -57,8 +57,10 @@ public class Main {
     }
 
     private static void Analysis(byte[] bReceive, Socket socket) throws IOException {
+        //System.out.println(socket.getLocalSocketAddress());
+        //System.out.println(socket.getRemoteSocketAddress());
         String strReceive = new String(bReceive, Charset.forName("US-ASCII"));
-        System.out.println(strReceive);
+        //System.out.println(strReceive);
 
         if (strReceive.contains("cdata?")) {
             cdataProcess(bReceive, socket);
@@ -108,10 +110,10 @@ public class Main {
         outputStream.close();
 
         int responseCode = con.getResponseCode();
-        System.out.println("update online request status: " + responseCode);
+        System.out.println("::" + snValue + ":: > update online request status: " + responseCode);
     }
 
-    private static void  devicecmdProcess(byte[] bReceive, Socket remoteSocket) {
+    private static void  devicecmdProcess(byte[] bReceive, Socket remoteSocket) throws IOException {
         String sBuffer = new String(bReceive, StandardCharsets.US_ASCII).trim();
         String strReceive = sBuffer;
         String errMessage = "";
@@ -121,6 +123,32 @@ public class Main {
 
         int index = strReceive.indexOf("ID=");
         sendDataToDevice("200 OK", "OK", remoteSocket);
+
+        Pattern pattern = Pattern.compile("IPAddress=(\\d+\\.\\d+\\.\\d+\\.\\d+)");
+        Matcher matcher = pattern.matcher(strReceive);
+
+        if (matcher.find()) {
+            String ipAddress = matcher.group(1);
+
+            URL url = new URL("http://localhost:8081/v3/terminal/ip");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setRequestProperty("x-token-ref", token_ref);
+            String requestBody = "{\"sn\":\"" + machineSN.split(" ")[0] + "\",\"ip\":\"" + ipAddress + "\"}";
+
+            con.setDoOutput(true);
+            DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
+            outputStream.writeBytes(requestBody);
+            outputStream.flush();
+            outputStream.close();
+
+            int responseCode = con.getResponseCode();
+            System.out.println("::" + machineSN.split(" ")[0] + ":: > update IP request status: " + responseCode);
+
+        } else {
+            System.out.println("Error parsing the IP Address. Update skipped.");
+        }
         try {
             remoteSocket.close();
         } catch (IOException e) {
@@ -216,9 +244,7 @@ public class Main {
         int operIndex = sBuffer.indexOf("\r\n\r\n", 1);
         String operStr = sBuffer.substring(operIndex + 4);
 
-        System.out.println(operStr);
-
-
+        //System.out.println(operStr);
     }
 
     // Helper method
@@ -292,22 +318,33 @@ public class Main {
         int attIndex = sBuffer.indexOf("\r\n\r\n", 1);
         String attStr = sBuffer.substring(attIndex + 4);
 
-        URL url = new URL("http://localhost:8081/v3/terminal/log/add");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/json");
-        con.setRequestProperty("x-token-ref", token_ref);
-        String requestBody = "{\"sn\":\"" + machineSN.split("&")[0] + "\",\"log\":\"" + attStr.replaceAll("\\t", "-").replaceAll("\\n", "") + "\"}";
+        String patternSn = "SN=(\\d+)";
+        Pattern regex = Pattern.compile(patternSn);
+        Matcher matcherSn = regex.matcher(sBuffer);
+        String snValue = "";
+
+        if (matcherSn.find()) {
+            snValue = matcherSn.group(1);
+
+            URL url = new URL("http://localhost:8081/v3/terminal/log/add");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setRequestProperty("x-token-ref", token_ref);
+            String requestBody = "{\"sn\":\"" + snValue + "\",\"log\":\"" + attStr.replaceAll("\\t", "-").replaceAll("\\n", "") + "\"}";
 
 
-        con.setDoOutput(true);
-        DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
-        outputStream.writeBytes(requestBody);
-        outputStream.flush();
-        outputStream.close();
+            con.setDoOutput(true);
+            DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
+            outputStream.writeBytes(requestBody);
+            outputStream.flush();
+            outputStream.close();
 
-        int responseCode = con.getResponseCode();
-        System.out.println("addlog request status: " + responseCode);
+            int responseCode = con.getResponseCode();
+            System.out.println("::" + snValue + ":: > update attLog request status: " + responseCode);
+        } else {
+            System.out.println("Cannot update attLog, SN parse error");
+        }
     }
 
     private static void getNumber(String sBuffer, String numberStr) {

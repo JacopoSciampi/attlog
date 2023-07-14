@@ -12,6 +12,7 @@ import { CustomerListDetails } from '@models/customer.model';
 import { DeleteCustomer } from './delete-customer/delete-customer.component';
 import { FormsModule } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { finalize, takeWhile } from 'rxjs';
 
 @Component({
     selector: 'app-customers',
@@ -34,6 +35,8 @@ export class CustomersComponent implements OnInit {
     public dataSource!: MatTableDataSource<CustomerListDetails>;
     public f_name!: string;
     public f_email!: string;
+    public customerList: CustomerListDetails[] = [];
+    public _initCustomerList: CustomerListDetails[] = [];
 
     constructor(
         private _router: Router,
@@ -43,7 +46,21 @@ export class CustomersComponent implements OnInit {
     ) { }
 
     public ngOnInit(): void {
-        this._upsertTableData();
+        this.isLoading = true;
+        let take = true;
+        this._service.getCustomerList().pipe(
+            takeWhile(() => take),
+            finalize(() => take = false)
+        ).subscribe({
+            next: (data) => {
+                this.customerList = data.data;
+                this._initCustomerList = JSON.parse(JSON.stringify(data.data));
+                this._upsertTableData();
+            }, error: (err) => {
+                this.isLoading = false;
+                this._toastService.errorGeneric(err.error.title, err.error.message)
+            }
+        });
     }
 
     public onNavigate(route: string): void {
@@ -53,6 +70,7 @@ export class CustomersComponent implements OnInit {
     private _upsertTableData(): void {
         this._service.getCustomerList(this.f_name, this.f_email).subscribe({
             next: (data) => {
+
                 this.dataSource = new MatTableDataSource(data.data);
                 this.isLoading = false;
             }, error: (err) => {

@@ -12,9 +12,14 @@
             <div class="title">Data</div>
             <input type="text" [(ngModel)]="f_date" matInput ngxDaterangepickerMd>
         </div>
-        <div class="field-material">
+        <div class="field-material f-field f-field-long">
             <div class="title">Cliente</div>
-            <input type="text" [(ngModel)]="f_customer_name">
+            <mat-select [(ngModel)]="f_customer_name">
+                <input class="filterSearch" placeholder="Cerca cliente" (keyup)="onCustomerListFilter($event.target)">
+                <mat-option *ngFor="let c of customerList" [value]="c.customer_name">
+                    {{c.customer_name}}
+                </mat-option>
+            </mat-select>
         </div>
         <div class="field-material">
             <div class="title">Ubicazione</div>

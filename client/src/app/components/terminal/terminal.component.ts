@@ -39,7 +39,7 @@ import { CustomerService } from '@services/customer.service';
 export class TerminalComponent implements OnInit, OnDestroy {
     public isInError = false;
     public isLoading = true;
-    public displayedColumns = ["_actions", "c_sn", "c_name", "c_model", "c_note", "c_desc", "c_location", "customer_name", "status"];
+    public displayedColumns = ["_actions", "c_sn", "c_name", "c_model", "c_note", "c_desc", "c_location", "customer_name", "c_local_ip", "status"];
     public dataSource!: MatTableDataSource<TerminalListDetails>;
     public f_customer_name!: string;
     public f_status = "Tutti";
@@ -93,8 +93,8 @@ export class TerminalComponent implements OnInit, OnDestroy {
         this._router.navigate([route]);
     }
 
-    public onCustomerListFilter(name: string): void {
-        this.customerList = this._initCustomerList.filter(i => i.customer_name.indexOf(name) !== -1);
+    public onCustomerListFilter(value: any): void {
+        this.customerList = this._initCustomerList.filter(i => i.customer_name.indexOf(value.value) !== -1);
     }
 
     public onFilterApplyClicked(): void {
