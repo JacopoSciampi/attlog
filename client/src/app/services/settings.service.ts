@@ -17,4 +17,8 @@ export class SettingsService {
     public createSettings(data: SettingsDetails) {
         return this._http.put(`${BE_PATH.basePath}settings`, data);
     }
+
+    public updateEmailSettings(data: SettingsDetails) {
+        return this._http.post(`${BE_PATH.basePath}settings/email`, data);
+    }
 }

@@ -5,12 +5,12 @@ class JekoEmailer {
 
     __init__() {
         this.transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 587,
+            host: "smtp",
+            port: 111,
             secure: false,
             auth: {
-                user: 'timbrature.semprebonlux@gmail.com',
-                pass: 'jjdnnzyaykzoghng'
+                user: 'asdasdas.dasdasd@ddasdsa.com',
+                pass: '1234ff1ff13f133f1'
             }
         });
     }
@@ -19,10 +19,10 @@ class JekoEmailer {
         return new Promise((resolve, reject) => {
             try {
                 resolve(this.transporter.sendMail({
-                    from: '"Test 👻" <timbrature.semprebonlux@gmail.com>',
-                    to: "sciampi.jacopo@gmail.com", // mail, mail2, mail3, ...
-                    subject: "Hello ✔",
-                    text: "Hello world?",
+                    from: '"Test 👻" <asfasg.asgddsag@gsagasd.com>',
+                    to: "gsagsda.gsdag@gasdgasd.com", // mail, mail2, mail3, ...
+                    subject: "gasdgasd ✔",
+                    text: "Hegllo world?",
                     //html: "<b>Hello world?</b>",
                 }));
             } catch (e) {

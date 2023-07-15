@@ -99,7 +99,7 @@ export class SettingsComponent implements OnInit {
     }
 
     public onSaveEmailSettings(): void {
-        console.log(this.settings);
+        this._.updateEmailSettings(this.settings).subscribe({});
     }
 }
 
