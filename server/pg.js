@@ -214,11 +214,29 @@ class JekoPgInit {
         });
     }
 
+    getClocksForMail() {
+        return new Promise((r, j) => {
+            pool.query(`SELECT * FROM public.clocks`,
+                (err, data) => {
+                    if (err) {
+                        console.log(err);
+                        j();
+                    }
+
+                    data?.rows?.forEach(item => {
+                        item['online'] = new Date().getTime() - +item.c_last_timestamp < 60000;
+                    });
+
+                    r(data);
+                });
+        });
+    }
+
     getClocks(customerName, status) {
         let mustFilterStatus = status !== "Tutti";
 
         return new Promise((r, j) => {
-            pool.query(`SELECT c.c_id, c.c_sn, c.c_name, c.c_local_ip, c.c_model, c.c_note, c.c_desc, c.c_location, c.c_last_timestamp, cu.c_name AS customer_name
+            pool.query(`SELECT c.c_id, c.c_sn, c.c_name, c.c_local_ip, c.c_mail_sent, c.c_model, c.c_note, c.c_desc, c.c_location, c.c_last_timestamp, cu.c_name AS customer_name
             FROM public.clocks c
             LEFT JOIN public.customers cu ON c.fk_customer_id = cu.customer_id
             WHERE cu.c_name LIKE '${customerName}%'
@@ -324,9 +342,22 @@ class JekoPgInit {
         });
     }
 
+    updateClockMailSent(sn, status) {
+        return new Promise((r, j) => {
+            pool.query(`UPDATE clocks SET c_mail_sent = '${status}' WHERE clocks.c_sn  = '${sn}'`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                r();
+            });
+        });
+    }
+
     updateClockTimestamp(sn) {
         return new Promise((r, j) => {
-            pool.query(`UPDATE clocks SET c_last_timestamp = '${new Date().getTime()}' WHERE clocks.c_sn  = '${sn}'`, (err, data) => {
+            pool.query(`UPDATE clocks SET c_last_timestamp = '${new Date().getTime()}', c_mail_sent = '${false}' WHERE clocks.c_sn  = '${sn}'`, (err, data) => {
                 if (err) {
                     console.log(err);
                     j();

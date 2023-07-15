@@ -13,6 +13,8 @@ const uptime = new Date().getTime();
 let queryFromClocks = 0;
 let queryToDatabase = 0;
 
+let intervalMailCheck;
+
 const internal_token = "uQOpixuDj/YtSlXjayO-dNBcsd2fKx14OBqMOmHikiUUXi6Zhg2UxufCQDg7ic=y/yn6i2VSV9K2EMxcGYpzrQSgDNgbbBBaWlc4Xlhc2mOhNAPAF?Y929cAUHXEj6GL5jzxhASk4Z6u?s/gdEjGXjP/PpQqDZvelyGnbhrZocCyYRxy!P5WXS!eu053XhUJV5zLl121glT?g54HPVX2kvvkyqENk1tWl3E/Otz-ErK7SItzubR59ElypGOPwm?f";
 
 function validatePrismaToken(token, reply) {
@@ -430,6 +432,7 @@ fastify.register(require('@fastify/cors'), {
         }
 
         pgAdapter.createSettings(request.body).then(data => {
+            upsertEmailStuff();
             reply.status(200).send({ data: data?.rows && data.rows[0] || null });
         }).catch((e) => {
             console.log(e);
@@ -444,6 +447,7 @@ fastify.register(require('@fastify/cors'), {
         }
 
         pgAdapter.updateSettingsEmail(request.body).then(data => {
+            upsertEmailStuff();
             reply.status(200).send({ data: data?.rows && data.rows[0] || null });
         }).catch((e) => {
             console.log(e);
@@ -486,6 +490,7 @@ fastify.register(require('@fastify/cors'), {
                 if (data && data.rows && data.rows[0]) {
                     console.log("Email settings UP")
                     jekoEmailer.__init__(data.rows[0]);
+                    _upsertTerminalChecker();
                 } else {
                     console.log("WARNING: YOU MUST DEFINE THE SETTINGS IN THE FRONT END, THEN RESTART THE SERVER")
                 }
@@ -496,6 +501,37 @@ fastify.register(require('@fastify/cors'), {
                 rej();
             });
         });
+    }
+
+    function _upsertTerminalChecker() {
+        clearInterval(intervalMailCheck);
+
+        intervalMailCheck = setInterval(() => {
+            console.log("Checking terminal status for email...");
+            pgAdapter.getClocksForMail().then(data => {
+                if (data && data?.rows) {
+                    let terminalList = data?.rows?.filter(e => !e.online && (!e.c_mail_sent || e.c_mail_sent === "false"));
+
+                    terminalList?.forEach(terminal => {
+                        if (!jekoEmailer.snList.find(sn => sn === terminal.c_sn)) {
+                            jekoEmailer.snList.push(terminal.c_sn);
+
+                            jekoEmailer.sendMailTerminalOffline(terminal).then(() => {
+                                console.log(`Terminal ${terminal.c_sn} offline. Mail sent.`);
+                                pgAdapter.updateClockMailSent(terminal.c_sn, true).then(() => { }).catch(() => { });
+                                const idx = jekoEmailer.snList.indexOf(terminal.c_sn);
+                                jekoEmailer.snList = jekoEmailer.snList.splice(idx, 1);
+                            });
+
+                        }
+                    });
+
+                    console.log("Check done");
+                }
+            }).catch(() => {
+                console.error("There was an error getting the clock list");
+            })
+        }, jekoEmailer.config.set_mail_offline_after * 60 * 1000);
     }
 
     const start = async () => {

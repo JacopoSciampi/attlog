@@ -3,6 +3,7 @@ const nodemailer = require("nodemailer");
 class JekoEmailer {
     config = {};
     transporter = null;
+    snList = [];
 
     __init__(data) {
         this.config = data;
@@ -34,7 +35,6 @@ class JekoEmailer {
     }
 
     sendMailTerminalOffline(terminal) {
-        console.log(this.config)
         return new Promise((resolve, reject) => {
             try {
                 resolve(this.transporter.sendMail({
