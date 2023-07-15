@@ -22,7 +22,3 @@ Timbrature: once FTP  | custom page with pwd
     -> Pagina API 0-25
 
 NodeJS -> se orologio down > 1 h invio email (once, non ogni tot, ogni giorno ecc).
-
-Da fixare: 
-    Se Java crasha dopo ricezione timbratura perché server è offline -> timbratura persa
-    Aggiungere try catch + store in file timbrature da mandare appena torna UP il server

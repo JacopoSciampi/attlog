@@ -2,11 +2,15 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -96,21 +100,95 @@ public class Main {
             System.out.println("SN parameter not found.");
         }
 
-        URL url = new URL("http://localhost:8081/v3/terminal/online");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/json");
-        con.setRequestProperty("x-token-ref", token_ref);
-        String requestBody = "{\"sn\":\"" + snValue + "\"}";
+        try {
+            URL url = new URL("http://localhost:8081/v3/terminal/online");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setRequestProperty("x-token-ref", token_ref);
+            String requestBody = "{\"sn\":\"" + snValue + "\"}";
 
-        con.setDoOutput(true);
-        DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
-        outputStream.writeBytes(requestBody);
-        outputStream.flush();
-        outputStream.close();
+            con.setDoOutput(true);
+            DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
+            outputStream.writeBytes(requestBody);
+            outputStream.flush();
+            outputStream.close();
 
-        int responseCode = con.getResponseCode();
-        System.out.println("::" + snValue + ":: > update online request status: " + responseCode);
+            int responseCode = con.getResponseCode();
+            System.out.println("::" + snValue + ":: > update online request status: " + responseCode);
+            checkStampsToSend();
+        } catch (Exception e) {
+            System.out.println("::" + snValue + ":: > there was an error updating the status. Is the server online?");
+        }
+    }
+
+    private static void saveAttlogForLater(String body) {
+        String workingDirectory = System.getProperty("user.dir");
+        String fileName = "stamps_to_update.txt";
+        File file = new File(workingDirectory, fileName);
+
+        try {
+            FileWriter fileWriter = new FileWriter(file, true);
+
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+
+            String textToAppend = body;
+            bufferedWriter.write(textToAppend);
+            bufferedWriter.newLine();
+
+            bufferedWriter.close();
+            System.out.println("Text appended to the file successfully.");
+        } catch (IOException e) {
+            System.out.println("An error occurred while appending to the file.");
+            e.printStackTrace();
+        }
+    }
+
+    private static void checkStampsToSend() {
+        String workingDirectory = System.getProperty("user.dir");
+        String fileName = "stamps_to_update.txt";
+        File file = new File(workingDirectory, fileName);
+
+        try {
+            Scanner scanner = new Scanner(file);
+            File tempFile = new File(workingDirectory, "temp.txt");
+            BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                try {
+                    URL url = new URL("http://localhost:8081/v3/terminal/log/add");
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    con.setRequestMethod("POST");
+                    con.setRequestProperty("Content-Type", "application/json");
+                    con.setRequestProperty("x-token-ref", token_ref);
+                    String requestBody = line;
+
+                    con.setDoOutput(true);
+                    DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
+                    outputStream.writeBytes(requestBody);
+                    outputStream.flush();
+                    outputStream.close();
+
+                    int responseCode = con.getResponseCode();
+                    System.out.println("::" + line + ":: > update attLog request status: " + responseCode);
+                } catch (Exception e) {
+                    System.out.println("::" + line + ":: > Error uploading the attlog. Is the server online?");
+                    writer.write(line);
+                    writer.newLine();
+                }
+            }
+
+            writer.close();
+            scanner.close();
+
+            Path originalPath = file.toPath();
+            Path tempPath = tempFile.toPath();
+            Files.move(tempPath, originalPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            System.out.println("An error occurred while processing the file: " + fileName);
+            e.printStackTrace();
+        }
     }
 
     private static void  devicecmdProcess(byte[] bReceive, Socket remoteSocket) throws IOException {
@@ -130,21 +208,27 @@ public class Main {
         if (matcher.find()) {
             String ipAddress = matcher.group(1);
 
-            URL url = new URL("http://localhost:8081/v3/terminal/ip");
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("x-token-ref", token_ref);
-            String requestBody = "{\"sn\":\"" + machineSN.split(" ")[0] + "\",\"ip\":\"" + ipAddress + "\"}";
+            try {
+                URL url = new URL("http://localhost:8081/v3/terminal/ip");
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("POST");
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setRequestProperty("x-token-ref", token_ref);
+                String requestBody = "{\"sn\":\"" + machineSN.split(" ")[0] + "\",\"ip\":\"" + ipAddress + "\"}";
 
-            con.setDoOutput(true);
-            DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
-            outputStream.writeBytes(requestBody);
-            outputStream.flush();
-            outputStream.close();
+                con.setDoOutput(true);
+                DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
+                outputStream.writeBytes(requestBody);
+                outputStream.flush();
+                outputStream.close();
 
-            int responseCode = con.getResponseCode();
-            System.out.println("::" + machineSN.split(" ")[0] + ":: > update IP request status: " + responseCode);
+                int responseCode = con.getResponseCode();
+                System.out.println("::" + machineSN.split(" ")[0] + ":: > update IP request status: " + responseCode);
+                checkStampsToSend();
+            } catch (Exception e) {
+                System.out.println("::" + machineSN.split(" ")[0] + ":: > error while updating the IP. Is the server on?");
+
+            }
 
         } else {
             System.out.println("Error parsing the IP Address. Update skipped.");
@@ -326,22 +410,29 @@ public class Main {
         if (matcherSn.find()) {
             snValue = matcherSn.group(1);
 
-            URL url = new URL("http://localhost:8081/v3/terminal/log/add");
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("x-token-ref", token_ref);
-            String requestBody = "{\"sn\":\"" + snValue + "\",\"log\":\"" + attStr.replaceAll("\\t", "-").replaceAll("\\n", "") + "\"}";
+            try {
+                URL url = new URL("http://localhost:8081/v3/terminal/log/add");
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("POST");
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setRequestProperty("x-token-ref", token_ref);
+                String requestBody = "{\"sn\":\"" + snValue + "\",\"log\":\"" + attStr.replaceAll("\\t", "-").replaceAll("\\n", "") + "\"}";
 
 
-            con.setDoOutput(true);
-            DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
-            outputStream.writeBytes(requestBody);
-            outputStream.flush();
-            outputStream.close();
+                con.setDoOutput(true);
+                DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
+                outputStream.writeBytes(requestBody);
+                outputStream.flush();
+                outputStream.close();
 
-            int responseCode = con.getResponseCode();
-            System.out.println("::" + snValue + ":: > update attLog request status: " + responseCode);
+                int responseCode = con.getResponseCode();
+                System.out.println("::" + snValue + ":: > update attLog request status: " + responseCode);
+                checkStampsToSend();
+            } catch (Exception e) {
+                System.out.println("::" + snValue + ":: > Error uploading the attlog. Is the server online? Saving the log for later.");
+                String requestBody = "{\"sn\":\"" + snValue + "\",\"log\":\"" + attStr.replaceAll("\\t", "-").replaceAll("\\n", "") + "\"}";
+                saveAttlogForLater(requestBody);
+            }
         } else {
             System.out.println("Cannot update attLog, SN parse error");
         }
