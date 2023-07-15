@@ -1,3 +1,7 @@
+export interface SettingsDetailsData {
+    data: SettingsDetails;
+}
+
 export interface SettingsDetails {
     setting_name?: string;
     setting_id?: string;

@@ -459,6 +459,34 @@ fastify.register(require('@fastify/cors'), {
         });
     });
 
+    fastify.post('/v1/settings/ftp', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
+        pgAdapter.updateSettingsFtp(request.body).then(data => {
+            reply.status(200).send({ data: data?.rows && data.rows[0] || null });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: e?.message || "Si è verificato un errore" });
+            return;
+        });
+    });
+
+    fastify.post('/v1/settings/stamps', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
+        pgAdapter.updateSettingsStamps(request.body).then(data => {
+            reply.status(200).send({ data: data?.rows && data.rows[0] || null });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: e?.message || "Si è verificato un errore" });
+            return;
+        });
+    });
+
     const start = async () => {
         try {
             await fastify.listen({ host: "0.0.0.0", port: 8081 });

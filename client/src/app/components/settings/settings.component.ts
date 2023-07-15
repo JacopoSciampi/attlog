@@ -69,10 +69,11 @@ export class SettingsComponent implements OnInit {
             takeWhile(() => take),
             finalize(() => take = false)
         ).subscribe({
-            next: (data: any) => {
+            next: (data) => {
                 this.hasConfig = !!data?.data;
 
                 if (data?.data) {
+                    data.data.set_mail_ssl = data.data.set_mail_ssl === "false" ? false : true;
                     this.settings = data.data;
                 }
 
@@ -99,7 +100,48 @@ export class SettingsComponent implements OnInit {
     }
 
     public onSaveEmailSettings(): void {
-        this._.updateEmailSettings(this.settings).subscribe({});
+        let take = true;
+        this._.updateEmailSettings(this.settings).pipe(
+            takeWhile(() => take),
+            finalize(() => take = false)
+        ).subscribe({
+            next: () => {
+                this._toastService.generic("Operazione completata", "Aggiornamento avvenuto con successo")
+                this._getSettings();
+            }, error: (err) => {
+                this._toastService.errorGeneric(err.error.title, err.error.message)
+            }
+        });
+    }
+
+    public onSaveFtpSettings(): void {
+        let take = true;
+        this._.updateFtpSettings(this.settings).pipe(
+            takeWhile(() => take),
+            finalize(() => take = false)
+        ).subscribe({
+            next: () => {
+                this._toastService.generic("Operazione completata", "Aggiornamento avvenuto con successo")
+                this._getSettings();
+            }, error: (err) => {
+                this._toastService.errorGeneric(err.error.title, err.error.message)
+            }
+        });
+    }
+
+    public onSaveStampsSettings(): void {
+        let take = true;
+        this._.updateStampsSettings(this.settings).pipe(
+            takeWhile(() => take),
+            finalize(() => take = false)
+        ).subscribe({
+            next: () => {
+                this._toastService.generic("Operazione completata", "Aggiornamento avvenuto con successo")
+                this._getSettings();
+            }, error: (err) => {
+                this._toastService.errorGeneric(err.error.title, err.error.message)
+            }
+        });
     }
 }
 

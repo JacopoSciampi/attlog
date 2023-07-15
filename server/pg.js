@@ -541,6 +541,62 @@ class JekoPgInit {
             });
         });
     }
+
+    updateSettingsFtp(data) {
+        return new Promise((r, j) => {
+            pool.query(`SELECT * FROM public.settings WHERE settings.setting_id = '${data.setting_id}'`, (err, res) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                if (!res?.rowCount) {
+                    j({ message: `Configurazione non trovata` });
+                    return;
+                }
+
+                pool.query(`UPDATE settings SET set_ftp_server_ip = '${data.set_ftp_server_ip}',
+                set_ftp_server_port = '${data.set_ftp_server_port}',
+                set_ftp_server_user = '${data.set_ftp_server_user}',
+                set_ftp_server_password = '${data.set_ftp_server_password}',
+                set_ftp_server_folder = '${data.set_ftp_server_folder}',
+                set_ftp_send_every = '${data.set_ftp_send_every}' WHERE settings.setting_id  = '${data.setting_id}'`, (err, data) => {
+                    if (err) {
+                        console.log(err);
+                        j();
+                    }
+
+                    r();
+                });
+            });
+        });
+    }
+
+    updateSettingsStamps(data) {
+        return new Promise((r, j) => {
+            pool.query(`SELECT * FROM public.settings WHERE settings.setting_id = '${data.setting_id}'`, (err, res) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                if (!res?.rowCount) {
+                    j({ message: `Configurazione non trovata` });
+                    return;
+                }
+
+                pool.query(`UPDATE settings SET set_terminal_file_name = '${data.set_terminal_file_name}',
+                set_terminal_file_format = '${data.set_terminal_file_format}' WHERE settings.setting_id  = '${data.setting_id}'`, (err, data) => {
+                    if (err) {
+                        console.log(err);
+                        j();
+                    }
+
+                    r();
+                });
+            });
+        });
+    }
 }
 
 module.exports = JekoPgInit

@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 
 import { BE_PATH } from "src/urls";
-import { SettingsDetails } from "@models/settings.model";
+import { SettingsDetails, SettingsDetailsData } from "@models/settings.model";
 
 @Injectable()
 export class SettingsService {
@@ -11,7 +11,7 @@ export class SettingsService {
     ) { }
 
     public getSettings() {
-        return this._http.get(`${BE_PATH.basePath}settings`);
+        return this._http.get<SettingsDetailsData>(`${BE_PATH.basePath}settings`);
     }
 
     public createSettings(data: SettingsDetails) {
@@ -20,5 +20,13 @@ export class SettingsService {
 
     public updateEmailSettings(data: SettingsDetails) {
         return this._http.post(`${BE_PATH.basePath}settings/email`, data);
+    }
+
+    public updateFtpSettings(data: SettingsDetails) {
+        return this._http.post(`${BE_PATH.basePath}settings/ftp`, data);
+    }
+
+    public updateStampsSettings(data: SettingsDetails) {
+        return this._http.post(`${BE_PATH.basePath}settings/stamps`, data);
     }
 }
