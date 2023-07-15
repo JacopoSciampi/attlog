@@ -1,5 +1,7 @@
 const JekoPgInit = require('./pg');
 const JekoEmailer = require('./email');
+const ftp = require("basic-ftp");
+const { Readable } = require('stream');
 const fastify = require('fastify')({ logger: true });
 const jwt_decode = require('jwt-decode');
 const pgAdapter = new JekoPgInit();
@@ -14,6 +16,9 @@ let queryFromClocks = 0;
 let queryToDatabase = 0;
 
 let intervalMailCheck;
+let intervalStampSend;
+
+const ftpClient = new ftp.Client()
 
 const internal_token = "uQOpixuDj/YtSlXjayO-dNBcsd2fKx14OBqMOmHikiUUXi6Zhg2UxufCQDg7ic=y/yn6i2VSV9K2EMxcGYpzrQSgDNgbbBBaWlc4Xlhc2mOhNAPAF?Y929cAUHXEj6GL5jzxhASk4Z6u?s/gdEjGXjP/PpQqDZvelyGnbhrZocCyYRxy!P5WXS!eu053XhUJV5zLl121glT?g54HPVX2kvvkyqENk1tWl3E/Otz-ErK7SItzubR59ElypGOPwm?f";
 
@@ -433,6 +438,7 @@ fastify.register(require('@fastify/cors'), {
 
         pgAdapter.createSettings(request.body).then(data => {
             upsertEmailStuff();
+            upsertStampFtpStuff();
             reply.status(200).send({ data: data?.rows && data.rows[0] || null });
         }).catch((e) => {
             console.log(e);
@@ -462,6 +468,7 @@ fastify.register(require('@fastify/cors'), {
         }
 
         pgAdapter.updateSettingsFtp(request.body).then(data => {
+            upsertStampFtpStuff();
             reply.status(200).send({ data: data?.rows && data.rows[0] || null });
         }).catch((e) => {
             console.log(e);
@@ -491,6 +498,7 @@ fastify.register(require('@fastify/cors'), {
                     console.log("Email settings UP")
                     jekoEmailer.__init__(data.rows[0]);
                     _upsertTerminalChecker();
+                    _upsertFtpChecker();
                 } else {
                     console.log("WARNING: YOU MUST DEFINE THE SETTINGS IN THE FRONT END, THEN RESTART THE SERVER")
                 }
@@ -501,6 +509,73 @@ fastify.register(require('@fastify/cors'), {
                 rej();
             });
         });
+    }
+
+    function upsertStampFtpStuff() {
+        return new Promise((res, rej) => {
+            pgAdapter.getSettings().then(data => {
+                if (data && data.rows && data.rows[0]) {
+                    console.log("FTP settings UP")
+                    jekoEmailer.__init__(data.rows[0]);
+                    _upsertFtpChecker();
+                } else {
+                    console.log("WARNING: YOU MUST DEFINE THE SETTINGS IN THE FRONT END, THEN RESTART THE SERVER")
+                }
+
+            }).catch(e => {
+                console.error("Error while setting up the ftp at startup");
+                console.error(e);
+                rej();
+            });
+        });
+    }
+
+    function _upsertFtpChecker() {
+        clearInterval(intervalStampSend);
+
+        // intervalMailCheck = setInterval(() => {
+        console.log("Checking terminal status for FTP...");
+        pgAdapter.getLogsForFtp().then(data => {
+            if (data && data?.rows) {
+                ftpClient.access({
+                    host: jekoEmailer.config.set_ftp_server_ip,
+                    port: jekoEmailer.config.set_ftp_server_port,
+                    user: jekoEmailer.config.set_ftp_server_user,
+                    password: jekoEmailer.config.set_ftp_server_password,
+                    secure: false
+                }).then(() => {
+                    const stringToReadable = (str) => {
+                        const readableStream = new Readable();
+                        readableStream._read = () => { };
+                        readableStream.push(str);
+                        readableStream.push(null);
+                        return readableStream;
+                    };
+
+                    const remoteFolder = jekoEmailer.config.set_ftp_server_folder;
+
+                    // TODO -> logList must be formatted following the rules (Another TODO)
+                    const logList = data.rows;
+                    const fileContent = stringToReadable("ciao")
+                    // ftpClient.uploadFrom(fileContent, `${remoteFolder}test.txt`).then(() => {
+                    //     console.log("HURRAY")
+                    //     batch update logList with pg.setLogFtpStatus(id, true)
+                    // }).catch(err => {
+                    //     console.log("Error while uploading to the FTP server");
+                    //     console.error(err);
+                    // });
+
+                    console.log("Check done");
+                }).catch(err => {
+                    console.log("Error while connecting to the FTP server");
+                    console.error(err);
+                });
+
+            }
+        }).catch(() => {
+            console.error("There was an error getting the clock list");
+        })
+        // }, jekoEmailer.config.set_ftp_send_every * 60);
     }
 
     function _upsertTerminalChecker() {
@@ -538,7 +613,6 @@ fastify.register(require('@fastify/cors'), {
         try {
             await fastify.listen({ host: "0.0.0.0", port: 8081 });
             upsertEmailStuff().then(() => {
-
             }).catch(() => { });
         } catch (err) {
             fastify.log.error(err)

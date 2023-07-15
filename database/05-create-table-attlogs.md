@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS public.attlogs
     attlog_time character varying(15) COLLATE pg_catalog."default" NOT NULL,
     attlog_reason_code character varying(2) COLLATE pg_catalog."default" NOT NULL,
     attlog_access_type character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    attlog_sent character varying(10) COLLATE pg_catalog."default",
     CONSTRAINT attlogs_pkey PRIMARY KEY (attlog_id)
 )
 

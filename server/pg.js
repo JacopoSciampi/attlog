@@ -177,6 +177,32 @@ class JekoPgInit {
         });
     }
 
+    setLogFtpStatus(attlog_id, state) {
+        return new Promise((r, j) => {
+            pool.query(`UPDATE attlogs SET attlog_sent = '${state}',  WHERE attlogs.attlog_id  = '${attlog_id}'`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                r();
+            });
+        });
+    }
+
+    getLogsForFtp() {
+        return new Promise((r, j) => {
+            pool.query(`SELECT * FROM public.attlogs WHERE attlogs.attlog_sent IS NULL OR attlogs.attlog_sent LIKE '${false}'`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                r(data);
+            });
+        });
+    }
+
     getLogs(sn, userId, startDate, endDate, customerName, clockLocation) {
         return new Promise((r, j) => {
             let query = `SELECT attlogs.*, clocks.c_name AS clock_name, clocks.c_location AS clock_location, COALESCE(customers.c_name, '-') AS customer_name
@@ -591,7 +617,7 @@ class JekoPgInit {
                 pool.query(`UPDATE settings SET set_ftp_server_ip = '${data.set_ftp_server_ip}',
                 set_ftp_server_port = '${data.set_ftp_server_port}',
                 set_ftp_server_user = '${data.set_ftp_server_user}',
-                set_ftp_server_password = '${data.set_ftp_server_password}',
+                ${data.set_ftp_server_password !== "*****" ? `set_ftp_server_password = '${data.set_ftp_server_password}',` : ''}
                 set_ftp_server_folder = '${data.set_ftp_server_folder}',
                 set_ftp_send_every = '${data.set_ftp_send_every}' WHERE settings.setting_id  = '${data.setting_id}'`, (err, data) => {
                     if (err) {
