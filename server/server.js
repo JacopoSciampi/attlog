@@ -13,13 +13,6 @@ const uptime = new Date().getTime();
 let queryFromClocks = 0;
 let queryToDatabase = 0;
 
-// jekoEmailer.__init__();
-// jekoEmailer.sendMailTerminalOffline().then(data => {
-//     console.log(data)
-// }).catch(e => {
-//     console.log(e);
-// });
-
 const internal_token = "uQOpixuDj/YtSlXjayO-dNBcsd2fKx14OBqMOmHikiUUXi6Zhg2UxufCQDg7ic=y/yn6i2VSV9K2EMxcGYpzrQSgDNgbbBBaWlc4Xlhc2mOhNAPAF?Y929cAUHXEj6GL5jzxhASk4Z6u?s/gdEjGXjP/PpQqDZvelyGnbhrZocCyYRxy!P5WXS!eu053XhUJV5zLl121glT?g54HPVX2kvvkyqENk1tWl3E/Otz-ErK7SItzubR59ElypGOPwm?f";
 
 function validatePrismaToken(token, reply) {
@@ -487,11 +480,30 @@ fastify.register(require('@fastify/cors'), {
         });
     });
 
+    function upsertEmailStuff() {
+        return new Promise((res, rej) => {
+            pgAdapter.getSettings().then(data => {
+                if (data && data.rows && data.rows[0]) {
+                    console.log("Email settings UP")
+                    jekoEmailer.__init__(data.rows[0]);
+                } else {
+                    console.log("WARNING: YOU MUST DEFINE THE SETTINGS IN THE FRONT END, THEN RESTART THE SERVER")
+                }
+                res();
+            }).catch(e => {
+                console.error("Error while setting up the email at startup");
+                console.error(e);
+                rej();
+            });
+        });
+    }
+
     const start = async () => {
         try {
             await fastify.listen({ host: "0.0.0.0", port: 8081 });
-            console.log("Ready")
+            upsertEmailStuff().then(() => {
 
+            }).catch(() => { });
         } catch (err) {
             fastify.log.error(err)
             process.exit(1)

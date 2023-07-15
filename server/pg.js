@@ -523,14 +523,16 @@ class JekoPgInit {
 
                 data.set_mail_ssl === 'true' ? true : false;
 
-                pool.query(`UPDATE settings SET set_mail_smtp = '${data.set_mail_smtp}',
-                set_mail_ssl = '${data.set_mail_ssl}',
-                set_mail_port = '${data.set_mail_port}',
-                set_mail_user = '${data.set_mail_user}',
-                set_mail_pass = '${data.set_mail_pass}',
-                set_mail_sender = '${data.set_mail_sender}',
-                set_mail_receiver_list = '${data.set_mail_receiver_list}',
-                set_mail_offline_after = '${data.set_mail_offline_after}' WHERE settings.setting_id  = '${data.setting_id}'`, (err, data) => {
+                pool.query(`UPDATE settings SET 
+                        set_mail_smtp = '${data.set_mail_smtp}',
+                        set_mail_ssl = '${data.set_mail_ssl}',
+                        set_mail_port = '${data.set_mail_port}',
+                        set_mail_user = '${data.set_mail_user}',
+                        ${data.set_mail_pass !== "*****" ? `set_mail_pass = '${data.set_mail_pass}',` : ''}
+                        set_mail_sender = '${data.set_mail_sender}',
+                        set_mail_receiver_list = '${data.set_mail_receiver_list}',
+                        set_mail_offline_after = '${data.set_mail_offline_after}'
+                        WHERE settings.setting_id = '${data.setting_id}'`, (err, data) => {
                     if (err) {
                         console.log(err);
                         j();
