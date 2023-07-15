@@ -403,6 +403,70 @@ class JekoPgInit {
             });
         });
     }
+
+    addClockModel(name, desc) {
+        return new Promise((r, j) => {
+            pool.query(`SELECT * FROM public.clock_models WHERE clock_models.cm_name = '${name}'`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                if (data?.rowCount) {
+                    j({ message: `Modello ${name} già registrato` });
+                    return;
+                }
+
+                pool.query(
+                    `INSERT INTO "clock_models" ("cm_name", "cm_desc")
+                    VALUES ($1, $2)`, [name, desc]).then(() => {
+                        r()
+                    }).catch((err) => {
+                        console.log(err);
+                        j();
+                    });
+            });
+        });
+    }
+
+    getClockModelList() {
+        return new Promise((r, j) => {
+            pool.query(`SELECT * FROM public.clock_models`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                r(data);
+            });
+        });
+    }
+
+    deleteClockModelList(cm_id) {
+        return new Promise((r, j) => {
+            pool.query(`DELETE FROM public.clock_models WHERE clock_models.cm_id = '${cm_id}'`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                r();
+            });
+        });
+    }
+
+    updateClockModelList(cm_id, cm_name, cm_desc) {
+        return new Promise((r, j) => {
+            pool.query(`UPDATE clock_models SET cm_name = '${cm_name}', cm_desc = '${cm_desc}' WHERE clock_models.cm_id  = '${cm_id}'`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                r();
+            });
+        });
+    }
 }
 
 module.exports = JekoPgInit

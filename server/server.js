@@ -345,6 +345,64 @@ fastify.register(require('@fastify/cors'), {
         });
     });
 
+    fastify.get('/v1/clock_models', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
+        pgAdapter.getClockModelList().then(data => {
+            reply.status(200).send({ data: data?.rows || [] });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: e?.message || "Si è verificato un errore" });
+            return;
+        });
+    });
+
+    fastify.put('/v1/clock_models', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
+        pgAdapter.addClockModel(request.body.cm_name, request.body.cm_desc).then(data => {
+            reply.status(200).send({ data: data?.rows || [] });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: e?.message || "Si è verificato un errore" });
+            return;
+        });
+    });
+
+    fastify.post('/v1/clock_models', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
+        pgAdapter.updateClockModelList(request.body.cm_id, request.body.cm_name, request.body.cm_desc).then(data => {
+            reply.status(200).send({ data: data?.rows || [] });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: e?.message || "Si è verificato un errore" });
+            return;
+        });
+    });
+
+    fastify.delete('/v1/clock_models', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
+        const cm_id = request.headers['cm_id'] || "";
+
+        pgAdapter.deleteClockModelList(cm_id).then(data => {
+            reply.status(200).send({ data: data?.rows || [] });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: e?.message || "Si è verificato un errore" });
+            return;
+        });
+    });
+
     const start = async () => {
         try {
             await fastify.listen({ host: "0.0.0.0", port: 8081 });

@@ -13,13 +13,8 @@ KC:
 
 *******************************
 
-Java:
-    -> Info -> Add to stamps:
-        -> IpAddress
-        -> il fatto se è statico (credo sia isTFT, da verificare)- Se non c'è come info amen
-
 General: 
-    -> Add spinner when loading stuff
+    -> Add spinner when loading stuff >>>>>>>>> (WIP)
     -> Add/Edit cliente -> modello terminale -> select a search (la lista modelli va messa a DB)
 
 Timbrature: once FTP  | custom page with pwd

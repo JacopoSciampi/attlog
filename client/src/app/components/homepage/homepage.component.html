@@ -1,6 +1,8 @@
 <div class="routed-page">
     <ng-container *ngIf="isGettingMetrics">
-        Caricamento metriche...
+        <div class="abs-spinner">
+            <app-spinner></app-spinner>
+        </div>
     </ng-container>
     <ng-container *ngIf="!isGettingMetrics">
         <div class="card-list">
@@ -50,6 +52,41 @@
                         <div class="key">Timbrature</div>
                         <div class="value">{{metrics?.db?. totalAttlogs}}</div>
                     </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="title">
+                    <div>
+                        Modelli terminali
+                    </div>
+                    <div>
+                        <plus-circle-outline-icon class="clickable" [matTooltip]="'Aggiungi modello'"
+                            (click)="upsertClockModel()"></plus-circle-outline-icon>
+                    </div>
+                </div>
+                <div class="content">
+                    <ng-container *ngFor="let model of clockModelList">
+                        <div class="card-item">
+                            <div class="key">
+                                <div>
+                                    {{model.cm_name}}
+                                </div>
+                                <div> - </div>
+                                <div class="italic">
+                                    {{model.cm_desc}}
+                                </div>
+                            </div>
+                            <div class="value">
+                                <pencil-outline-icon class="clickable" matTooltip="Modifica modello"
+                                    (click)="upsertClockModel(model)"></pencil-outline-icon>
+                                <archive-box-x-mark-outline-icon class="clickable" matTooltip="Elimina modello"
+                                    (click)="deleteClockModel(model)"></archive-box-x-mark-outline-icon>
+                            </div>
+                        </div>
+                    </ng-container>
+                    <ng-container *ngIf="!clockModelList?.length">
+                        <span class="italic">Nessun modello disponibile.</span>
+                    </ng-container>
                 </div>
             </div>
         </div>

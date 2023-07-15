@@ -22,7 +22,7 @@ import { KcJwtToken } from '@models/auth.model';
         MatTooltipModule
     ]
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent {
     public username!: string;
 
     constructor(
@@ -32,8 +32,8 @@ export class NavbarComponent implements OnInit {
         this.username = jwt_decode<KcJwtToken>(this.authService.oAuthService.getAccessToken()).given_name;
     }
 
-    public ngOnInit(): void {
-
+    public gotoCredits(): void {
+        window.open('https://stackoverflow.com/users/9890873/jacopo-sciampi', '_blank');
     }
 }
 

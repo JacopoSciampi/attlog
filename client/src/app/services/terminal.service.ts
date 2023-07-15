@@ -4,6 +4,7 @@ import { HttpClient } from "@angular/common/http";
 import { BE_PATH } from "src/urls";
 import { Observable } from 'rxjs';
 import { TerminalList } from "@models/terminal.model";
+import { ClockModelList } from "@models/clock-model.model";
 
 @Injectable()
 export class TerminalService {
@@ -48,6 +49,33 @@ export class TerminalService {
         return this._http.delete(`${BE_PATH.basePath}clocks`, {
             headers: {
                 "c_sn": c_sn,
+            }
+        });
+    }
+
+    public getClockModelList(): Observable<ClockModelList> {
+        return this._http.get<ClockModelList>(`${BE_PATH.basePath}clock_models`);
+    }
+
+    public addClockModel(cm_name: string, cm_desc: string) {
+        return this._http.put(`${BE_PATH.basePath}clock_models`, {
+            'cm_name': cm_name,
+            'cm_desc': cm_desc || "",
+        });
+    }
+
+    public updateClockModel(cm_name: string, cm_desc: string, cm_id: string) {
+        return this._http.post(`${BE_PATH.basePath}clock_models`, {
+            'cm_id': cm_id || "",
+            'cm_name': cm_name,
+            'cm_desc': cm_desc || "",
+        });
+    }
+
+    public deleteClockModel(cm_id: string) {
+        return this._http.delete(`${BE_PATH.basePath}clock_models`, {
+            headers: {
+                "cm_id": cm_id,
             }
         });
     }

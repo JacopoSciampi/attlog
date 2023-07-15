@@ -23,6 +23,11 @@
             font-family: 'font-bold';
             background-color: $bg;
             font-size: 18px;
+            justify-content: space-between;
+
+            &>* {
+                font-family: 'font-bold';
+            }
         }
 
         .content {
@@ -40,6 +45,15 @@
                 .key {
                     flex: 1;
                     padding-right: $space-normal;
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                }
+
+                .value {
+                    display: flex;
+                    align-items: center;
+                    gap: 16px;
                 }
             }
 
