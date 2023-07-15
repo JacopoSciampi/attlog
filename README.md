@@ -15,7 +15,6 @@ KC:
 
 General: 
     -> Add spinner when loading stuff >>>>>>>>> (WIP)
-    -> Add/Edit cliente -> modello terminale -> select a search (la lista modelli va messa a DB)
 
 Timbrature: once FTP  | custom page with pwd
     -> Aggiungi colonna "Inviata quando"

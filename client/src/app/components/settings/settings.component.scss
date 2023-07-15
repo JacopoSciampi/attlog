@@ -1,65 +1,83 @@
 @import '../../../assets/style/palette.scss';
 
+.first-config {
+    font-size: 20px;
+}
+
+.no-card-title {
+    font-size: 16px;
+}
+
+.riep {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    &>.no-card-title:not(:first-child) {
+        margin-top: 16px;
+    }
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid;
+    border-radius: $radius;
+
+    .title {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding: $space-tiny $space-normal;
+        font-family: 'font-bold';
+        background-color: $bg;
+        font-size: 18px;
+    }
+
+    .content {
+        display: flex;
+        flex-direction: column;
+        gap: $space-normal;
+        background-color: $bg-alpha;
+        padding: $space-tiny;
+        flex: 1;
+
+        .card-item {
+            display: flex;
+            align-items: center;
+            width: 100%;
+
+            .key {
+                flex: 1;
+                padding-right: $space-normal;
+            }
+
+            .legend {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: $space-tiny;
+                font-size: 12px;
+                padding: 0px $space-normal;
+                font-style: italic;
+            }
+
+            .card-button {
+                width: 100%;
+            }
+        }
+
+        .card-item-button {
+            align-items: flex-end !important;
+            flex: 1;
+        }
+
+    }
+}
+
 .card-list {
     width: 100%;
     display: flex;
     justify-content: center;
     gap: $space-normal;
     flex-wrap: wrap;
-
-    .card {
-        display: flex;
-        flex-direction: column;
-        border: 1px solid;
-        border-radius: $radius;
-
-        .title {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            padding: $space-tiny $space-normal;
-            font-family: 'font-bold';
-            background-color: $bg;
-            font-size: 18px;
-        }
-
-        .content {
-            display: flex;
-            flex-direction: column;
-            gap: $space-normal;
-            background-color: $bg-alpha;
-            padding: $space-tiny;
-            flex: 1;
-
-            .card-item {
-                display: flex;
-                align-items: center;
-                width: 100%;
-
-                .key {
-                    flex: 1;
-                    padding-right: $space-normal;
-                }
-
-                .legend {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    gap: $space-tiny;
-                    font-size: 12px;
-                    padding: 0px $space-normal;
-                    font-style: italic;
-                }
-
-                .card-button {
-                    width: 100%;
-                }
-            }
-
-            .card-item-button {
-                align-items: flex-end !important;
-                flex: 1;
-            }
-
-        }
-    }
 }

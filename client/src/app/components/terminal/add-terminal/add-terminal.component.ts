@@ -8,11 +8,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { NgHeroiconsModule } from "@dimaslz/ng-heroicons";
 
 import { TerminalService } from "@services/terminal.service";
-import { finalize, takeWhile } from "rxjs";
+import { finalize, takeWhile, zip } from "rxjs";
 import { ToastService } from "@services/toast.service";
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
 import { CustomerService } from '@services/customer.service';
 import { CustomerList, CustomerListDetails } from '@models/customer.model';
+import { ClockModelListDetails } from '@models/clock-model.model';
 
 @Component({
     selector: 'app-add-terminal',
@@ -36,6 +37,10 @@ export class AddTerminalModalComponent implements OnInit {
 
     public customerList: CustomerListDetails[] = [];
     private _initCustomerList: CustomerListDetails[] = [];
+    public clockModelList: ClockModelListDetails[] = [];
+    private _initClockModelList: ClockModelListDetails[] = [];
+
+    public selectedModel!: string;
     public selectedCustomer!: string;
     public canSendRequest = false;
 
@@ -53,21 +58,26 @@ export class AddTerminalModalComponent implements OnInit {
             c_note: string;
             c_desc: string;
             c_location: string;
+            fk_cm_name: string;
         }
-    ) {
-
-    }
+    ) { }
 
     public ngOnInit(): void {
         this.isLoading = true;
         let take = true;
-        this._c.getCustomerList().pipe(
+        zip(
+            this._c.getCustomerList(),
+            this._service.getClockModelList()
+        ).pipe(
             takeWhile(() => take),
             finalize(() => take = false)
         ).subscribe({
             next: (data) => {
-                this.customerList = data.data;
-                this._initCustomerList = JSON.parse(JSON.stringify(data.data));
+                this.customerList = data[0].data;
+                this._initCustomerList = JSON.parse(JSON.stringify(data[0].data));
+
+                this.clockModelList = data[1].data;
+                this._initClockModelList = JSON.parse(JSON.stringify(data[1].data));
 
                 this.form = this._fb.group({
                     'c_sn': [{ value: this.data?.c_sn || '', disabled: this.data }, Validators.required],
@@ -86,6 +96,7 @@ export class AddTerminalModalComponent implements OnInit {
                 });
 
                 this.selectedCustomer = this.data?.fk_customer_name || "";
+                this.selectedModel = this.data?.fk_cm_name || "";
                 this.isLoading = false;
             }, error: (err) => {
                 this.isInError = true;
@@ -100,7 +111,7 @@ export class AddTerminalModalComponent implements OnInit {
     }
 
     private _validateButton(): void {
-        this.canSendRequest = Object.keys(this.form.controls).every(k => this.form.controls[k].value) && !!this.selectedCustomer;
+        this.canSendRequest = Object.keys(this.form.controls).every(k => this.form.controls[k].value) && !!this.selectedCustomer && !!this.selectedModel;
     }
 
     public onUpdateTerminal(): void {
@@ -108,7 +119,7 @@ export class AddTerminalModalComponent implements OnInit {
         this._service.updateTerminal(
             this.form.controls['c_sn'].value,
             this.form.controls['c_name'].value,
-            this.form.controls['c_model'].value,
+            this.selectedModel,
             this.selectedCustomer,
             this.form.controls['c_note'].value,
             this.form.controls['c_desc'].value,
@@ -131,12 +142,16 @@ export class AddTerminalModalComponent implements OnInit {
         this.customerList = this._initCustomerList.filter(i => i.customer_name.indexOf(value.value) !== -1);
     }
 
+    public onModelListFilter(value: any): void {
+        this.clockModelList = this._initClockModelList.filter(i => i.cm_name.indexOf(value.value) !== -1);
+    }
+
     public onCreateTerminal(): void {
         let take = true;
         this._service.addTerminal(
             this.form.controls['c_sn'].value,
             this.form.controls['c_name'].value,
-            this.form.controls['c_model'].value,
+            this.selectedModel,
             this.selectedCustomer,
             this.form.controls['c_note'].value,
             this.form.controls['c_desc'].value,

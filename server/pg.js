@@ -467,6 +467,44 @@ class JekoPgInit {
             });
         });
     }
+
+    getSettings() {
+        return new Promise((r, j) => {
+            pool.query(`SELECT * FROM public.settings`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                r(data);
+            });
+        });
+    }
+
+    createSettings(data) {
+        return new Promise((r, j) => {
+            pool.query(`SELECT * FROM public.settings WHERE settings.setting_name = '${data.setting_name}'`, (err, res) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                if (res?.rowCount) {
+                    j({ message: `Il Nome ${data.setting_name} risulta già utilizzato` });
+                    return;
+                }
+
+                pool.query(
+                    `INSERT INTO "settings" ("setting_name", "set_mail_smtp", "set_mail_ssl", "set_mail_port", "set_mail_user", "set_mail_pass", "set_mail_sender", "set_mail_receiver_list", "set_mail_offline_after", "set_ftp_server_ip", "set_ftp_server_port", "set_ftp_server_user", "set_ftp_server_password", "set_ftp_server_folder", "set_ftp_send_every", "set_terminal_file_name", "set_terminal_file_format")
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`, [data.setting_name, data.set_mail_smtp, data.set_mail_ssl, data.set_mail_port, data.set_mail_user, data.set_mail_pass, data.set_mail_sender, data.set_mail_receiver_list, data.set_mail_offline_after, data.set_ftp_server_ip, data.set_ftp_server_port, data.set_ftp_server_user, data.set_ftp_server_password, data.set_ftp_server_folder, data.set_ftp_send_every, data.set_terminal_file_name, data.set_terminal_file_format]).then(() => {
+                        r()
+                    }).catch((err) => {
+                        console.log(err);
+                        j();
+                    });
+            });
+        });
+    }
 }
 
 module.exports = JekoPgInit

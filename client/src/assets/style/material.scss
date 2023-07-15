@@ -53,3 +53,7 @@ td {
     color: $bg !important;
     font-size: 13px !important;
 }
+
+mat-stepper {
+    background: $gradient-light;
+}

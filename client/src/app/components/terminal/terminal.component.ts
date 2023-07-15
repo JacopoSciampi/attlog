@@ -157,7 +157,9 @@ export class TerminalComponent implements OnInit, OnDestroy {
                 c_model: clock.c_model,
                 c_note: clock.c_note,
                 c_desc: clock.c_desc,
-                fk_customer_name: clock.customer_name
+                c_location: clock.c_location,
+                fk_customer_name: clock.customer_name,
+                fk_cm_name: clock.c_model
             }
         }).afterClosed().subscribe({
             next: (update) => {

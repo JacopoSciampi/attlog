@@ -1,7 +1,9 @@
 const JekoPgInit = require('./pg');
+const JekoEmailer = require('./email');
 const fastify = require('fastify')({ logger: true });
 const jwt_decode = require('jwt-decode');
 const pgAdapter = new JekoPgInit();
+const jekoEmailer = new JekoEmailer();
 
 var osu = require('node-os-utils');
 const __cpu = osu.cpu;
@@ -10,6 +12,13 @@ const __mem = osu.mem;
 const uptime = new Date().getTime();
 let queryFromClocks = 0;
 let queryToDatabase = 0;
+
+// jekoEmailer.__init__();
+// jekoEmailer.sendMailTerminalOffline().then(data => {
+//     console.log(data)
+// }).catch(e => {
+//     console.log(e);
+// });
 
 const internal_token = "uQOpixuDj/YtSlXjayO-dNBcsd2fKx14OBqMOmHikiUUXi6Zhg2UxufCQDg7ic=y/yn6i2VSV9K2EMxcGYpzrQSgDNgbbBBaWlc4Xlhc2mOhNAPAF?Y929cAUHXEj6GL5jzxhASk4Z6u?s/gdEjGXjP/PpQqDZvelyGnbhrZocCyYRxy!P5WXS!eu053XhUJV5zLl121glT?g54HPVX2kvvkyqENk1tWl3E/Otz-ErK7SItzubR59ElypGOPwm?f";
 
@@ -396,6 +405,39 @@ fastify.register(require('@fastify/cors'), {
 
         pgAdapter.deleteClockModelList(cm_id).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: e?.message || "Si è verificato un errore" });
+            return;
+        });
+    });
+
+    fastify.get('/v1/settings', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
+        pgAdapter.getSettings().then(data => {
+            if (data && data?.rows && data?.rows[0]) {
+                data.rows[0].set_ftp_server_password = data.rows[0].set_ftp_server_password ? '*****' : '';
+                data.rows[0].set_mail_pass = data.rows[0].set_mail_pass ? '*****' : '';
+            }
+
+            reply.status(200).send({ data: data?.rows && data.rows[0] || null });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: e?.message || "Si è verificato un errore" });
+            return;
+        });
+    });
+
+    fastify.put('/v1/settings', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
+        pgAdapter.createSettings(request.body).then(data => {
+            reply.status(200).send({ data: data?.rows && data.rows[0] || null });
         }).catch((e) => {
             console.log(e);
             reply.status(500).send({ title: "Errore", message: e?.message || "Si è verificato un errore" });

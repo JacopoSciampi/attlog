@@ -396,6 +396,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nodemailer@npm:^6.9.3":
+  version: 6.9.3
+  resolution: "nodemailer@npm:6.9.3"
+  checksum: 3bea8316652c0578515d9146d2f24660e4855807520153f061d39af76b440a4f61b4e70f10fed35f8f12f115f6aea1aeb483ea7ba0337c0e3e675f117c41c611
+  languageName: node
+  linkType: hard
+
 "obliterator@npm:^2.0.1":
   version: 2.0.4
   resolution: "obliterator@npm:2.0.4"
@@ -704,6 +711,7 @@ __metadata:
     jwt-decode: ^3.1.2
     node-os-utils: ^1.3.7
     node-zklib: ^1.3.0
+    nodemailer: ^6.9.3
     pg: ^8.11.0
     ws: ^8.13.0
   languageName: unknown
