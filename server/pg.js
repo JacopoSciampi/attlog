@@ -135,13 +135,13 @@ class JekoPgInit {
         });
     }
 
-    downloadLogs(sn, userId, startDate, endDate, customerName) {
+    downloadLogs(sn, userId, startDate, endDate, customerName, toBeSent) {
         return new Promise((r, j) => {
             let query = `SELECT attlogs.*, clocks.c_name AS clock_name, COALESCE(customers.c_name, '-') AS customer_name, users.user_badge
             FROM public.attlogs
             LEFT JOIN public.clocks ON attlogs.attlog_terminal_sn = clocks.c_sn
             LEFT JOIN public.customers ON clocks.fk_customer_id = customers.customer_id
-			LEFT JOIN public.users ON users.user_sn = '${sn}' AND users.user_pin = attlogs.attlog_user_id
+			LEFT JOIN public.users ON users.user_sn LIKE '%${sn}%' AND users.user_pin = attlogs.attlog_user_id
             WHERE attlogs.attlog_terminal_sn LIKE '%${sn}%'`;
 
             if (userId) {
@@ -153,6 +153,10 @@ class JekoPgInit {
 
             if (startDate && endDate) {
                 query += ` AND attlogs.attlog_date BETWEEN '${startDate}' AND '${endDate}'`;
+            }
+
+            if (toBeSent) {
+                query += ` AND attlogs.attlog_sent IS null OR attlogs.attlog_sent = 'false'`;
             }
 
             query += ' ORDER BY customer_name ASC';
@@ -170,30 +174,32 @@ class JekoPgInit {
                 });
 
                 r(data);
-
-                // let toReturn = '';
-
-                // data?.rows?.forEach(i => {
-                //     Object.entries(i).forEach(([key, value]) => {
-                //         toReturn += `${key}: ${value} -`;
-                //     });
-                //     toReturn += '\n';
-                // });
-
-                // r(toReturn);
             });
         });
     }
 
-    setLogFtpStatus(attlog_id, state) {
+    setStampToBeSent(attlog_id) {
         return new Promise((r, j) => {
-            pool.query(`UPDATE attlogs SET attlog_sent = '${state}',  WHERE attlogs.attlog_id  = '${attlog_id}'`, (err, data) => {
+            pool.query(`UPDATE attlogs SET attlog_sent = 'false', attlog_sent_timestamp = '' WHERE attlogs.attlog_id  = '${attlog_id}'`, (err, data) => {
                 if (err) {
                     console.log(err);
                     j();
                 }
 
-                r();
+                r(data);
+            });
+        });
+    }
+
+    batchUpdateStamps(data) {
+        const timestamp = new Date().getTime();
+
+        data?.rows?.forEach(item => {
+            pool.query(`UPDATE attlogs SET attlog_sent = 'true', attlog_sent_timestamp = '${timestamp}' WHERE attlogs.attlog_id  = '${item.attlog_id}'`, (err, data) => {
+                if (err) {
+                    console.log(`Error while updating the status SENT of the attlog ${item.attlog_id}`);
+                    console.log(err);
+                }
             });
         });
     }
@@ -577,8 +583,8 @@ class JekoPgInit {
                 }
 
                 pool.query(
-                    `INSERT INTO "settings" ("setting_name", "set_mail_smtp", "set_mail_ssl", "set_mail_port", "set_mail_user", "set_mail_pass", "set_mail_sender", "set_mail_receiver_list", "set_mail_offline_after", "set_ftp_server_ip", "set_ftp_server_port", "set_ftp_server_user", "set_ftp_server_password", "set_ftp_server_folder", "set_ftp_send_every", "set_terminal_file_name", "set_terminal_file_format")
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`, [data.setting_name, data.set_mail_smtp, data.set_mail_ssl, data.set_mail_port, data.set_mail_user, data.set_mail_pass, data.set_mail_sender, data.set_mail_receiver_list, data.set_mail_offline_after, data.set_ftp_server_ip, data.set_ftp_server_port, data.set_ftp_server_user, data.set_ftp_server_password, data.set_ftp_server_folder, data.set_ftp_send_every, data.set_terminal_file_name, data.set_terminal_file_format]).then(() => {
+                    `INSERT INTO "settings" ("setting_name", "set_mail_smtp", "set_mail_ssl", "set_mail_port", "set_mail_user", "set_mail_pass", "set_mail_sender", "set_mail_receiver_list", "set_mail_offline_after", "set_ftp_server_ip", "set_ftp_server_port", "set_ftp_server_user", "set_ftp_server_password", "set_ftp_server_folder", "set_ftp_send_every", "set_terminal_file_name", "set_terminal_file_format", "set_ftp_enabled")
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`, [data.setting_name, data.set_mail_smtp, data.set_mail_ssl, data.set_mail_port, data.set_mail_user, data.set_mail_pass, data.set_mail_sender, data.set_mail_receiver_list, data.set_mail_offline_after, data.set_ftp_server_ip, data.set_ftp_server_port, data.set_ftp_server_user, data.set_ftp_server_password, data.set_ftp_server_folder, data.set_ftp_send_every, data.set_terminal_file_name, data.set_terminal_file_format, data.set_ftp_enabled]).then(() => {
                         r()
                     }).catch((err) => {
                         console.log(err);
@@ -642,6 +648,7 @@ class JekoPgInit {
                 pool.query(`UPDATE settings SET set_ftp_server_ip = '${data.set_ftp_server_ip}',
                 set_ftp_server_port = '${data.set_ftp_server_port}',
                 set_ftp_server_user = '${data.set_ftp_server_user}',
+                set_ftp_enabled = '${data.set_ftp_enabled}',
                 ${data.set_ftp_server_password !== "*****" ? `set_ftp_server_password = '${data.set_ftp_server_password}',` : ''}
                 set_ftp_server_folder = '${data.set_ftp_server_folder}',
                 set_ftp_send_every = '${data.set_ftp_send_every}' WHERE settings.setting_id  = '${data.setting_id}'`, (err, data) => {

@@ -78,6 +78,15 @@
                         <div class="title">FTP</div>
                         <div class="content">
                             <div class="card-item">
+                                <div class="key">Abilita invio FTP</div>
+                                <div class="value">
+                                    <div class="checkbox" [ngClass]="{'checkbox-active': settings.set_ftp_enabled}"
+                                        (click)="settings.set_ftp_enabled = !settings.set_ftp_enabled">
+                                        <ng-container *ngIf="settings.set_ftp_enabled">✔</ng-container>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-item">
                                 <div class="key">Server IP</div>
                                 <div class="value">
                                     <input type="text" [(ngModel)]="settings.set_ftp_server_ip">
@@ -176,6 +185,7 @@
                         <div>Offline dopo (m): {{settings.set_mail_offline_after}}</div>
 
                         <div class="bold no-card-title">Impostazioni FTP</div>
+                        <div>Abilita invio FTP: {{settings.set_ftp_enabled ? 'Si' : 'No'}}</div>
                         <div>Server IP: {{settings.set_ftp_server_ip}}</div>
                         <div>Porta: {{settings.set_ftp_server_port}}</div>
                         <div>Utente: {{settings.set_ftp_server_user}}</div>
@@ -265,6 +275,15 @@
                 <div class="card">
                     <div class="title">FTP</div>
                     <div class="content">
+                        <div class="card-item">
+                            <div class="key">Abilita invio FTP</div>
+                            <div class="value">
+                                <div class="checkbox" [ngClass]="{'checkbox-active': settings.set_ftp_enabled}"
+                                    (click)="settings.set_ftp_enabled = !settings.set_ftp_enabled">
+                                    <ng-container *ngIf="settings.set_ftp_enabled">✔</ng-container>
+                                </div>
+                            </div>
+                        </div>
                         <div class="card-item">
                             <div class="key">Server IP</div>
                             <div class="value">

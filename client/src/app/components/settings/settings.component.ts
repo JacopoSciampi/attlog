@@ -50,6 +50,7 @@ export class SettingsComponent implements OnInit {
         set_ftp_server_password: '',
         set_ftp_server_folder: '',
         set_ftp_send_every: '',
+        set_ftp_enabled: false,
         set_terminal_file_name: '',
         set_terminal_file_format: '',
     };

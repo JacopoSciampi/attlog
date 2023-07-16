@@ -37,4 +37,11 @@ export class StampService {
             observe: 'response'
         });
     }
+
+    public setStampToBeSentToFtp(id: string | number) {
+        return this._http.post(`${BE_PATH.basePath}attlog/set_to_be_sent`, {
+            'id': id || ""
+
+        });
+    }
 }

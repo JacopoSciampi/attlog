@@ -16,6 +16,11 @@
     cursor: pointer;
 }
 
+.icon-disalbed {
+    fill: $bg-alpha;
+    color: $bg-alpha;
+}
+
 .bold {
     font-family: "font-bold", Arial, Helvetica, sans-serif;
 }

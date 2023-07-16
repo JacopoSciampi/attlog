@@ -300,6 +300,21 @@ fastify.register(require('@fastify/cors'), {
         }, []);
     }
 
+    fastify.post('/v1/attlog/set_to_be_sent', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
+        const id = request.body.id || "";
+        pgAdapter.setStampToBeSent(id).then(() => {
+            reply.status(200).send({ message: 'Aggiornamento effettuato con successo' });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
+            return;
+        });
+    });
+
     fastify.post('/v1/attlog/download', (request, reply) => {
         if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
             return;
@@ -324,16 +339,7 @@ fastify.register(require('@fastify/cors'), {
 
                     if ((!fileName || !fileFormat) || newArray?.length !== 1) {
                         console.info("stamps config not set or multiple customers detected. Using default");
-
-                        const date = new Date();
-                        const day = String(date.getDate()).padStart(2, "0");
-                        const month = String(date.getMonth() + 1).padStart(2, "0");
-                        const year = date.getFullYear();
-                        const hours = String(date.getHours()).padStart(2, "0");
-                        const minutes = String(date.getMinutes()).padStart(2, "0");
-                        const seconds = String(date.getSeconds()).padStart(2, "0");
-
-                        fileName = `${day}/${month}/${year}-${hours}_${minutes}_${seconds}`;
+                        fileName = generateGenericFileName();
                     } else {
                         fileName = generateFileNameForStamps(fileName,
                             newArray[0].customer_code,
@@ -624,16 +630,21 @@ fastify.register(require('@fastify/cors'), {
     }
 
     function _upsertFtpChecker() {
+        if (!jekoEmailer.config.set_ftp_enabled) {
+            return;
+        }
+
         clearInterval(intervalStampSend);
 
         intervalStampSend = setInterval(() => {
-            const fileName = jekoEmailer.config.set_terminal_file_name;
+            let fileName = jekoEmailer.config.set_terminal_file_name;
             const fileFormat = jekoEmailer.config.set_terminal_file_format;
 
             if (!fileName || !fileFormat) {
                 console.log("Cannot send FTP data: file name or format not set in settings");
                 return;
             }
+
             console.log("Checking terminal status for FTP...");
             pgAdapter.getLogsForFtp().then(data => {
                 if (data && data?.rows) {
@@ -653,19 +664,21 @@ fastify.register(require('@fastify/cors'), {
                         };
 
                         const remoteFolder = jekoEmailer.config.set_ftp_server_folder;
+                        pgAdapter.downloadLogs('', null, null, null, null, true).then(data => {
+                            const _ = data;
+                            data = generateFilContentForStamps(data.rows, fileFormat, '');
+                            fileName = generateGenericFileName();
+                            const fileContent = stringToReadable(data);
+                            // ftpClient.uploadFrom(fileContent, `${remoteFolder} ${fileName}`).then(() => {
+                            //     console.log("FTP stamps uploaded");
+                            //     pgAdapter.batchUpdateStamps(_);
+                            // }).catch(err => {
+                            //     console.log("Error while uploading to the FTP server");
+                            //     console.error(err);
+                            // });
 
-                        // TODO -> logList must be formatted following the rules (Another TODO)
-                        const logList = data.rows;
-                        const fileContent = stringToReadable("ciao")
-                        // ftpClient.uploadFrom(fileContent, `${remoteFolder}test.txt`).then(() => {
-                        //     console.log("HURRAY")
-                        //     batch update logList with pg.setLogFtpStatus(id, true)
-                        // }).catch(err => {
-                        //     console.log("Error while uploading to the FTP server");
-                        //     console.error(err);
-                        // });
-
-                        console.log("Check done");
+                            console.log("Check done");
+                        });
                     }).catch(err => {
                         console.log("Error while connecting to the FTP server");
                         console.error(err);
@@ -834,6 +847,18 @@ fastify.register(require('@fastify/cors'), {
         }
 
         return name;
+    }
+
+    function generateGenericFileName() {
+        const date = new Date();
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+        const seconds = String(date.getSeconds()).padStart(2, "0");
+
+        return `${day}/${month}/${year}-${hours}_${minutes}_${seconds}`;
     }
 
     const start = async () => {

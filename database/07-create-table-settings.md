@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS public.settings
     set_ftp_server_password character varying(50) COLLATE pg_catalog."default" ,
     set_ftp_server_folder character varying(50) COLLATE pg_catalog."default" ,
     set_ftp_send_every character varying(50) COLLATE pg_catalog."default" ,
+    set_ftp_enabled character varying(50) COLLATE pg_catalog."default" ,
     
     set_terminal_file_name character varying(50) COLLATE pg_catalog."default" ,
     set_terminal_file_format character varying(50) COLLATE pg_catalog."default" ,

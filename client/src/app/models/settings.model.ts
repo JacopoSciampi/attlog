@@ -21,6 +21,7 @@ export interface SettingsDetails {
     set_ftp_server_password: string;
     set_ftp_server_folder: string;
     set_ftp_send_every: string;
+    set_ftp_enabled: string | boolean;
 
     set_terminal_file_name: string;
     set_terminal_file_format: string;

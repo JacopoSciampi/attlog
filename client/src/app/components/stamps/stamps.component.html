@@ -69,6 +69,18 @@
                 <th mat-header-cell *matHeaderCellDef> Motivo </th>
                 <td mat-cell *matCellDef="let element"> {{element.attlog_reason_code}} </td>
             </ng-container>
+            <ng-container matColumnDef="attlog_sent_timestamp">
+                <th mat-header-cell *matHeaderCellDef> Inviato il </th>
+                <td mat-cell *matCellDef="let element"> {{formatDate(element.attlog_sent_timestamp)}} </td>
+            </ng-container>
+            <ng-container matColumnDef="_actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let element">
+                    <paper-airplane-outline-icon matTooltip="Segna come da inviare" class="clickable"
+                        (click)="markAttlogAsToBeSent(element)"></paper-airplane-outline-icon>
+                </td>
+            </ng-container>
+
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>

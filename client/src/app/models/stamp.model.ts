@@ -3,7 +3,7 @@ export interface StampList {
 }
 
 export interface StampListDetails {
-    attlog_id: number;
+    attlog_id: number | string;
     attlog_access_type: string;
     attlog_date: string;
     attlog_reason_code: string;
@@ -12,4 +12,6 @@ export interface StampListDetails {
     attlog_user_id: string;
     customer_name: string;
     clock_location: string;
+    attlog_sent: string | boolean;
+    attlog_sent_timestamp: number;
 }

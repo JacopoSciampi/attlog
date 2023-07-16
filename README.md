@@ -22,6 +22,4 @@ Settings:
     -> stamps/all -> doesn't need to load stamps. stamps/<blabla> it does
 
 Timbrature: once FTP  | custom page with pwd
-    -> Aggiungi colonna "Inviata quando"
-    -> Aggiungi azione "Segna come da "Inviare" (anche se già inviato)
     -> Pagina API 0-25
