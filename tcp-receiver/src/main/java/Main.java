@@ -117,8 +117,31 @@ public class Main {
             int responseCode = con.getResponseCode();
             System.out.println("::" + snValue + ":: > update online request status: " + responseCode);
             checkStampsToSend();
+            checkUserInfoToSend();
         } catch (Exception e) {
             System.out.println("::" + snValue + ":: > there was an error updating the status. Is the server online?");
+        }
+    }
+
+    private static void saveUserInfoForLater(String body) {
+        String workingDirectory = System.getProperty("user.dir");
+        String fileName = "user_to_update.txt";
+        File file = new File(workingDirectory, fileName);
+
+        try {
+            FileWriter fileWriter = new FileWriter(file, true);
+
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+
+            String textToAppend = body;
+            bufferedWriter.write(textToAppend);
+            bufferedWriter.newLine();
+
+            bufferedWriter.close();
+            System.out.println("Text appended to the file successfully.");
+        } catch (IOException e) {
+            System.out.println("An error occurred while appending to the file.");
+            e.printStackTrace();
         }
     }
 
@@ -140,6 +163,58 @@ public class Main {
             System.out.println("Text appended to the file successfully.");
         } catch (IOException e) {
             System.out.println("An error occurred while appending to the file.");
+            e.printStackTrace();
+        }
+    }
+
+    private static void checkUserInfoToSend() {
+        String workingDirectory = System.getProperty("user.dir");
+        String fileName = "user_to_update.txt";
+        File file = new File(workingDirectory, fileName);
+
+        try {
+            Scanner scanner = new Scanner(file);
+            File tempFile = new File(workingDirectory, "temp.txt");
+            BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                try {
+                    URL url = new URL("http://localhost:8081/v3/user/upsert");
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    con.setRequestMethod("POST");
+                    con.setRequestProperty("Content-Type", "application/json");
+                    con.setRequestProperty("x-token-ref", token_ref);
+                    String requestBody = line;
+
+                    con.setDoOutput(true);
+                    DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
+                    outputStream.writeBytes(requestBody);
+                    outputStream.flush();
+                    outputStream.close();
+
+                    int responseCode = con.getResponseCode();
+                    System.out.println("::" + line + ":: > update userInfo request status: " + responseCode);
+
+                    if(responseCode != 200) {
+                        writer.write(line);
+                        writer.newLine();
+                    }
+                } catch (Exception e) {
+                    System.out.println("::" + line + ":: > Error uploading the attlog. Is the server online?");
+                    writer.write(line);
+                    writer.newLine();
+                }
+            }
+
+            writer.close();
+            scanner.close();
+
+            Path originalPath = file.toPath();
+            Path tempPath = tempFile.toPath();
+            Files.move(tempPath, originalPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            System.out.println("An error occurred while processing the file: " + fileName);
             e.printStackTrace();
         }
     }
@@ -172,6 +247,11 @@ public class Main {
 
                     int responseCode = con.getResponseCode();
                     System.out.println("::" + line + ":: > update attLog request status: " + responseCode);
+
+                    if(responseCode != 200) {
+                        writer.write(line);
+                        writer.newLine();
+                    }
                 } catch (Exception e) {
                     System.out.println("::" + line + ":: > Error uploading the attlog. Is the server online?");
                     writer.write(line);
@@ -225,6 +305,7 @@ public class Main {
                 int responseCode = con.getResponseCode();
                 System.out.println("::" + machineSN.split(" ")[0] + ":: > update IP request status: " + responseCode);
                 checkStampsToSend();
+                checkUserInfoToSend();
             } catch (Exception e) {
                 System.out.println("::" + machineSN.split(" ")[0] + ":: > error while updating the IP. Is the server on?");
 
@@ -328,7 +409,55 @@ public class Main {
         int operIndex = sBuffer.indexOf("\r\n\r\n", 1);
         String operStr = sBuffer.substring(operIndex + 4);
 
-        //System.out.println(operStr);
+        String[] fields = sBuffer.split("\\s+");
+        String pin = null;
+        String name = null;
+        String passwd = null;
+        String card = null;
+
+        for (String field : fields) {
+            if (field.startsWith("PIN=")) {
+                pin = field.substring(4);
+            } else if (field.startsWith("Name=")) {
+                name = field.substring(5);
+            } else if (field.startsWith("Passwd=")) {
+                passwd = field.substring(7);
+            } else if (field.startsWith("Card=")) {
+                card = field.substring(5);
+            }
+        }
+
+        SN = machineSN.split(" ")[0].split("&")[0];
+        // upsert utente + manda anche SN che la relazione è quella -> upsert generico su tutti i campi
+        if(pin != null && pin.length() > 0 && SN != null) {
+            try {
+                URL url = new URL("http://localhost:8081/v3/user/upsert");
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("POST");
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setRequestProperty("x-token-ref", token_ref);
+                String requestBody = "{\"sn\":\"" + SN + "\",\"pin\":\"" + pin + "\", \"name\":\"" + name + "\", \"pass\": \"" + passwd + "\", \"badgeId\": \"" + card + "\"}";
+
+                con.setDoOutput(true);
+                DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
+                outputStream.writeBytes(requestBody);
+                outputStream.flush();
+                outputStream.close();
+
+                int responseCode = con.getResponseCode();
+                System.out.println("::" + SN + ":: > update user info request status: " + responseCode);
+                checkStampsToSend();
+                checkUserInfoToSend();
+            } catch (Exception e) {
+                System.out.println("::" + SN + ":: > Error uploading the user Info. Is the server online? Saving the log for later.");
+                String requestBody = "{\"sn\":\"" + SN + "\",\"pin\":\"" + pin + "\", \"name\":\"" + name + "\", \"pass\": \"" + passwd + "\", \"badgeId\": \"" + card + "\"}";
+                saveUserInfoForLater(requestBody);
+            }
+        } else {
+            if(SN == null || SN == "") {
+                System.out.println("Cannot update the user info. No SN found.");
+            }
+        }
     }
 
     // Helper method

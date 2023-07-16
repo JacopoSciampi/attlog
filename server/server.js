@@ -118,6 +118,36 @@ fastify.register(require('@fastify/cors'), {
         } else {
             reply.status(500).send({ msg: "no serial number or IP sent" });
         }
+    });;
+
+    fastify.post('/v3/user/upsert', (request, reply) => {
+        const tkn = request.headers["x-token-ref"];
+        queryFromClocks++;
+
+        if (!tkn || tkn !== internal_token) {
+            reply.status(401).message({ msg: "Unauthorized" });
+            return;
+        }
+
+        const sn = request.body.sn;
+        const pin = request.body.pin;
+        const name = request.body.name;
+        const pass = request.body.pass;
+        const badgeId = request.body.badgeId;
+
+
+        if (sn && pin) {
+            pgAdapter.upsertUser(sn, pin, name, pass, badgeId,).then(() => {
+                console.log(`User ${name} upsert`);
+                reply.status(200).send({ msg: `User ${name} upsert` });
+                return;
+            }).catch(() => {
+                reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
+                return;
+            })
+        } else {
+            reply.status(500).send({ msg: "no serial number or PIN sent" });
+        }
     });
 
     fastify.get('/', (request, reply) => {
@@ -252,6 +282,24 @@ fastify.register(require('@fastify/cors'), {
         });
     });
 
+    function __getDataInArrayForLogs__(data, customer_code) {
+        return data?.rows.reduce((acc, current) => {
+            const { attlog_access_type, attlog_date, attlog_id, attlog_reason_code, attlog_terminal_sn, attlog_time, attlog_user_id, clock_name, customer_name, int_attlog_access_type, int_attlog_reason_code } = current;
+            const existingCustomerIndex = acc.findIndex((entry) => entry.customer_code === customer_code);
+
+            if (existingCustomerIndex === -1) {
+                acc.push({
+                    customer_code,
+                    entries: [{ attlog_access_type, attlog_date, attlog_id, attlog_reason_code, attlog_terminal_sn, attlog_time, attlog_user_id, clock_name, customer_name, int_attlog_access_type, int_attlog_reason_code }],
+                });
+            } else {
+                acc[existingCustomerIndex].entries.push({ attlog_access_type, attlog_date, attlog_id, attlog_reason_code, attlog_terminal_sn, attlog_time, attlog_user_id, clock_name, customer_name, int_attlog_access_type, int_attlog_reason_code });
+            }
+
+            return acc;
+        }, []);
+    }
+
     fastify.post('/v1/attlog/download', (request, reply) => {
         if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
             return;
@@ -261,15 +309,60 @@ fastify.register(require('@fastify/cors'), {
         const userId = request.body.userId || "";
         const startDate = request.body.startDate || "";
         const endDate = request.body.endDate || "";
-        const customerName = request.body.customerName || "";
+        let customerName = request.body.customerName || "";
 
-        pgAdapter.downloadLogs(sn, userId, startDate, endDate, customerName).then(data => {
-            reply.status(200).send({ data: data || '' });
-        }).catch((e) => {
-            console.log(e);
-            reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
-            return;
-        });
+        if (sn) {
+            pgAdapter.getClockBySn(sn).then(data => {
+                customerName = data.rows[0].customer_name;
+                const customer_code = data.rows[0].customer_code;
+
+                pgAdapter.downloadLogs(sn, userId, startDate, endDate, customerName).then(data => {
+                    let fileName = jekoEmailer.config.set_terminal_file_name;
+                    const fileFormat = jekoEmailer.config.set_terminal_file_format;
+
+                    const newArray = __getDataInArrayForLogs__(data, customer_code)
+
+                    if ((!fileName || !fileFormat) || newArray?.length !== 1) {
+                        console.info("stamps config not set or multiple customers detected. Using default");
+
+                        const date = new Date();
+                        const day = String(date.getDate()).padStart(2, "0");
+                        const month = String(date.getMonth() + 1).padStart(2, "0");
+                        const year = date.getFullYear();
+                        const hours = String(date.getHours()).padStart(2, "0");
+                        const minutes = String(date.getMinutes()).padStart(2, "0");
+                        const seconds = String(date.getSeconds()).padStart(2, "0");
+
+                        fileName = `${day}/${month}/${year}-${hours}_${minutes}_${seconds}`;
+                    } else {
+                        fileName = generateFileNameForStamps(fileName,
+                            newArray[0].customer_code,
+                            newArray[0].entries.every(x => x.attlog_terminal_sn === sn) ? sn : null
+                        );
+                    }
+
+                    data = JSON.stringify(data);
+
+                    reply.status(200).send({ data: data || '', fileName: fileName });
+                }).catch((e) => {
+                    console.log(e);
+                    reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
+                    return;
+                });
+            }).catch((e) => {
+                console.log(e);
+                reply.status(500).send({ title: "Errore", message: "Si è verificato un errore nel download" });
+                return;
+            });
+        } else {
+            pgAdapter.downloadLogs(sn, userId, startDate, endDate, customerName).then(data => {
+                reply.status(200).send({ data: data || '' });
+            }).catch((e) => {
+                console.log(e);
+                reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
+                return;
+            });
+        }
     });
 
     fastify.get('/v1/attlog', (request, reply) => {
@@ -533,49 +626,56 @@ fastify.register(require('@fastify/cors'), {
     function _upsertFtpChecker() {
         clearInterval(intervalStampSend);
 
-        // intervalMailCheck = setInterval(() => {
-        console.log("Checking terminal status for FTP...");
-        pgAdapter.getLogsForFtp().then(data => {
-            if (data && data?.rows) {
-                ftpClient.access({
-                    host: jekoEmailer.config.set_ftp_server_ip,
-                    port: jekoEmailer.config.set_ftp_server_port,
-                    user: jekoEmailer.config.set_ftp_server_user,
-                    password: jekoEmailer.config.set_ftp_server_password,
-                    secure: false
-                }).then(() => {
-                    const stringToReadable = (str) => {
-                        const readableStream = new Readable();
-                        readableStream._read = () => { };
-                        readableStream.push(str);
-                        readableStream.push(null);
-                        return readableStream;
-                    };
+        intervalStampSend = setInterval(() => {
+            const fileName = jekoEmailer.config.set_terminal_file_name;
+            const fileFormat = jekoEmailer.config.set_terminal_file_format;
 
-                    const remoteFolder = jekoEmailer.config.set_ftp_server_folder;
-
-                    // TODO -> logList must be formatted following the rules (Another TODO)
-                    const logList = data.rows;
-                    const fileContent = stringToReadable("ciao")
-                    // ftpClient.uploadFrom(fileContent, `${remoteFolder}test.txt`).then(() => {
-                    //     console.log("HURRAY")
-                    //     batch update logList with pg.setLogFtpStatus(id, true)
-                    // }).catch(err => {
-                    //     console.log("Error while uploading to the FTP server");
-                    //     console.error(err);
-                    // });
-
-                    console.log("Check done");
-                }).catch(err => {
-                    console.log("Error while connecting to the FTP server");
-                    console.error(err);
-                });
-
+            if (!fileName || !fileFormat) {
+                console.log("Cannot send FTP data: file name or format not set in settings");
+                return;
             }
-        }).catch(() => {
-            console.error("There was an error getting the clock list");
-        })
-        // }, jekoEmailer.config.set_ftp_send_every * 60);
+            console.log("Checking terminal status for FTP...");
+            pgAdapter.getLogsForFtp().then(data => {
+                if (data && data?.rows) {
+                    ftpClient.access({
+                        host: jekoEmailer.config.set_ftp_server_ip,
+                        port: jekoEmailer.config.set_ftp_server_port,
+                        user: jekoEmailer.config.set_ftp_server_user,
+                        password: jekoEmailer.config.set_ftp_server_password,
+                        secure: false
+                    }).then(() => {
+                        const stringToReadable = (str) => {
+                            const readableStream = new Readable();
+                            readableStream._read = () => { };
+                            readableStream.push(str);
+                            readableStream.push(null);
+                            return readableStream;
+                        };
+
+                        const remoteFolder = jekoEmailer.config.set_ftp_server_folder;
+
+                        // TODO -> logList must be formatted following the rules (Another TODO)
+                        const logList = data.rows;
+                        const fileContent = stringToReadable("ciao")
+                        // ftpClient.uploadFrom(fileContent, `${remoteFolder}test.txt`).then(() => {
+                        //     console.log("HURRAY")
+                        //     batch update logList with pg.setLogFtpStatus(id, true)
+                        // }).catch(err => {
+                        //     console.log("Error while uploading to the FTP server");
+                        //     console.error(err);
+                        // });
+
+                        console.log("Check done");
+                    }).catch(err => {
+                        console.log("Error while connecting to the FTP server");
+                        console.error(err);
+                    });
+
+                }
+            }).catch(() => {
+                console.error("There was an error getting the clock list");
+            })
+        }, jekoEmailer.config.set_ftp_send_every * 1000);
     }
 
     function _upsertTerminalChecker() {
@@ -607,6 +707,68 @@ fastify.register(require('@fastify/cors'), {
                 console.error("There was an error getting the clock list");
             })
         }, jekoEmailer.config.set_mail_offline_after * 60 * 1000);
+    }
+
+    function generateFileNameForStamps(path, customer, clockSn) {
+        const formatter = path.split('.')[0];
+        const fileExt = path.split('.')[1];
+        const parts = formatter.split('_');
+
+        let fileNameAsArray = [];
+
+        parts.forEach(key => {
+            const length = key.length;
+
+            if (key.startsWith('C')) {
+                fileNameAsArray.push(customer.slice(0, length));
+            } else if (key.startsWith('T')) {
+                fileNameAsArray.push(clockSn.slice(0, length));
+            } else if (key.startsWith('A') || key.startsWith('M') || key.startsWith('G')) {
+                const now = new Date();
+
+                const year = key.replace(/[^A]/g, "").length;
+                const month = key.replace(/[^M]/g, "").length;
+                const day = key.replace(/[^G]/g, "").length;
+
+                let string = '';
+                new Set(key).forEach(k => {
+                    if (k.startsWith('A')) {
+                        string += now.getFullYear().toString().slice(-year);
+                    } else if (k.startsWith('M')) {
+                        string += (now.getMonth() + 1).toString().padStart(month, '0');
+                    } else if (k.startsWith('G')) {
+                        string += now.getDate().toString().padStart(day, '0');
+                    }
+                });
+
+                fileNameAsArray.push(string);
+            } else if (key.startsWith('H') || key.startsWith('N') || key.startsWith('S')) {
+                const now = new Date();
+
+                const hours = key.replace(/[^H]/g, "").length;
+                const minutes = key.replace(/[^N]/g, "").length;
+                const seconds = key.replace(/[^S]/g, "").length;
+
+                let string = '';
+                new Set(key).forEach(k => {
+                    if (k.startsWith('H')) {
+                        string += now.getHours().toString().slice(-hours);
+                    } else if (k.startsWith('N')) {
+                        string += (now.getMonth() + 1).toString().padStart(minutes, '0');
+                    } else if (k.startsWith('S')) {
+                        string += now.getDate().toString().padStart(seconds, '0');
+                    }
+                });
+
+                fileNameAsArray.push(string);
+            }
+        });
+
+        if (fileExt) {
+            fileNameAsArray.push(`.${fileExt}`);
+        }
+
+        return fileNameAsArray.join('_');
     }
 
     const start = async () => {

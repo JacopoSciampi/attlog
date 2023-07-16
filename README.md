@@ -15,10 +15,13 @@ KC:
 
 General: 
     -> Add spinner when loading stuff >>>>>>>>> (WIP)
+    -> things like, cambio nome al cliente -> le timbrature del cliente devono cambiare cliente as well
+
+Settings:
+    -> Add something like "terminal X doesn't have a customer assigned -> assign it"
+    -> stamps/all -> doesn't need to load stamps. stamps/<blabla> it does
 
 Timbrature: once FTP  | custom page with pwd
     -> Aggiungi colonna "Inviata quando"
     -> Aggiungi azione "Segna come da "Inviare" (anche se già inviato)
     -> Pagina API 0-25
-
-NodeJS -> se orologio down > 1 h invio email (once, non ogni tot, ogni giorno ecc).

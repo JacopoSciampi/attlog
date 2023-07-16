@@ -159,20 +159,24 @@ class JekoPgInit {
                 }
 
                 data?.rows?.forEach(log => {
+                    log.int_attlog_reason_code = log.attlog_reason_code;
+                    log.int_attlog_access_type = log.attlog_access_type;
                     log.attlog_reason_code = reasonCode[log.attlog_reason_code];
                     log.attlog_access_type = accessType[log.attlog_access_type];
                 });
 
-                let toReturn = '';
+                r(data);
 
-                data?.rows?.forEach(i => {
-                    Object.entries(i).forEach(([key, value]) => {
-                        toReturn += `${key}: ${value} -`;
-                    });
-                    toReturn += '\n';
-                });
+                // let toReturn = '';
 
-                r(toReturn);
+                // data?.rows?.forEach(i => {
+                //     Object.entries(i).forEach(([key, value]) => {
+                //         toReturn += `${key}: ${value} -`;
+                //     });
+                //     toReturn += '\n';
+                // });
+
+                // r(toReturn);
             });
         });
     }
@@ -255,6 +259,23 @@ class JekoPgInit {
 
                     r(data);
                 });
+        });
+    }
+
+    getClockBySn(sn) {
+        return new Promise((r, j) => {
+            pool.query(`SELECT c.c_id, c.c_sn, c.c_name, c.c_local_ip, c.c_mail_sent, c.c_model, c.c_note, c.c_desc, c.c_location, c.c_last_timestamp, cu.c_name AS customer_name, cu.cu_code AS customer_code
+            FROM public.clocks c
+            LEFT JOIN public.customers cu ON c.fk_customer_id = cu.customer_id
+            WHERE c.c_sn LIKE '%${sn}%'
+            ORDER BY c.c_sn ASC;`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                r(data);
+            });
         });
     }
 
@@ -653,6 +674,59 @@ class JekoPgInit {
 
                     r();
                 });
+            });
+        });
+    }
+
+    getUserBySnAndPin(sn, pin) {
+        return new Promise((r, j) => {
+            pool.query(`SELECT * FROM public.users WHERE users.user_sn = '${sn}' AND users.user_pin = '${pin}'`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                if (!data?.rowCount) {
+                    j({ message: `USER_NOT_FOUND` });
+                    return;
+                }
+
+                r(data)
+            });
+        });
+    }
+
+    upsertUser(sn, pin, user_name, user_pass, user_badge) {
+        return new Promise((r, j) => {
+            pool.query(`SELECT * FROM public.users WHERE users.user_sn = '${sn}' AND users.user_pin = '${pin}'`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                if (data?.rowCount) {
+                    pool.query(`UPDATE users SET user_name = '${user_name}',
+                    user_pass = '${user_pass}',
+                    user_badge = '${user_badge}'
+                     WHERE users.user_sn  = '${sn}' AND users.user_pin  = '${pin}'`, (err, data) => {
+                        if (err) {
+                            console.log(err);
+                            j();
+                        }
+
+                        r();
+                    });
+                } else {
+                    pool.query(
+                        `INSERT INTO "users" ("user_sn", "user_pin", "user_name", "user_pass", "user_badge")
+                        VALUES ($1, $2, $3, $4, $5)`, [sn, pin, user_name, user_pass, user_badge]).then(() => {
+                            r()
+                        }).catch((err) => {
+                            console.log(err);
+                            j();
+                        });
+                }
+
             });
         });
     }
