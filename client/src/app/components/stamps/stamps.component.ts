@@ -149,7 +149,7 @@ export class StampsComponent implements OnInit {
             finalize(() => take = false)
         ).subscribe({
             next: (data: any) => {
-                saveAs(new Blob([String(data.body.data)], { type: 'text/plain;charset=utf-8' }), `timbrature-${_.transform(new Date(), 'dd/MM/yyyy-HH_mm_ss')}`);
+                saveAs(new Blob([String(data.body.data)], { type: 'text/plain;charset=utf-8' }), data.body.fileName);
             }, error: (err) => {
                 this._toastService.errorGeneric(err.error.title, err.error.message)
             }

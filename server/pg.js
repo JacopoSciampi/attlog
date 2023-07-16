@@ -137,12 +137,16 @@ class JekoPgInit {
 
     downloadLogs(sn, userId, startDate, endDate, customerName) {
         return new Promise((r, j) => {
-            let query = `SELECT attlogs.*, clocks.c_name AS clock_name, COALESCE(customers.c_name, '-') AS customer_name
+            let query = `SELECT attlogs.*, clocks.c_name AS clock_name, COALESCE(customers.c_name, '-') AS customer_name, users.user_badge
             FROM public.attlogs
             LEFT JOIN public.clocks ON attlogs.attlog_terminal_sn = clocks.c_sn
             LEFT JOIN public.customers ON clocks.fk_customer_id = customers.customer_id
-            WHERE attlogs.attlog_terminal_sn LIKE '${sn}%' AND attlogs.attlog_user_id LIKE '${userId}%'`;
+			LEFT JOIN public.users ON users.user_sn = '${sn}' AND users.user_pin = attlogs.attlog_user_id
+            WHERE attlogs.attlog_terminal_sn LIKE '%${sn}%'`;
 
+            if (userId) {
+                query += ` AND attlogs.attlog_user_id LIKE '%${userId}%'`;
+            }
             if (customerName) {
                 query += ` AND customers.c_name LIKE '${customerName}%'`;
             }

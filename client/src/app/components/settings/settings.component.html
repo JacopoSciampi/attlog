@@ -330,23 +330,25 @@
                             </div>
                         </div>
                         <div class="card-item">
-                            <div class="key">Formato file</div>
+                            <div class="key" matTooltip="Il separatore non sarà usato all'interno del file">Formato file
+                            </div>
                             <div class="value">
                                 <input type="text" [(ngModel)]="settings.set_terminal_file_format">
                             </div>
                         </div>
                         <div class="card-item">
                             <div class="legend">
-                                <div>T = Numero disp.</div>
+                                <div>T = SN terminale</div>
                                 <div>A = Anno</div>
                                 <div>M = Mese</div>
                                 <div>G = Giorno</div>
                                 <div>H = Ore</div>
                                 <div>N = Minuti</div>
+                                <div>S = Secondi</div>
                                 <div>B = Badge</div>
-                                <div>V = Verso</div>
-                                <div>C = Causale</div>
-                                <div>K = Categoria</div>
+                                <div>*V = Verso</div>
+                                <div>*C = Causale</div>
+                                <div>*K = Categoria</div>
                                 <div>F = Cliente</div>
                             </div>
                         </div>

@@ -27,7 +27,7 @@ export class StampService {
     }
 
     public downloadStamps(sn: string, userId: string, startDate: string, endDate: string, customerName: string) {
-        return this._http.post<BlobPart>(`${BE_PATH.basePath}attlog/download`, {
+        return this._http.post(`${BE_PATH.basePath}attlog/download`, {
             'sn': sn || "",
             'userId': userId || "",
             'startDate': startDate || "",

@@ -341,7 +341,7 @@ fastify.register(require('@fastify/cors'), {
                         );
                     }
 
-                    data = JSON.stringify(data);
+                    data = generateFilContentForStamps(data.rows, fileFormat, customer_code);
 
                     reply.status(200).send({ data: data || '', fileName: fileName });
                 }).catch((e) => {
@@ -709,6 +709,69 @@ fastify.register(require('@fastify/cors'), {
         }, jekoEmailer.config.set_mail_offline_after * 60 * 1000);
     }
 
+    function generateFilContentForStamps(data, path, customer_code) {
+        const parts = path.split('_');
+        const dataToSendAsArray = [];
+
+        data?.forEach(item => {
+            let string = '';
+            parts.forEach(key => {
+                const length = key.length;
+
+                if (key.startsWith('T')) {
+                    string += item.attlog_terminal_sn.slice(0, length);
+                } else if (key.startsWith('F')) {
+                    string += customer_code.slice(0, length);
+                } else if (key.startsWith('C')) {
+                    string += '<c_todo>';
+                } else if (key.startsWith('B')) {
+                    string += item.user_badge.slice(0, length);
+                } else if (key.startsWith('A') || key.startsWith('M') || key.startsWith('G')) {
+                    const year = key.replace(/[^A]/g, "").length;
+                    const month = key.replace(/[^M]/g, "").length;
+                    const day = key.replace(/[^G]/g, "").length;
+                    const now = new Date(item.attlog_date);
+
+                    let _ = '';
+                    new Set(key).forEach(k => {
+                        if (k.startsWith('A')) {
+                            _ += now.getFullYear().toString().slice(-year);
+                        } else if (k.startsWith('M')) {
+                            _ += (now.getMonth() + 1).toString().padStart(month, '0');
+                        } else if (k.startsWith('G')) {
+                            _ += now.getDate().toString().padStart(day, '0');
+                        }
+                    });
+
+                    string += _;
+                } else if (key.startsWith('H') || key.startsWith('N') || key.startsWith('S')) {
+                    const now = new Date();
+
+                    const hours = key.replace(/[^H]/g, "").length;
+                    const minutes = key.replace(/[^N]/g, "").length;
+                    const seconds = key.replace(/[^S]/g, "").length;
+
+                    let _ = '';
+                    new Set(key).forEach(k => {
+                        if (k.startsWith('H')) {
+                            _ += item.attlog_time.split(':')[0].slice(-hours);
+                        } else if (k.startsWith('N')) {
+                            _ += item.attlog_time.split(':')[1].padStart(minutes, '0');
+                        } else if (k.startsWith('S')) {
+                            _ += item.attlog_time.split(':')[2].padStart(seconds, '0');
+                        }
+                    });
+
+                    string += _;
+                }
+            });
+
+            dataToSendAsArray.push(string);
+        });
+
+        return dataToSendAsArray.join('\n');
+    }
+
     function generateFileNameForStamps(path, customer, clockSn) {
         const formatter = path.split('.')[0];
         const fileExt = path.split('.')[1];
@@ -764,11 +827,13 @@ fastify.register(require('@fastify/cors'), {
             }
         });
 
+        let name = fileNameAsArray.join('_');
+
         if (fileExt) {
-            fileNameAsArray.push(`.${fileExt}`);
+            name += `.${fileExt}`;
         }
 
-        return fileNameAsArray.join('_');
+        return name;
     }
 
     const start = async () => {
