@@ -24,10 +24,13 @@ public class Main {
     public static void main(String[] args) throws UnknownHostException {
 
         //int port = 7777;
-        //InetAddress addr = InetAddress.getByName("192.168.0.112");
+        //inr port = 50000;
+        //InetAddress addr = InetAddress.getByName("localhost");
+        //String serverAddr = "http://node:8081";
 
         int port = 50000;
         InetAddress addr = InetAddress.getByName("10.0.0.11");
+        String serverAddr = "http://localhost:8081";
 
         try (ServerSocket serverSocket = new ServerSocket(port, 50, addr)) {
 
@@ -77,8 +80,6 @@ public class Main {
         }
     }
 
-
-
     private static void sendDataInGet(byte[] bReceive)  throws IOException {
         String sBuffer = new String(bReceive, Charset.forName("US-ASCII"));
 
@@ -101,7 +102,7 @@ public class Main {
         }
 
         try {
-            URL url = new URL("http://localhost:8081/v3/terminal/online");
+            URL url = new URL(this.serverAddr + "/v3/terminal/online");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json");
@@ -180,7 +181,7 @@ public class Main {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 try {
-                    URL url = new URL("http://localhost:8081/v3/user/upsert");
+                    URL url = new URL(this.serverAddr + "/v3/user/upsert");
                     HttpURLConnection con = (HttpURLConnection) url.openConnection();
                     con.setRequestMethod("POST");
                     con.setRequestProperty("Content-Type", "application/json");
@@ -232,7 +233,7 @@ public class Main {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 try {
-                    URL url = new URL("http://localhost:8081/v3/terminal/log/add");
+                    URL url = new URL(this.serverAddr + "/v3/terminal/log/add");
                     HttpURLConnection con = (HttpURLConnection) url.openConnection();
                     con.setRequestMethod("POST");
                     con.setRequestProperty("Content-Type", "application/json");
@@ -289,7 +290,7 @@ public class Main {
             String ipAddress = matcher.group(1);
 
             try {
-                URL url = new URL("http://localhost:8081/v3/terminal/ip");
+                URL url = new URL(this.serverAddr + "/v3/terminal/ip");
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("POST");
                 con.setRequestProperty("Content-Type", "application/json");
@@ -431,7 +432,7 @@ public class Main {
         // upsert utente + manda anche SN che la relazione è quella -> upsert generico su tutti i campi
         if(pin != null && pin.length() > 0 && SN != null) {
             try {
-                URL url = new URL("http://localhost:8081/v3/user/upsert");
+                URL url = new URL(this.serverAddr + "/v3/user/upsert");
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("POST");
                 con.setRequestProperty("Content-Type", "application/json");
@@ -540,7 +541,7 @@ public class Main {
             snValue = matcherSn.group(1);
 
             try {
-                URL url = new URL("http://localhost:8081/v3/terminal/log/add");
+                URL url = new URL(this.serverAddr + "/v3/terminal/log/add");
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("POST");
                 con.setRequestProperty("Content-Type", "application/json");
