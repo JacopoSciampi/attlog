@@ -20,18 +20,17 @@ public class Main {
     private static String token_ref = "uQOpixuDj/YtSlXjayO-dNBcsd2fKx14OBqMOmHikiUUXi6Zhg2UxufCQDg7ic=y/yn6i2VSV9K2EMxcGYpzrQSgDNgbbBBaWlc4Xlhc2mOhNAPAF?Y929cAUHXEj6GL5jzxhASk4Z6u?s/gdEjGXjP/PpQqDZvelyGnbhrZocCyYRxy!P5WXS!eu053XhUJV5zLl121glT?g54HPVX2kvvkyqENk1tWl3E/Otz-ErK7SItzubR59ElypGOPwm?f";
     //int port = 7777;
     // private static int port = 50000;
-    // private static InetAddress addr = InetAddress.getByName("localhost");
-    // private static String serverAddr = "http://node:8081";
-
     private static int port = 50000;
     private static InetAddress addr;
 
+    // private static String serverAddr = "http://node:8081";
     private static String serverAddr = "http://localhost:8081";
-    //C:385:INFO
 
+    //C:385:INFO
     public static void main(String[] args) throws UnknownHostException {
         try {
             addr = InetAddress.getByName("10.0.0.11");
+            //addr = InetAddress.getByName("localhost");
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
