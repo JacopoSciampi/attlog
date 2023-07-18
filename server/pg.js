@@ -589,6 +589,7 @@ class JekoPgInit {
 
     deleteClockModelList(cm_id) {
         return new Promise((r, j) => {
+            console.log(`DELETE FROM public.clock_models WHERE clock_models.cm_id = '${cm_id}'`);
             pool.query(`DELETE FROM public.clock_models WHERE clock_models.cm_id = '${cm_id}'`, (err, data) => {
                 if (err) {
                     console.log(err);
