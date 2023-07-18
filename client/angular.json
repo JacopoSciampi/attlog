@@ -43,15 +43,12 @@
                     },
                     "configurations": {
                         "production": {
-                            "outputHashing": "all",
                             "buildOptimizer": false,
                             "optimization": false,
                             "vendorChunk": true,
                             "extractLicenses": false,
-                            "sourceMap": false,
-                            "aot": true,
+                            "sourceMap": true,
                             "namedChunks": true,
-                            "baseHref": "./",
                             "fileReplacements": [
                                 {
                                     "replace": "src/urls.ts",

@@ -52,4 +52,4 @@ Thumbs.db
 /.vscode
 /packages
 
-doclker-compose.yml
+docker-compose.yml
