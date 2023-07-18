@@ -51,7 +51,13 @@
                             "sourceMap": false,
                             "aot": true,
                             "namedChunks": true,
-                            "baseHref": "./"
+                            "baseHref": "./",
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/urls.ts",
+                                    "with": "src/urls-prod.ts"
+                                }
+                            ]
                         },
                         "development": {
                             "buildOptimizer": false,
