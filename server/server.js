@@ -39,7 +39,7 @@ fastify.register(require('@fastify/cors'), {
             return;
         }
 
-        if (new URL(origin).hostname === "localhost") {
+        if (new URL(origin).hostname === "localhost" || new URL(origin).hostname === "192.168.0.161") {
             cb(null, true)
             return
         }
