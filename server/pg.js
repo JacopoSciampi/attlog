@@ -271,13 +271,17 @@ class JekoPgInit {
         });
     }
 
-    getLogs(sn, userId, startDate, endDate, customerName, clockLocation) {
+    getLogs(sn, userId, startDate, endDate, customerName, clockLocation, clockModel) {
         return new Promise((r, j) => {
-            let query = `SELECT attlogs.*, clocks.c_name AS clock_name, clocks.c_location AS clock_location, COALESCE(customers.c_name, '-') AS customer_name
+            let query = `SELECT attlogs.*, clocks.c_name AS clock_name, clocks.c_location AS clock_location, COALESCE(customers.c_name, '-') AS customer_name, clocks.c_model
             FROM public.attlogs
             LEFT JOIN public.clocks ON attlogs.attlog_terminal_sn = clocks.c_sn
             LEFT JOIN public.customers ON clocks.fk_customer_id = customers.customer_id
             WHERE attlogs.attlog_terminal_sn LIKE '${sn}%' AND attlogs.attlog_user_id LIKE '${userId}%'`;
+
+            if (clockModel) {
+                query += ` AND clocks.c_model = '${clockModel}'`;
+            }
 
             if (customerName) {
                 query += ` AND customers.c_name LIKE '${customerName}%'`;

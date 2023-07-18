@@ -2,7 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 
-import { finalize, takeWhile } from 'rxjs';
+import { finalize, takeWhile, zip } from 'rxjs';
 
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -20,6 +20,8 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 import { CustomerListDetails } from "@models/customer.model";
 import { CustomerService } from "@services/customer.service";
 import { MatSelectModule } from "@angular/material/select";
+import { ClockModelListDetails } from "@models/clock-model.model";
+import { TerminalService } from "@services/terminal.service";
 
 @Component({
     selector: 'app-stamps',
@@ -45,9 +47,11 @@ export class StampsComponent implements OnInit {
     public f_customer_name!: string;
     public f_terminalSN!: string;
     public f_clock_location!: string;
+    public f_c_model!: string;
     public f_date;
     public customerList: CustomerListDetails[] = [];
     public _initCustomerList: CustomerListDetails[] = [];
+    public clockModelList!: ClockModelListDetails[];
 
     @ViewChild('f_userId') f_userId!: ElementRef<HTMLInputElement>;
     @ViewChild(DaterangepickerDirective, { static: false }) pickerDirective: DaterangepickerDirective;
@@ -57,36 +61,43 @@ export class StampsComponent implements OnInit {
         private _toastService: ToastService,
         private _c: CustomerService,
         private _ar: ActivatedRoute,
+        private _t: TerminalService,
         private _router: Router,
     ) { }
 
     public ngOnInit(): void {
         this.isLoading = true;
         let take = true;
-        this._c.getCustomerList(this.f_customer_name).pipe(
-            takeWhile(() => take),
-            finalize(() => take = false)
-        ).subscribe({
-            next: (data) => {
-                this.customerList = data.data;
-                this._initCustomerList = JSON.parse(JSON.stringify(data.data));
 
-                if (this._ar.snapshot.params.clockSn !== "all") {
-                    this.f_terminalSN = this._ar.snapshot.params.clockSn;
-                    this._getData();
+        zip(
+            this._c.getCustomerList(this.f_customer_name),
+            this._t.getClockModelList()
+        )
+            .pipe(
+                takeWhile(() => take),
+                finalize(() => take = false)
+            ).subscribe({
+                next: (data) => {
+                    this.customerList = data[0].data;
+                    this._initCustomerList = JSON.parse(JSON.stringify(data[0].data));
+                    this.clockModelList = data[1].data;
+
+                    if (this._ar.snapshot.params.clockSn !== "all") {
+                        this.f_terminalSN = this._ar.snapshot.params.clockSn;
+                        this._getData();
+                    }
+                }, error: (err) => {
+                    this.isLoading = false;
+                    this._toastService.errorGeneric(err.error.title, err.error.message)
                 }
-            }, error: (err) => {
-                this.isLoading = false;
-                this._toastService.errorGeneric(err.error.title, err.error.message)
-            }
-        });
+            });
     }
 
-    private _getData(sn?: string, userId?: string, startDate?: string, endDate?: string, f_customer_name?: string, f_clock_location?: string): void {
+    private _getData(sn?: string, userId?: string, startDate?: string, endDate?: string, f_customer_name?: string, f_clock_location?: string, c_model?: string): void {
         this.isLoading = true;
         let take = true;
 
-        this._stampService.getStampList(sn, userId, startDate, endDate, f_customer_name, f_clock_location).pipe(
+        this._stampService.getStampList(sn, userId, startDate, endDate, f_customer_name, f_clock_location, c_model).pipe(
             takeWhile(() => take),
             finalize(() => take = false)
         ).subscribe({
@@ -169,8 +180,8 @@ export class StampsComponent implements OnInit {
             endDate = _.transform(endDate, "yyyy/MM/dd");
         }
 
-        if (this.f_terminalSN || this.f_userId.nativeElement.value || startDate || endDate || this.f_customer_name || this.f_clock_location) {
-            this._getData(this.f_terminalSN, this.f_userId?.nativeElement?.value, startDate, endDate, this.f_customer_name, this.f_clock_location);
+        if (this.f_terminalSN || this.f_userId.nativeElement.value || startDate || endDate || this.f_customer_name || this.f_clock_location || this.f_c_model) {
+            this._getData(this.f_terminalSN, this.f_userId?.nativeElement?.value, startDate, endDate, this.f_customer_name, this.f_clock_location, this.f_c_model);
         }
     }
 
@@ -203,6 +214,7 @@ export class StampsComponent implements OnInit {
         this.f_terminalSN = '';
         this.f_customer_name = '';
         this.f_clock_location = '';
+        this.f_c_model = '';
         this.pickerDirective.clear();
 
         this.dataSource = new MatTableDataSource([]);

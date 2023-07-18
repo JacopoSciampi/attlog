@@ -13,7 +13,7 @@ export class StampService {
         private _http: HttpClient
     ) { }
 
-    public getStampList(sn: string, userId: string, startDate: string, endDate: string, customerName: string, clockLocation: string): Observable<StampList> {
+    public getStampList(sn: string, userId: string, startDate: string, endDate: string, customerName: string, clockLocation: string, c_model: string): Observable<StampList> {
         return this._http.get<StampList>(`${BE_PATH.basePath}attlog`, {
             headers: {
                 'x-sn': sn || "",
@@ -22,6 +22,7 @@ export class StampService {
                 'x-end-date': endDate || "",
                 'x-customer-name': customerName || "",
                 'x-clock-location': clockLocation || "",
+                'x-c-model': c_model || "",
             }
         });
     }

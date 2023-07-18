@@ -426,8 +426,9 @@ fastify.register(require('@fastify/cors'), {
         const endDate = request.headers['x-end-date'] || "";
         const customerName = request.headers['x-customer-name'] || "";
         const clockLocation = request.headers['x-clock-location'] || "";
+        const clockModel = request.headers['x-c-model'] || "";
 
-        pgAdapter.getLogs(sn, userId, startDate, endDate, customerName, clockLocation).then(data => {
+        pgAdapter.getLogs(sn, userId, startDate, endDate, customerName, clockLocation, clockModel).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
         }).catch((e) => {
             console.log(e);

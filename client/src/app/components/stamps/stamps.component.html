@@ -25,6 +25,14 @@
             <div class="title">Ubicazione</div>
             <input type="text" [(ngModel)]="f_clock_location">
         </div>
+        <div class="field-material">
+            <div class="title">Modello</div>
+            <mat-select [(ngModel)]="f_c_model">
+                <mat-option *ngFor="let c of clockModelList" [value]="c.cm_name">
+                    {{c.cm_name}}
+                </mat-option>
+            </mat-select>
+        </div>
         <div class="field-button-list">
             <div class="title">Filtri</div>
             <div class="button-list">

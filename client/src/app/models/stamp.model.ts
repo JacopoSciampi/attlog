@@ -14,4 +14,5 @@ export interface StampListDetails {
     clock_location: string;
     attlog_sent: string | boolean;
     attlog_sent_timestamp: number;
+    c_model: string;
 }
