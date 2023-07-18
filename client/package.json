@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "scripts": {
         "start": "ng serve --host 0.0.0.0",
-        "start-prod": "ng serve --host 0.0.0.0 --configuration production",
+        "start-prod": "ng serve --host 0.0.0.0 --configuration production --live-reload false",
         "build": "ng build --configuration production",
         "test": "jest --no-cache --collect-coverage --detectOpenHandles"
     },

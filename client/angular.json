@@ -53,6 +53,10 @@
                                 {
                                     "replace": "src/urls.ts",
                                     "with": "src/urls-prod.ts"
+                                },
+                                {
+                                    "replace": "src/kc-conf.ts",
+                                    "with": "src/kc-conf-prod.ts"
                                 }
                             ]
                         },
