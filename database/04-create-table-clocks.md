@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS public.clocks
     c_note character varying(150) COLLATE pg_catalog."default" NOT NULL,
     c_desc character varying(150) COLLATE pg_catalog."default" NOT NULL,
     c_model character varying(150) COLLATE pg_catalog."default" NOT NULL,
-    c_note character varying(150) COLLATE pg_catalog."default" NOT NULL,
     c_location character varying(150) COLLATE pg_catalog."default" NOT NULL,
     c_last_timestamp character varying(150) COLLATE pg_catalog."default" NOT NULL,
     c_local_ip character varying(150) COLLATE pg_catalog."default" NOT NULL,
