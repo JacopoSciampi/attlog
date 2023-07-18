@@ -25,11 +25,11 @@
         </form>
     </div>
     <div class="modal-footer">
-        <ng-container *ngIf="data">
+        <ng-container *ngIf="data?.cm_id">
             <div class="button" (click)="canSendRequest && onUpdateClockModel()"
                 [ngClass]="[canSendRequest ? 'button-primary': 'button-disabled']">Aggiorna modello</div>
         </ng-container>
-        <ng-container *ngIf="!data">
+        <ng-container *ngIf="!data?.cm_id">
             <div class="button" (click)="canSendRequest && onAddClockModel()"
                 [ngClass]="[canSendRequest ? 'button-primary': 'button-disabled']">Aggiungi modello</div>
         </ng-container>

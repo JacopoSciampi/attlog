@@ -47,7 +47,7 @@ class JekoPgInit {
 
     deleteCustomer(customer_id, cu_code) {
         return new Promise((r, j) => {
-            pool.query(`DELETE FROM public.customers WHERE customers.customer_id = '${customer_id}' AND customers.cu_code = '${cu_code}'`, (err, data) => {
+            pool.query(`DELETE FROM public.customers WHERE customers.customer_id = '${+customer_id}' AND customers.cu_code = '${cu_code}'`, (err, data) => {
                 if (err) {
                     console.log(err);
                     j();
