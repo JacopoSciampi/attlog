@@ -18,19 +18,24 @@ import java.util.regex.Pattern;
 public class Main {
     private static Set<String> clientSN = new HashSet<>();
     private static String token_ref = "uQOpixuDj/YtSlXjayO-dNBcsd2fKx14OBqMOmHikiUUXi6Zhg2UxufCQDg7ic=y/yn6i2VSV9K2EMxcGYpzrQSgDNgbbBBaWlc4Xlhc2mOhNAPAF?Y929cAUHXEj6GL5jzxhASk4Z6u?s/gdEjGXjP/PpQqDZvelyGnbhrZocCyYRxy!P5WXS!eu053XhUJV5zLl121glT?g54HPVX2kvvkyqENk1tWl3E/Otz-ErK7SItzubR59ElypGOPwm?f";
+    //int port = 7777;
+    // private static int port = 50000;
+    // private static InetAddress addr = InetAddress.getByName("localhost");
+    // private static String serverAddr = "http://node:8081";
 
+    private static int port = 50000;
+    private static InetAddress addr;
+
+    private static String serverAddr = "http://localhost:8081";
     //C:385:INFO
 
     public static void main(String[] args) throws UnknownHostException {
+        try {
+            addr = InetAddress.getByName("10.0.0.11");
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
 
-        //int port = 7777;
-        //inr port = 50000;
-        //InetAddress addr = InetAddress.getByName("localhost");
-        //String serverAddr = "http://node:8081";
-
-        int port = 50000;
-        InetAddress addr = InetAddress.getByName("10.0.0.11");
-        String serverAddr = "http://localhost:8081";
 
         try (ServerSocket serverSocket = new ServerSocket(port, 50, addr)) {
 
@@ -102,7 +107,7 @@ public class Main {
         }
 
         try {
-            URL url = new URL(this.serverAddr + "/v3/terminal/online");
+            URL url = new URL(serverAddr + "/v3/terminal/online");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json");
@@ -181,7 +186,7 @@ public class Main {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 try {
-                    URL url = new URL(this.serverAddr + "/v3/user/upsert");
+                    URL url = new URL(serverAddr + "/v3/user/upsert");
                     HttpURLConnection con = (HttpURLConnection) url.openConnection();
                     con.setRequestMethod("POST");
                     con.setRequestProperty("Content-Type", "application/json");
@@ -233,7 +238,7 @@ public class Main {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 try {
-                    URL url = new URL(this.serverAddr + "/v3/terminal/log/add");
+                    URL url = new URL(serverAddr + "/v3/terminal/log/add");
                     HttpURLConnection con = (HttpURLConnection) url.openConnection();
                     con.setRequestMethod("POST");
                     con.setRequestProperty("Content-Type", "application/json");
@@ -290,7 +295,7 @@ public class Main {
             String ipAddress = matcher.group(1);
 
             try {
-                URL url = new URL(this.serverAddr + "/v3/terminal/ip");
+                URL url = new URL(serverAddr + "/v3/terminal/ip");
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("POST");
                 con.setRequestProperty("Content-Type", "application/json");
@@ -432,7 +437,7 @@ public class Main {
         // upsert utente + manda anche SN che la relazione è quella -> upsert generico su tutti i campi
         if(pin != null && pin.length() > 0 && SN != null) {
             try {
-                URL url = new URL(this.serverAddr + "/v3/user/upsert");
+                URL url = new URL(serverAddr + "/v3/user/upsert");
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("POST");
                 con.setRequestProperty("Content-Type", "application/json");
@@ -541,7 +546,7 @@ public class Main {
             snValue = matcherSn.group(1);
 
             try {
-                URL url = new URL(this.serverAddr + "/v3/terminal/log/add");
+                URL url = new URL(serverAddr + "/v3/terminal/log/add");
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("POST");
                 con.setRequestProperty("Content-Type", "application/json");
