@@ -51,3 +51,5 @@ Thumbs.db
 !/**/.yarn/releases/yarn-3.5.0.cjs
 /.vscode
 /packages
+
+doclker-compose.yml
