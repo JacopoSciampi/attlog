@@ -55,7 +55,7 @@
                                     "with": "src/urls-prod.ts"
                                 },
                                 {
-                                    "replace": "src/kc-conf.ts",
+                                    "replace": "src/kc.conf.ts",
                                     "with": "src/kc-conf-prod.ts"
                                 }
                             ]
