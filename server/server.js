@@ -546,7 +546,7 @@ fastify.register(require('@fastify/cors'), {
 
         const cm_id = request.headers['cm_id'] || "";
 
-        pgAdapter.deleteClockModelList(cm_id).then(data => {
+        pgAdapter.deleteClockModelList(+cm_id).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
         }).catch((e) => {
             console.log(e);
