@@ -15,11 +15,10 @@ KC:
 
 General: 
     -> Add spinner when loading stuff >>>>>>>>> (WIP)
-    -> things like, cambio nome al cliente -> le timbrature del cliente devono cambiare cliente as well
-
-Settings:
-    -> Add something like "terminal X doesn't have a customer assigned -> assign it"
-    -> stamps/all -> doesn't need to load stamps. stamps/<blabla> it does
 
 Timbrature: once FTP  | custom page with pwd
     -> Pagina API 0-25
+
+Server: HTTPS? Mi servono in caso i due files da mettere dentro nginx + live config di KC, eccetera per girare sotto https  
+
+FTP "per cliente", non è l'FTP ma la pagina stronza API_KEY

@@ -51,7 +51,7 @@ bootstrapApplication(RootComponent, {
                 displayFormat: 'DD/MM/YYYY'
             }),
             OAuthModule.forRoot(),
-            RouterModule.forRoot(routes),
+            RouterModule.forRoot(routes, { useHash: false }),
             CommonModule,
             BrowserModule,
             BrowserAnimationsModule,

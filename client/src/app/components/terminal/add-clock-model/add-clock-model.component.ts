@@ -37,7 +37,7 @@ export class AddClockModelComponent implements OnInit {
 
     public ngOnInit(): void {
         this.form = this._fb.group({
-            'cm_name': [{ value: this.data?.cm_name || '', disabled: this.data }, Validators.required],
+            'cm_name': [{ value: this.data?.cm_name || '', disabled: this.data?.cm_name }, Validators.required],
             'cm_desc': [this.data?.cm_desc || ''],
         });
 

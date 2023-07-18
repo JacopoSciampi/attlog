@@ -26,7 +26,7 @@ public class Main {
         //int port = 7777;
         //InetAddress addr = InetAddress.getByName("192.168.0.112");
 
-        int port = 56566;
+        int port = 50000;
         InetAddress addr = InetAddress.getByName("10.0.0.11");
 
         try (ServerSocket serverSocket = new ServerSocket(port, 50, addr)) {

@@ -73,10 +73,8 @@ export class StampsComponent implements OnInit {
 
                 if (this._ar.snapshot.params.clockSn !== "all") {
                     this.f_terminalSN = this._ar.snapshot.params.clockSn;
-                    this.onFilterApplyClicked();
-                    return;
+                    this._getData();
                 }
-                this._getData();
             }, error: (err) => {
                 this.isLoading = false;
                 this._toastService.errorGeneric(err.error.title, err.error.message)
@@ -118,6 +116,31 @@ export class StampsComponent implements OnInit {
     public onDateKeypressed(event): void {
         event.preventDefault();
         event.stopPropagation();
+    }
+
+    public MarkAllAttlogToBeSent(): void {
+        const _ = new DatePipe('it-IT');
+
+        let startDate = this.f_date?.startDate?.$d;
+        let endDate = this.f_date?.endDate?.$d;
+
+        if (startDate && endDate) {
+            startDate = _.transform(startDate, "yyyy/MM/dd");
+            endDate = _.transform(endDate, "yyyy/MM/dd");
+        }
+
+        let take = true;
+        this._stampService.setAllStampsToBeSentToFtp(this.f_terminalSN, this.f_userId?.nativeElement?.value, startDate, endDate, this.f_customer_name, this.f_clock_location).pipe(
+            takeWhile(() => take),
+            finalize(() => take = false)
+        ).subscribe({
+            next: () => {
+                this._toastService.generic("Aggiornamento effettuato", "Operazione avvenuta con successo");
+            }, error: (err) => {
+                this._toastService.errorGeneric(err.error.title, err.error.message)
+            }
+        });
+
     }
 
     public markAttlogAsToBeSent(item: StampListDetails): void {
@@ -182,7 +205,7 @@ export class StampsComponent implements OnInit {
         this.f_clock_location = '';
         this.pickerDirective.clear();
 
-        this._getData();
+        this.dataSource = new MatTableDataSource([]);
     }
 }
 

@@ -10,4 +10,5 @@ export interface CustomerListDetails {
     total_facilities: string;
     cu_code: string;
     cu_note: string;
+    cu_api_key: string;
 }

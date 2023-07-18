@@ -53,6 +53,9 @@ export class SettingsComponent implements OnInit {
         set_ftp_enabled: false,
         set_terminal_file_name: '',
         set_terminal_file_format: '',
+        set_terminal_attendance: '',
+        set_terminal_pause: '',
+        set_terminal_service: ''
     };
 
     constructor(

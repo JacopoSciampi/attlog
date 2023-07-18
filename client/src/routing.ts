@@ -1,4 +1,7 @@
-import { ActivatedRouteSnapshot, CanActivateFn, RouterStateSnapshot, Routes } from "@angular/router";
+import { inject } from "@angular/core";
+import { Routes } from "@angular/router";
+
+import { AuthService } from "@services/auth.service";
 
 import { StampsComponent } from "@components/stamps/stamps.component";
 import { HomepageComponent } from "@components/homepage/homepage.component";
@@ -6,10 +9,7 @@ import { SettingsComponent } from "@components/settings/settings.component";
 import { TerminalComponent } from "@components/terminal/terminal.component";
 import { CustomersComponent } from "@components/customers/customers.component";
 
-const canActivateRoute: CanActivateFn =
-    (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-        return true;
-    };
+const canActivateRoute = (): boolean => inject(AuthService).oAuthService.hasValidAccessToken();
 
 export const routes: Routes = [{
     path: 'homepage',

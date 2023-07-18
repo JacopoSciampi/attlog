@@ -26,6 +26,9 @@ CREATE TABLE IF NOT EXISTS public.settings
     
     set_terminal_file_name character varying(50) COLLATE pg_catalog."default" ,
     set_terminal_file_format character varying(50) COLLATE pg_catalog."default" ,
+    set_terminal_attendance character varying(50) COLLATE pg_catalog."default" ,
+    set_terminal_pause character varying(50) COLLATE pg_catalog."default" ,
+    set_terminal_service character varying(50) COLLATE pg_catalog."default" ,
     
     CONSTRAINT settings_pkey PRIMARY KEY (setting_id)
 )

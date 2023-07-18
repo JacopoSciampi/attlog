@@ -31,7 +31,7 @@ import { finalize, takeWhile } from 'rxjs';
 })
 export class CustomersComponent implements OnInit {
     public isLoading = true;
-    public displayedColumns = ["_actions", "name", "email", "cu_code", "cu_note", "total_clocks"];
+    public displayedColumns = ["_actions", "name", "email", "cu_code", "cu_note", "total_clocks", "cu_api_key"];
     public dataSource!: MatTableDataSource<CustomerListDetails>;
     public f_name!: string;
     public f_email!: string;
@@ -82,14 +82,15 @@ export class CustomersComponent implements OnInit {
 
     public onEditCustomer(item: CustomerListDetails): void {
         this._dialog.open(AddCustomerModalComponent, {
-            height: MODAL_SIZE.SMALL,
+            height: MODAL_SIZE.HALFER,
             width: MODAL_SIZE.HALF,
             data: {
                 customer_id: item.customer_id,
                 customer_name: item.customer_name,
                 customer_email: item.customer_email,
                 customer_code: item.cu_code,
-                customer_note: item.cu_note
+                customer_note: item.cu_note,
+                cu_api_key: item.cu_api_key
             }
         }).afterClosed().subscribe({
             next: () => {
@@ -100,7 +101,7 @@ export class CustomersComponent implements OnInit {
 
     public onAddCustomer(): void {
         this._dialog.open(AddCustomerModalComponent, {
-            height: MODAL_SIZE.SMALL,
+            height: MODAL_SIZE.HALFER,
             width: MODAL_SIZE.HALF,
         }).afterClosed().subscribe({
             next: () => {
@@ -111,7 +112,7 @@ export class CustomersComponent implements OnInit {
 
     public onDeleteCustomer(item: CustomerListDetails): void {
         this._dialog.open(DeleteCustomer, {
-            height: MODAL_SIZE.HALFER,
+            height: MODAL_SIZE.SMALL,
             width: MODAL_SIZE.HALF,
             data: {
                 customer_id: item.customer_id,

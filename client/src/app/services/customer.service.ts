@@ -22,22 +22,24 @@ export class CustomerService {
         });
     }
 
-    public createCustomer(name: string, mail: string, cu_code: string, cu_note: string): Observable<GenericHttpResponse> {
+    public createCustomer(customer_id: string = null, name: string, mail: string, cu_code: string, cu_note: string, apiKey: string): Observable<GenericHttpResponse> {
         return this._http.put<GenericHttpResponse>(`${BE_PATH.basePath}customer/add`, {
             name: name,
             mail: mail,
             cu_code: cu_code,
-            cu_note: cu_note
+            cu_note: cu_note,
+            cu_api_key: apiKey
         });
     }
 
-    public updateCustomer(customer_id: string, name: string, mail: string, cu_code: string, cu_note: string): Observable<GenericHttpResponse> {
+    public updateCustomer(customer_id: string, name: string, mail: string, cu_code: string, cu_note: string, apiKey: string): Observable<GenericHttpResponse> {
         return this._http.post<GenericHttpResponse>(`${BE_PATH.basePath}customer/add`, {
             customer_id: customer_id,
             name: name,
             mail: mail,
             cu_code: cu_code,
-            cu_note: cu_note
+            cu_note: cu_note,
+            cu_api_key: apiKey
         });
     }
 

@@ -1,5 +1,9 @@
 version: '3'
 
+networks:
+  sp_int:
+
+
 volumes:
   postgres_data:
     driver: local
@@ -22,6 +26,8 @@ services:
       POSTGRES_PASSWORD: ${DB_PASS}
     ports:
       - "5432:5432"
+    networks:
+      - sp_int
 
   pgadmin:
     container_name: pgadmin4
@@ -34,6 +40,8 @@ services:
       - "5050:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - sp_int
 
   keycloak:
     image: jboss/keycloak
@@ -54,6 +62,8 @@ services:
       - 8082:8080
     depends_on:
       - postgres
+    networks:
+      - sp_int
 
   nginx:
     image: nginx:1.25.0-alpine
@@ -63,3 +73,15 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - keycloak
+    networks:
+      - sp_int
+
+  node:
+    build:
+      context: ./server
+    image: nodeimage
+    container_name: sp_node
+    ports:
+      - "8081:8081"
+    networks:
+      - sp_int

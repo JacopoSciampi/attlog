@@ -58,3 +58,7 @@ form {
     padding: $space-less;
     background-color: $secondary;
 }
+
+form {
+    overflow-y: auto;
+}

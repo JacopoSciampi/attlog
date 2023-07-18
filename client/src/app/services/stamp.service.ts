@@ -38,6 +38,17 @@ export class StampService {
         });
     }
 
+    public setAllStampsToBeSentToFtp(sn: string, userId: string, startDate: string, endDate: string, customerName: string, clockLocation: string) {
+        return this._http.post(`${BE_PATH.basePath}attlog/set_all_to_be_sent`, {
+            'sn': sn || "",
+            'userId': userId || "",
+            'startDate': startDate || "",
+            'endDate': endDate || "",
+            'customerName': customerName || "",
+            'clockLocation': clockLocation || "",
+        });
+    }
+
     public setStampToBeSentToFtp(id: string | number) {
         return this._http.post(`${BE_PATH.basePath}attlog/set_to_be_sent`, {
             'id': id || ""

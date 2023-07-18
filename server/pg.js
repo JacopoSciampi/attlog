@@ -3,7 +3,7 @@ const pg = require('pg');
 pool = new pg.Client({
     user: process.env.DB_USER || "keycloak",
     password: process.env.DB_PASS || "xUc5rUj!ZISPos0$&iyaGe7riChAkL",
-    host: 'localhost',
+    host: 'pgsql',
     port: 5432,
     database: 'timbrature'
 });
@@ -32,11 +32,11 @@ pool.connect(err => {
 });
 
 class JekoPgInit {
-    createCustomer(name, mail, cu_code, cu_note) {
+    createCustomer(name, mail, cu_code, cu_note, cu_api_key) {
         return new Promise((r, j) => {
             pool.query(
-                `INSERT INTO "customers" ("c_name", "c_email", "cu_code", "cu_note")
-                VALUES ($1, $2, $3, $4)`, [name, mail, cu_code, cu_note]).then(() => {
+                `INSERT INTO "customers" ("c_name", "c_email", "cu_code", "cu_note", "cu_api_key")
+                VALUES ($1, $2, $3, $4, $5)`, [name, mail, cu_code, cu_note, cu_api_key]).then(() => {
                     r()
                 }).catch((err) => {
                     console.log(err);
@@ -61,7 +61,7 @@ class JekoPgInit {
     getCustomerList(name, email) {
         return new Promise((r, j) => {
             pool.query(`
-            SELECT c.customer_id, c.cu_code, c.cu_note, c.c_name AS customer_name, c.c_email AS customer_email, COALESCE(cl.total_clocks, 0) AS total_clocks
+            SELECT c.customer_id, c.cu_code, c.cu_note, c.cu_api_key, c.c_name AS customer_name, c.c_email AS customer_email, COALESCE(cl.total_clocks, 0) AS total_clocks
             FROM customers c
             LEFT JOIN (
                 SELECT fk_customer_id, COUNT(*) AS total_clocks
@@ -80,7 +80,7 @@ class JekoPgInit {
         });
     }
 
-    updateCustomerInfo(customer_id, cu_code, cu_note, customer_name, customer_email) {
+    updateCustomerInfo(customer_id, cu_code, cu_note, customer_name, customer_email, cu_api_key) {
         return new Promise((r, j) => {
             pool.query(`SELECT * FROM public.customers WHERE customers.customer_id = '${customer_id}'`, (err, data) => {
                 if (err) {
@@ -93,7 +93,7 @@ class JekoPgInit {
                     return;
                 }
 
-                pool.query(`UPDATE customers SET cu_code = '${cu_code}', cu_note = '${cu_note}', c_name = '${customer_name}', c_email = '${customer_email}' WHERE customers.customer_id  = '${customer_id}'`, (err, data) => {
+                pool.query(`UPDATE customers SET cu_code = '${cu_code}', cu_api_key = '${cu_api_key}', cu_note = '${cu_note}', c_name = '${customer_name}', c_email = '${customer_email}' WHERE customers.customer_id  = '${customer_id}'`, (err, data) => {
                     if (err) {
                         console.log(err);
                         j();
@@ -137,7 +137,7 @@ class JekoPgInit {
 
     downloadLogs(sn, userId, startDate, endDate, customerName, toBeSent) {
         return new Promise((r, j) => {
-            let query = `SELECT attlogs.*, clocks.c_name AS clock_name, COALESCE(customers.c_name, '-') AS customer_name, users.user_badge
+            let query = `SELECT attlogs.*, clocks.c_name AS clock_name, COALESCE(customers.c_name, '-') AS customer_name, users.user_badge, customers.cu_code
             FROM public.attlogs
             LEFT JOIN public.clocks ON attlogs.attlog_terminal_sn = clocks.c_sn
             LEFT JOIN public.customers ON clocks.fk_customer_id = customers.customer_id
@@ -178,6 +178,31 @@ class JekoPgInit {
         });
     }
 
+    setAllStampToBeSent(data) {
+        return new Promise((resolve, reject) => {
+            const updatePromises = data.rows?.map(item => {
+                return new Promise((resolveItem, rejectItem) => {
+                    pool.query(`UPDATE attlogs SET attlog_sent = 'false', attlog_sent_timestamp = '' WHERE attlogs.attlog_id = '${item.attlog_id}'`, (err, data) => {
+                        if (err) {
+                            console.log(err);
+                            rejectItem(err);
+                        } else {
+                            resolveItem(data);
+                        }
+                    });
+                });
+            });
+
+            Promise.all(updatePromises)
+                .then(results => {
+                    resolve(results);
+                })
+                .catch(err => {
+                    reject(err);
+                });
+        });
+    }
+
     setStampToBeSent(attlog_id) {
         return new Promise((r, j) => {
             pool.query(`UPDATE attlogs SET attlog_sent = 'false', attlog_sent_timestamp = '' WHERE attlogs.attlog_id  = '${attlog_id}'`, (err, data) => {
@@ -200,6 +225,35 @@ class JekoPgInit {
                     console.log(`Error while updating the status SENT of the attlog ${item.attlog_id}`);
                     console.log(err);
                 }
+            });
+        });
+    }
+
+    getLogsFromApiKey(key) {
+        return new Promise((r, j) => {
+            pool.query(`
+            SELECT * from public.attlogs
+            LEFT JOIN public.clocks ON clocks.c_sn = attlogs.attlog_terminal_sn
+            LEFT JOIN public.customers ON customers.customer_id = public.clocks.fk_customer_id
+            WHERE customers.cu_api_key = '${key}' AND (attlogs.attlog_sent IS NULL OR attlogs.attlog_sent = 'false')
+            `, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                pool.query(`SELECT cu_code FROM public.customers WHERE customers.cu_api_key = '${key}'`, (err, cu_code) => {
+                    if (err) {
+                        console.log(err);
+                        j();
+                    }
+
+                    if (!data?.rowCount) {
+                        j(`Requested a non existing API KEY: ${key}`);
+                    }
+
+                    r({ data: data, code: cu_code });
+                });
             });
         });
     }
@@ -237,7 +291,7 @@ class JekoPgInit {
                 query += ` AND clocks.c_location LIKE '%${clockLocation}%'`;
             }
 
-            query += ' ORDER BY customer_name ASC';
+            query += ' ORDER BY attlogs.attlog_id DESC';
             pool.query(query, (err, data) => {
                 if (err) {
                     console.log(err);
@@ -441,9 +495,12 @@ class JekoPgInit {
     addLogIfNotExist(sn, data) {
         // const userId_date = _f[0].split(/-(.*)/).filter(e => !!e);
         // const otherData = _f[1].split('-').filter(e => !!e);
-        //'10-2023-06-27 14:51:15-0-1-0-0-0-0-0-0-' // Ingresso mano
-        //'10-2023-06-27 14:51:15-0-1-0-0-0-0-0-0-' // Ingresso mano
+        //'10-2023-06-27 14:51:15-0-1-0-0-0-0-0-0-' // Ingresso               mano
+        //'10-2023-06-27 14:51:15-0-1-0-0-0-0-0-0-' // Ingresso               mano
         //'10-2023-06-27 15:02:40-4-1-0-0-0-0-0-0-' // Ingresso straordinario mano
+        //' 1-2023-07-18 14:51:27-0-2-0-0-0-0-0-0-' // Ingresso               badge
+        //  1-2023-07-18 14:53:18-0-2-55-0-0-0-0-0- // Ingresso               badge codiceLavoro55
+        //  1-2023-07-18 14:53:18-0-2-2-0-0-0-0-0- // Ingresso                badge codiceLavoro2
         return new Promise((r, j) => {
             const _f = data.split(' ');
             const userId_date = _f[0].split(/-(.*)/).filter(e => !!e);
@@ -466,8 +523,8 @@ class JekoPgInit {
             }
 
             pool.query(
-                `INSERT INTO "attlogs" ("attlog_terminal_sn", "attlog_user_id", "attlog_date", "attlog_time", "attlog_reason_code", "attlog_access_type")
-                    VALUES ($1, $2, $3, $4, $5, $6)`, [sn, userId_date[0], userId_date[1], otherData[0], otherData[1], otherData[2]]).then(() => {
+                `INSERT INTO "attlogs" ("attlog_terminal_sn", "attlog_user_id", "attlog_date", "attlog_time", "attlog_reason_code", "attlog_access_type", "attlog_sent", "attlog_sent_timestamp", "attlog_work_code")
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, [sn, userId_date[0], userId_date[1], otherData[0], otherData[1], otherData[2], 'false', '', otherData[3]]).then(() => {
                     r();
                 }).catch((err) => {
                     console.log(err);
@@ -582,9 +639,10 @@ class JekoPgInit {
                     return;
                 }
 
+
                 pool.query(
-                    `INSERT INTO "settings" ("setting_name", "set_mail_smtp", "set_mail_ssl", "set_mail_port", "set_mail_user", "set_mail_pass", "set_mail_sender", "set_mail_receiver_list", "set_mail_offline_after", "set_ftp_server_ip", "set_ftp_server_port", "set_ftp_server_user", "set_ftp_server_password", "set_ftp_server_folder", "set_ftp_send_every", "set_terminal_file_name", "set_terminal_file_format", "set_ftp_enabled")
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`, [data.setting_name, data.set_mail_smtp, data.set_mail_ssl, data.set_mail_port, data.set_mail_user, data.set_mail_pass, data.set_mail_sender, data.set_mail_receiver_list, data.set_mail_offline_after, data.set_ftp_server_ip, data.set_ftp_server_port, data.set_ftp_server_user, data.set_ftp_server_password, data.set_ftp_server_folder, data.set_ftp_send_every, data.set_terminal_file_name, data.set_terminal_file_format, data.set_ftp_enabled]).then(() => {
+                    `INSERT INTO "settings" ("setting_name", "set_mail_smtp", "set_mail_ssl", "set_mail_port", "set_mail_user", "set_mail_pass", "set_mail_sender", "set_mail_receiver_list", "set_mail_offline_after", "set_ftp_server_ip", "set_ftp_server_port", "set_ftp_server_user", "set_ftp_server_password", "set_ftp_server_folder", "set_ftp_send_every", "set_terminal_file_name", "set_terminal_file_format", "set_ftp_enabled", "set_terminal_attendance", "set_terminal_pause","set_terminal_service")
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`, [data.setting_name, data.set_mail_smtp, data.set_mail_ssl, data.set_mail_port, data.set_mail_user, data.set_mail_pass, data.set_mail_sender, data.set_mail_receiver_list, data.set_mail_offline_after, data.set_ftp_server_ip, data.set_ftp_server_port, data.set_ftp_server_user, data.set_ftp_server_password, data.set_ftp_server_folder, data.set_ftp_send_every, data.set_terminal_file_name, data.set_terminal_file_format, data.set_ftp_enabled, data.set_terminal_attendance, data.set_terminal_pause, data.set_terminal_service]).then(() => {
                         r()
                     }).catch((err) => {
                         console.log(err);
@@ -610,7 +668,6 @@ class JekoPgInit {
                 }
 
                 data.set_mail_ssl === 'true' ? true : false;
-
                 pool.query(`UPDATE settings SET 
                         set_mail_smtp = '${data.set_mail_smtp}',
                         set_mail_ssl = '${data.set_mail_ssl}',
@@ -677,7 +734,10 @@ class JekoPgInit {
                 }
 
                 pool.query(`UPDATE settings SET set_terminal_file_name = '${data.set_terminal_file_name}',
-                set_terminal_file_format = '${data.set_terminal_file_format}' WHERE settings.setting_id  = '${data.setting_id}'`, (err, data) => {
+                set_terminal_file_format = '${data.set_terminal_file_format}',
+                set_terminal_attendance = '${data.set_terminal_attendance}',
+                set_terminal_pause = '${data.set_terminal_pause}',
+                set_terminal_service = '${data.set_terminal_service}' WHERE settings.setting_id  = '${data.setting_id}'`, (err, data) => {
                     if (err) {
                         console.log(err);
                         j();

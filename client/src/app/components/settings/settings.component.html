@@ -168,6 +168,32 @@
                                     <div>F = Cliente</div>
                                 </div>
                             </div>
+                            <div class="card-item">
+                                <div class="card-item-title bold">
+                                    Categoria
+                                </div>
+                            </div>
+                            <div class="card-item">
+                                <div class="key">Presenza (0)
+                                </div>
+                                <div class="value">
+                                    <input type="text" [(ngModel)]="settings.set_terminal_attendance">
+                                </div>
+                            </div>
+                            <div class="card-item">
+                                <div class="key">Pausa (1)
+                                </div>
+                                <div class="value">
+                                    <input type="text" [(ngModel)]="settings.set_terminal_pause">
+                                </div>
+                            </div>
+                            <div class="card-item">
+                                <div class="key">Servizio (2)
+                                </div>
+                                <div class="value">
+                                    <input type="text" [(ngModel)]="settings.set_terminal_service">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </mat-step>
@@ -196,6 +222,9 @@
                         <div class="bold no-card-title">Impostazioni timbrature</div>
                         <div>Nome file: {{settings.set_terminal_file_name}}</div>
                         <div>Formato file: {{settings.set_terminal_file_format}}</div>
+                        <div>Presenza (0): {{settings.set_terminal_attendance}}</div>
+                        <div>Pausa (1): {{settings.set_terminal_pause}}</div>
+                        <div>Servizio (2): {{settings.set_terminal_service}}</div>
 
                         <div class="bold no-card-title">Nome configurazione*</div>
                         <div class="value">
@@ -365,10 +394,36 @@
                                 <div>N = Minuti</div>
                                 <div>S = Secondi</div>
                                 <div>B = Badge</div>
-                                <div>*V = Verso</div>
-                                <div>*C = Causale</div>
-                                <div>*K = Categoria</div>
+                                <div>V = Verso</div>
+                                <div>C = Causale</div>
+                                <div>K = Categoria</div>
                                 <div>F = Cliente</div>
+                            </div>
+                        </div>
+                        <div class="card-item">
+                            <div class="card-item-title bold" matTooltip="Usare la , come separatore">
+                                Categoria
+                            </div>
+                        </div>
+                        <div class="card-item">
+                            <div class="key">Presenza (0)
+                            </div>
+                            <div class="value">
+                                <input type="text" [(ngModel)]="settings.set_terminal_attendance">
+                            </div>
+                        </div>
+                        <div class="card-item">
+                            <div class="key">Pausa (1)
+                            </div>
+                            <div class="value">
+                                <input type="text" [(ngModel)]="settings.set_terminal_pause">
+                            </div>
+                        </div>
+                        <div class="card-item">
+                            <div class="key">Servizio (2)
+                            </div>
+                            <div class="value">
+                                <input type="text" [(ngModel)]="settings.set_terminal_service">
                             </div>
                         </div>
                         <div class="card-item card-item-button">

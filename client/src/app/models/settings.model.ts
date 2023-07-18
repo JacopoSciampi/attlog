@@ -25,4 +25,7 @@ export interface SettingsDetails {
 
     set_terminal_file_name: string;
     set_terminal_file_format: string;
+    set_terminal_attendance: string;
+    set_terminal_pause: string;
+    set_terminal_service: string;
 }

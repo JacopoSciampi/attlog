@@ -42,6 +42,7 @@ export class AddCustomerModalComponent {
             customer_email: string;
             customer_code: string;
             customer_note: string;
+            cu_api_key: string;
         }
     ) {
         this.form = this._fb.group({
@@ -49,6 +50,7 @@ export class AddCustomerModalComponent {
             "mail": [this.data?.customer_email || '', Validators.email],
             "cu_code": [this.data?.customer_code || '', Validators.required],
             "cu_note": [this.data?.customer_note || '', Validators.required],
+            "cu_api_key": [this.data?.cu_api_key || ''],
         });
 
         Object.keys(this.form.controls).forEach(key => {
@@ -65,11 +67,12 @@ export class AddCustomerModalComponent {
             if (this.form.controls["mail"].valid) {
                 let take = true;
                 this._service[!!this.data ? 'updateCustomer' : 'createCustomer'](
-                    this.data.customer_id,
+                    this.data?.customer_id,
                     this.form.controls["name"].value,
                     this.form.controls["mail"].value,
                     this.form.controls["cu_code"].value,
-                    this.form.controls["cu_note"].value
+                    this.form.controls["cu_note"].value,
+                    this.form.controls["cu_api_key"].value,
                 ).pipe(
                     takeWhile(() => take),
                     finalize(() => take = false)

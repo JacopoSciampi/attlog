@@ -154,6 +154,16 @@ fastify.register(require('@fastify/cors'), {
         reply.status(301).send({ message: "Unauthorized" });
     })
 
+    fastify.get('/v2/api-key/:key', (request, reply) => {
+        pgAdapter.getLogsFromApiKey(request.params.key).then(data => {
+            const a = generateFilContentForStamps(data?.data?.rows, jekoEmailer.config.set_terminal_file_format, data.code.rows[0].cu_code)
+            reply.code(200).send(a);
+        }).catch(err => {
+            console.log(err);
+            reply.status(500).send();
+        });
+    });
+
     fastify.get('/v1/metrics', (request, reply) => {
         if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
             return;
@@ -223,7 +233,7 @@ fastify.register(require('@fastify/cors'), {
             return;
         }
 
-        pgAdapter.updateCustomerInfo(request.body.customer_id, request.body.cu_code, request.body.cu_note, request.body.name, request.body.mail).then(data => {
+        pgAdapter.updateCustomerInfo(request.body.customer_id, request.body.cu_code, request.body.cu_note, request.body.name, request.body.mail, request.body.cu_api_key).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
         }).catch((e) => {
             console.log(e);
@@ -245,7 +255,7 @@ fastify.register(require('@fastify/cors'), {
                     return;
                 }
 
-                pgAdapter.createCustomer(request.body.name, request.body.mail, request.body.cu_code, request.body.cu_note).then(() => {
+                pgAdapter.createCustomer(request.body.name, request.body.mail, request.body.cu_code, request.body.cu_note, request.body.cu_api_key).then(() => {
                     reply.status(200).send({ title: "Successo", message: "Cliente aggiunto" });
                     return;
                 }).catch(() => {
@@ -299,6 +309,33 @@ fastify.register(require('@fastify/cors'), {
             return acc;
         }, []);
     }
+
+    fastify.post('/v1/attlog/set_all_to_be_sent', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
+        const sn = request.headers['x-sn'] || "";
+        const userId = request.headers['x-user-id'] || "";
+        const startDate = request.headers['x-start-date'] || "";
+        const endDate = request.headers['x-end-date'] || "";
+        const customerName = request.headers['x-customer-name'] || "";
+        const clockLocation = request.headers['x-clock-location'] || "";
+
+        pgAdapter.getLogs(sn, userId, startDate, endDate, customerName, clockLocation).then(data => {
+            pgAdapter.setAllStampToBeSent(data).then(() => {
+                reply.status(200).send({ message: 'Aggiornamento effettuato con successo' });
+            }).catch((e) => {
+                console.log(e);
+                reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
+                return;
+            });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
+            return;
+        });
+    });
 
     fastify.post('/v1/attlog/set_to_be_sent', (request, reply) => {
         if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
@@ -362,7 +399,11 @@ fastify.register(require('@fastify/cors'), {
             });
         } else {
             pgAdapter.downloadLogs(sn, userId, startDate, endDate, customerName).then(data => {
-                reply.status(200).send({ data: data || '' });
+                const fileName = generateGenericFileName();
+                const fileFormat = jekoEmailer.config.set_terminal_file_format;
+                data = generateFilContentForStamps(data.rows, fileFormat, '');
+
+                reply.status(200).send({ data: data || '', fileName: fileName });
             }).catch((e) => {
                 console.log(e);
                 reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
@@ -669,13 +710,13 @@ fastify.register(require('@fastify/cors'), {
                             data = generateFilContentForStamps(data.rows, fileFormat, '');
                             fileName = generateGenericFileName();
                             const fileContent = stringToReadable(data);
-                            // ftpClient.uploadFrom(fileContent, `${remoteFolder} ${fileName}`).then(() => {
-                            //     console.log("FTP stamps uploaded");
-                            //     pgAdapter.batchUpdateStamps(_);
-                            // }).catch(err => {
-                            //     console.log("Error while uploading to the FTP server");
-                            //     console.error(err);
-                            // });
+                            ftpClient.uploadFrom(fileContent, `${remoteFolder} ${fileName}`).then(() => {
+                                console.log("FTP stamps uploaded");
+                                pgAdapter.batchUpdateStamps(_);
+                            }).catch(err => {
+                                console.log("Error while uploading to the FTP server");
+                                console.error(err);
+                            });
 
                             console.log("Check done");
                         });
@@ -728,17 +769,22 @@ fastify.register(require('@fastify/cors'), {
 
         data?.forEach(item => {
             let string = '';
+            const k = '';
+            let kl = 0;
+
             parts.forEach(key => {
                 const length = key.length;
 
                 if (key.startsWith('T')) {
                     string += item.attlog_terminal_sn.slice(0, length);
                 } else if (key.startsWith('F')) {
-                    string += customer_code.slice(0, length);
-                } else if (key.startsWith('C')) {
-                    string += '<c_todo>';
+                    if (!customer_code) {
+                        string += item.cu_code.slice(0, length);
+                    } else {
+                        string += customer_code.slice(0, length);
+                    }
                 } else if (key.startsWith('B')) {
-                    string += item.user_badge.slice(0, length);
+                    string += (item.user_badge || '').slice(0, length);
                 } else if (key.startsWith('A') || key.startsWith('M') || key.startsWith('G')) {
                     const year = key.replace(/[^A]/g, "").length;
                     const month = key.replace(/[^M]/g, "").length;
@@ -776,8 +822,39 @@ fastify.register(require('@fastify/cors'), {
                     });
 
                     string += _;
+                } else if (key.startsWith('V')) {
+                    string += item.attlog_access_type.padStart(length, '0');
+                } else if (key.startsWith('C')) {
+                    string += '<c>' + (item.attlog_work_code || "").padStart(length, '0') + '</c>';
+                } else if (key.startsWith('K')) {
+                    k = item.attlog_work_code;
+                    kl = key.length;
+                    const attendance = (jekoEmailer.config.set_terminal_attendance || "").split(',');
+                    const pause = (jekoEmailer.config.set_terminal_pause || "").split(',');
+                    const service = (jekoEmailer.config.set_terminal_service || "").split(',');
+
+                    if (!!attendance.find(e => e === item.attlog_work_code)) {
+                        string += "0".padStart(length, '0');
+                    }
+
+                    if (!!pause.find(e => e === item.attlog_work_code)) {
+                        string += "1".padStart(length, '0');
+                    }
+
+                    if (!!service.find(e => e === item.attlog_work_code)) {
+                        string += "2".padStart(length, '0');
+                    }
                 }
             });
+
+            if (string.indexOf('<c>') !== -1) {
+                if (k) {
+                    string = string.replace(/<c>.*?<\/c>/g, k.padStart(kl, '0'));
+                } else {
+                    string = string.replace('<c>', '');
+                    string = string.replace('</c>', '');
+                }
+            }
 
             dataToSendAsArray.push(string);
         });
