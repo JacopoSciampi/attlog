@@ -37,7 +37,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PG_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PG_PASSW}
     ports:
-      - "5050:80"
+      - "5050:5050"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     networks:
