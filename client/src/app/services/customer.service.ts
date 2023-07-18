@@ -46,8 +46,8 @@ export class CustomerService {
     public deleteCustomer(customer_id: string, cu_code: string) {
         return this._http.delete(`${BE_PATH.basePath}customer`, {
             headers: {
-                "customer_id": customer_id,
-                "cu_code": cu_code,
+                "customer-id": customer_id,
+                "cu-code": cu_code,
             }
         });
     }

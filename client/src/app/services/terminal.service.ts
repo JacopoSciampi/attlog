@@ -48,7 +48,7 @@ export class TerminalService {
     public deleteTerminal(c_sn: string) {
         return this._http.delete(`${BE_PATH.basePath}clocks`, {
             headers: {
-                "c_sn": c_sn,
+                "c-sn": c_sn,
             }
         });
     }
@@ -75,7 +75,7 @@ export class TerminalService {
     public deleteClockModel(cm_id: string) {
         return this._http.delete(`${BE_PATH.basePath}clock_models`, {
             headers: {
-                "cm_id": cm_id,
+                "cm-id": cm_id,
             }
         });
     }

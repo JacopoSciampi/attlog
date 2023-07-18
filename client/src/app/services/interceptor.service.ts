@@ -11,7 +11,7 @@ export class Interceptor implements HttpInterceptor {
         }
 
         const authReq = req.clone({
-            headers: req.headers.set('x-prisma-token', ConstClass.token)
+            headers: req.headers.append('x-prisma-token', ConstClass.token)
         });
 
         return next.handle(authReq);

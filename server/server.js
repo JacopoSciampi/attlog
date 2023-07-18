@@ -283,8 +283,8 @@ fastify.register(require('@fastify/cors'), {
             return;
         }
 
-        const customer_id = request.headers['customer_id'] || "";
-        const cu_code = request.headers['cu_code'] || "";
+        const customer_id = request.headers['customer-id'] || "";
+        const cu_code = request.headers['cu-code'] || "";
 
         pgAdapter.deleteCustomer(customer_id, cu_code).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
@@ -486,7 +486,7 @@ fastify.register(require('@fastify/cors'), {
             return;
         }
 
-        const clock_sn = request.headers['c_sn'] || "";
+        const clock_sn = request.headers['c-sn'] || "";
 
         pgAdapter.deleteClock(clock_sn).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
@@ -545,7 +545,7 @@ fastify.register(require('@fastify/cors'), {
         }
 
         console.log(request.headers);
-        const cm_id = request.headers['cm_id'] || "";
+        const cm_id = request.headers['cm-id'] || "";
 
         pgAdapter.deleteClockModelList(+cm_id).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
