@@ -34,6 +34,9 @@ function validatePrismaToken(token, reply) {
 
 fastify.register(require('@fastify/cors'), {
     origin: (origin, cb) => {
+        cb(null, true);
+        return;
+
         if (!origin) {
             cb(null, true)
             return;
