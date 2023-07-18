@@ -1,10 +1,10 @@
 <div class="modal-container">
     <div class="modal-header">
         <div class="modal-title">
-            <ng-container *ngIf="data">
+            <ng-container *ngIf="data?.cm_id">
                 Modifica dati modello
             </ng-container>
-            <ng-container *ngIf="!data">
+            <ng-container *ngIf="!data?.cm_id">
                 Aggiungi modello
             </ng-container>
         </div>
