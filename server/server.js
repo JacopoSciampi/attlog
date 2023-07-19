@@ -958,8 +958,7 @@ fastify.register(require('@fastify/cors'), {
             upsertEmailStuff().then(() => {
             }).catch(() => { });
         } catch (err) {
-            fastify.log.error(err)
-            process.exit(1)
+            fastify.log.error(err);
         }
     }
     start()
