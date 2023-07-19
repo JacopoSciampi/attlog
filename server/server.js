@@ -676,8 +676,9 @@ fastify.register(require('@fastify/cors'), {
     }
 
     function _upsertFtpChecker() {
+        clearInterval(intervalStampSend);
+
         const type = typeof (jekoEmailer.config.set_ftp_enabled);
-        console.log("type: " + type);
 
         if (type === "string") {
             if (jekoEmailer.config.set_ftp_enabled !== "true") {
@@ -688,8 +689,6 @@ fastify.register(require('@fastify/cors'), {
                 return;
             }
         }
-
-        clearInterval(intervalStampSend);
 
         intervalStampSend = setInterval(() => {
             let fileName = jekoEmailer.config.set_terminal_file_name;
