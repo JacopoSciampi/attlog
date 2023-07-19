@@ -676,8 +676,17 @@ fastify.register(require('@fastify/cors'), {
     }
 
     function _upsertFtpChecker() {
-        if (jekoEmailer.config.set_ftp_enabled !== true) {
-            return;
+        const type = typeof (jekoEmailer.config.set_ftp_enabled);
+        console.log("type: " + type);
+
+        if (type === "string") {
+            if (jekoEmailer.config.set_ftp_enabled !== "true") {
+                return;
+            }
+        } else {
+            if (jekoEmailer.config.set_ftp_enabled !== true) {
+                return;
+            }
         }
 
         clearInterval(intervalStampSend);
