@@ -755,7 +755,7 @@ fastify.register(require('@fastify/cors'), {
                         if (!jekoEmailer.snList.find(sn => sn === terminal.c_sn)) {
                             jekoEmailer.snList.push(terminal.c_sn);
 
-                            try {
+                            /*try {
                                 jekoEmailer.sendMailTerminalOffline(terminal).then(() => {
                                     console.log(`Terminal ${terminal.c_sn} offline. Mail sent.`);
                                     pgAdapter.updateClockMailSent(terminal.c_sn, true).then(() => { }).catch(() => { });
@@ -765,7 +765,7 @@ fastify.register(require('@fastify/cors'), {
                             } catch (e) {
                                 console.error("There was an error sending the emails")
                                 console.log(e);
-                            }
+                            }*/
                         }
                     });
 
