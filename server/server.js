@@ -807,7 +807,7 @@ fastify.register(require('@fastify/cors'), {
                         string += customer_code.slice(0, length);
                     }
                 } else if (key.startsWith('B')) {
-                    if (!item.user_badge) {
+                    if (!item.user_badge || item.user_badge === "null") {
                         string += "0".padStart(length, '0');
                     } else {
                         string += (item.user_badge || '').slice(0, length);
@@ -850,7 +850,7 @@ fastify.register(require('@fastify/cors'), {
 
                     string += _;
                 } else if (key.startsWith('V')) {
-                    string += item.attlog_access_type.padStart(length, '0');
+                    string += item.int_attlog_access_type.padStart(length, '0');
                 } else if (key.startsWith('C')) {
                     string += '<c>' + (item.attlog_work_code || "").padStart(length, '0') + '</c>';
                 } else if (key.startsWith('K')) {
