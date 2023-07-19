@@ -39,7 +39,7 @@ import { CustomerService } from '@services/customer.service';
 export class TerminalComponent implements OnInit, OnDestroy {
     public isInError = false;
     public isLoading = true;
-    public displayedColumns = ["_actions", "c_sn", "c_name", "c_model", "c_note", "c_desc", "c_location", "customer_name", "c_local_ip", "status"];
+    public displayedColumns = ["_actions", "c_custom_id", "c_sn", "c_name", "c_model", "c_note", "c_desc", "c_location", "customer_name", "c_local_ip", "status"];
     public dataSource!: MatTableDataSource<TerminalListDetails>;
     public f_customer_name!: string;
     public f_status = "Tutti";
@@ -159,7 +159,8 @@ export class TerminalComponent implements OnInit, OnDestroy {
                 c_desc: clock.c_desc,
                 c_location: clock.c_location,
                 fk_customer_name: clock.customer_name,
-                fk_cm_name: clock.c_model
+                fk_cm_name: clock.c_model,
+                c_custom_id: clock.c_custom_id
             }
         }).afterClosed().subscribe({
             next: (update) => {

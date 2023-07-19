@@ -161,6 +161,7 @@ fastify.register(require('@fastify/cors'), {
         pgAdapter.getLogsFromApiKey(request.params.key).then(data => {
             const a = generateFilContentForStamps(data?.data?.rows, jekoEmailer.config.set_terminal_file_format, data.code.rows[0].cu_code)
             reply.code(200).send(a);
+            pgAdapter.batchUpdateStamps(data?.data);
         }).catch(err => {
             console.log(err);
             reply.status(500).send();
@@ -213,10 +214,10 @@ fastify.register(require('@fastify/cors'), {
         }
 
         const name = request.headers['x-name'] || "";
-        const email = request.headers['x-email'] || "";
+        const customerCode = request.headers['x-customer-code'] || "";
 
         try {
-            pgAdapter.getCustomerList(name, email).then(data => {
+            pgAdapter.getCustomerList(name, customerCode).then(data => {
                 reply.status(200).send({ data: data || [] });
                 return;
             }).catch(() => {
@@ -460,7 +461,7 @@ fastify.register(require('@fastify/cors'), {
             return;
         }
 
-        pgAdapter.addClock(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name, request.body.c_note, request.body.c_desc, request.body.c_location).then(data => {
+        pgAdapter.addClock(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name, request.body.c_note, request.body.c_desc, request.body.c_location, request.body.c_custom_id).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
         }).catch((e) => {
             console.log(e);
@@ -798,19 +799,24 @@ fastify.register(require('@fastify/cors'), {
             parts.forEach(key => {
                 const length = key.length;
 
+                item.attlog_work_code = item.attlog_work_code || '';
+                item.clock_name = item.clock_name || '';
+                item.cu_code = item.cu_code || '';
+                item.c_custom_id = item.c_custom_id || '';
+
                 if (key.startsWith('T')) {
-                    string += item.attlog_terminal_sn.slice(0, length);
+                    string += item.c_custom_id.slice(0, length).padStart(0, length);
                 } else if (key.startsWith('F')) {
                     if (!customer_code) {
-                        string += item.cu_code.slice(0, length);
+                        string += (item.cu_code || '').slice(0, length).padStart(0, length);
                     } else {
-                        string += customer_code.slice(0, length);
+                        string += customer_code.slice(0, length).padStart(0, length);
                     }
                 } else if (key.startsWith('B')) {
                     if (!item.user_badge || item.user_badge === "null") {
                         string += "0".padStart(length, '0');
                     } else {
-                        string += (item.user_badge || '').slice(0, length);
+                        string += (item.user_badge || '').slice(0, length).padStart(0, length);
                     }
                 } else if (key.startsWith('A') || key.startsWith('M') || key.startsWith('G')) {
                     const year = key.replace(/[^A]/g, "").length;

@@ -59,6 +59,7 @@ export class AddTerminalModalComponent implements OnInit {
             c_desc: string;
             c_location: string;
             fk_cm_name: string;
+            c_custom_id: string;
         }
     ) { }
 
@@ -80,13 +81,14 @@ export class AddTerminalModalComponent implements OnInit {
                 this._initClockModelList = JSON.parse(JSON.stringify(data[1].data));
 
                 this.form = this._fb.group({
+                    'c_custom_id': [{ value: this.data?.c_custom_id || '', disabled: this.data }, Validators.required],
                     'c_sn': [{ value: this.data?.c_sn || '', disabled: this.data }, Validators.required],
                     'c_name': [this.data?.c_name || '', Validators.required],
                     'c_model': [this.data?.c_model || '', Validators.required],
                     'c_note': [this.data?.c_note || '', Validators.required],
                     'c_desc': [this.data?.c_desc || '', Validators.required],
                     'c_location': [this.data?.c_location || '', Validators.required],
-                    'c_fk_cst': ['_']
+                    'c_fk_cst': ['_'],
                 });
 
                 Object.keys(this.form.controls).forEach(key => {
@@ -156,6 +158,7 @@ export class AddTerminalModalComponent implements OnInit {
             this.form.controls['c_note'].value,
             this.form.controls['c_desc'].value,
             this.form.controls['c_location'].value,
+            this.form.controls['c_custom_id'].value,
         ).pipe(
             takeWhile(() => take),
             finalize(() => take = false)

@@ -6,6 +6,7 @@ $primary: hsl(8, 80%, 56%);
 $secondary: hsl(207, 54%, 51%);
 $disabled-bg: hsl(0, 0%, 46%);
 $disabled-fg: hsl(0, 0%, 64%);
+$success: hsl(120, 100%, 25%);
 
 $bg-alpha: hsla(200, 6%, 10%, 0.57);
 $btn-primary: __dynamicColor__($secondary, 9, -13, -19);

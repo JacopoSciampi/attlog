@@ -17,8 +17,13 @@
             Errore nel recuperare la lista clienti.
         </ng-container>
         <ng-container *ngIf="!isInError">
+
             <div class="field field-grid">
-                <div class="title">SN Terminale</div>
+                <div class="title">ID Terminale</div>
+                <input type="text" formControlName="c_custom_id">
+            </div>
+            <div class="field field-grid">
+                <div class="title">Numero seriale</div>
                 <input type="text" formControlName="c_sn">
             </div>
             <div class="field field-grid">

@@ -4,6 +4,7 @@ export interface TerminalList {
 
 export interface TerminalListDetails {
     c_id: number;
+    c_custom_id: string;
     c_last_timestamp: string;
     c_model: string;
     c_name: string;

@@ -48,8 +48,13 @@
                         </div>
                     </td>
                 </ng-container>
+
+                <ng-container matColumnDef="c_custom_id">
+                    <th mat-header-cell *matHeaderCellDef> ID Terminale </th>
+                    <td mat-cell *matCellDef="let element"> {{element.c_custom_id}} </td>
+                </ng-container>
                 <ng-container matColumnDef="c_sn">
-                    <th mat-header-cell *matHeaderCellDef> Terminale </th>
+                    <th mat-header-cell *matHeaderCellDef> Numero Seriale </th>
                     <td mat-cell *matCellDef="let element"> {{element.c_sn}} </td>
                 </ng-container>
                 <ng-container matColumnDef="c_name">

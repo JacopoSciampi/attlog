@@ -38,7 +38,6 @@
     display: flex;
     flex-direction: column;
     gap: $space-tiny;
-    min-width: 150px;
 
     .title {
         font-family: 'font-bold', Arial, Helvetica, sans-serif;
@@ -54,7 +53,6 @@
     display: flex;
     flex-direction: column;
     gap: $space-tiny;
-    min-width: 200px;
 
     .title {
         font-family: 'font-bold', Arial, Helvetica, sans-serif;
@@ -71,7 +69,6 @@
 .field-material {
     display: flex;
     flex-direction: column;
-    min-width: 150px;
 
     .title {
         font-family: 'font-bold', Arial, Helvetica, sans-serif;
@@ -94,4 +91,24 @@
         align-items: center;
         justify-content: center;
     }
+}
+
+.filter-container {
+
+    .field,
+    .field-material {
+        min-width: 150px;
+    }
+
+    .field-button-list {
+        min-width: 200px;
+    }
+}
+
+.s-attlog-not-sent {
+    stroke: $primary;
+}
+
+.s-attlog-sent {
+    stroke: $success;
 }

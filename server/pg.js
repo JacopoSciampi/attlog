@@ -58,7 +58,7 @@ class JekoPgInit {
         });
     }
 
-    getCustomerList(name, email) {
+    getCustomerList(name, customerCode) {
         return new Promise((r, j) => {
             pool.query(`
             SELECT c.customer_id, c.cu_code, c.cu_note, c.cu_api_key, c.c_name AS customer_name, c.c_email AS customer_email, COALESCE(cl.total_clocks, 0) AS total_clocks
@@ -68,7 +68,7 @@ class JekoPgInit {
                 FROM clocks
                 GROUP BY fk_customer_id
             ) cl ON c.customer_id = cl.fk_customer_id
-            WHERE c.c_name LIKE '%${name}%' AND c.c_email LIKE '%${email}%';
+            WHERE c.c_name LIKE '%${name}%' AND c.cu_code LIKE '%${customerCode}%';
             `, (err, data) => {
                 if (err) {
                     console.log(err);
@@ -137,7 +137,7 @@ class JekoPgInit {
 
     downloadLogs(sn, userId, startDate, endDate, customerName, toBeSent) {
         return new Promise((r, j) => {
-            let query = `SELECT attlogs.*, clocks.c_name AS clock_name, COALESCE(customers.c_name, '-') AS customer_name, users.user_badge, customers.cu_code
+            let query = `SELECT attlogs.*, clocks.c_name AS clock_name, COALESCE(customers.c_name, '-') AS customer_name, users.user_badge, customers.cu_code, clocks.c_custom_id
             FROM public.attlogs
             LEFT JOIN public.clocks ON attlogs.attlog_terminal_sn = clocks.c_sn
             LEFT JOIN public.customers ON clocks.fk_customer_id = customers.customer_id
@@ -260,7 +260,13 @@ class JekoPgInit {
 
     getLogsForFtp() {
         return new Promise((r, j) => {
-            pool.query(`SELECT * FROM public.attlogs WHERE attlogs.attlog_sent IS NULL OR attlogs.attlog_sent LIKE '${false}'`, (err, data) => {
+            pool.query(`
+                SELECT * FROM public.attlogs
+                LEFT JOIN public.clocks ON clocks.c_sn = attlogs.attlog_terminal_sn
+                LEFT JOIN public.customers ON customers.customer_id = attlogs.attlog_user_id::int
+                WHERE attlogs.attlog_sent IS NULL OR attlogs.attlog_sent LIKE '${false}'
+                AND (customers.cu_api_key IS NULL OR customers.cu_api_key <> '')
+            `, (err, data) => {
                 if (err) {
                     console.log(err);
                     j();
@@ -351,7 +357,7 @@ class JekoPgInit {
         let mustFilterStatus = status !== "Tutti";
 
         return new Promise((r, j) => {
-            pool.query(`SELECT c.c_id, c.c_sn, c.c_name, c.c_local_ip, c.c_mail_sent, c.c_model, c.c_note, c.c_desc, c.c_location, c.c_last_timestamp, cu.c_name AS customer_name
+            pool.query(`SELECT c.c_id, c.c_custom_id, c.c_sn, c.c_name, c.c_local_ip, c.c_mail_sent, c.c_model, c.c_note, c.c_desc, c.c_location, c.c_last_timestamp, cu.c_name AS customer_name
             FROM public.clocks c
             LEFT JOIN public.customers cu ON c.fk_customer_id = cu.customer_id
             WHERE cu.c_name LIKE '${customerName}%'
@@ -416,7 +422,7 @@ class JekoPgInit {
         });
     }
 
-    addClock(c_sn, c_name, c_model, fk_customer_name, c_note, c_desc, c_location) {
+    addClock(c_sn, c_name, c_model, fk_customer_name, c_note, c_desc, c_location, c_custom_id) {
         return new Promise((r, j) => {
             pool.query(`SELECT * FROM public.customers WHERE customers.c_name = '${fk_customer_name}'`, (err, data) => {
                 if (err) {
@@ -444,8 +450,8 @@ class JekoPgInit {
 
                     const timeStamp = "-1";
                     pool.query(
-                        `INSERT INTO "clocks" ("c_sn", "c_name", "c_model", "c_last_timestamp", "fk_customer_id", "c_note", "c_desc", "c_location", "c_local_ip")
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, [c_sn, c_name, c_model, timeStamp, customerId, c_note, c_desc, c_location, '']).then(() => {
+                        `INSERT INTO "clocks" ("c_sn", "c_name", "c_model", "c_last_timestamp", "fk_customer_id", "c_note", "c_desc", "c_location", "c_local_ip", "c_custom_id")
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [c_sn, c_name, c_model, timeStamp, customerId, c_note, c_desc, c_location, '', c_custom_id]).then(() => {
                             r()
                         }).catch((err) => {
                             console.log(err);

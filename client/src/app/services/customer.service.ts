@@ -13,11 +13,11 @@ export class CustomerService {
         private _http: HttpClient
     ) { }
 
-    public getCustomerList(name?: string, email?: string): Observable<CustomerList> {
+    public getCustomerList(name?: string, customer_code?: string): Observable<CustomerList> {
         return this._http.get<CustomerList>(`${BE_PATH.basePath}customer/list`, {
             headers: {
                 'x-name': name || '',
-                'x-email': email || ''
+                'x-customer-code': customer_code || ''
             }
         });
     }

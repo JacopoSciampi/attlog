@@ -34,7 +34,7 @@ export class CustomersComponent implements OnInit {
     public displayedColumns = ["_actions", "name", "email", "cu_code", "cu_note", "total_clocks", "cu_api_key"];
     public dataSource!: MatTableDataSource<CustomerListDetails>;
     public f_name!: string;
-    public f_email!: string;
+    public f_customer_code!: string;
     public customerList: CustomerListDetails[] = [];
     public _initCustomerList: CustomerListDetails[] = [];
 
@@ -68,7 +68,7 @@ export class CustomersComponent implements OnInit {
     }
 
     private _upsertTableData(): void {
-        this._service.getCustomerList(this.f_name, this.f_email).subscribe({
+        this._service.getCustomerList(this.f_name, this.f_customer_code).subscribe({
             next: (data) => {
 
                 this.dataSource = new MatTableDataSource(data.data);
@@ -131,7 +131,7 @@ export class CustomersComponent implements OnInit {
     }
 
     public onFilterResetClicked(): void {
-        this.f_email = '';
+        this.f_customer_code = '';
         this.f_name = '';
 
         this._upsertTableData();

@@ -1,4 +1,4 @@
-import { Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from "@angular/core";
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -10,6 +10,7 @@ import { NgHeroiconsModule } from "@dimaslz/ng-heroicons";
 import { AuthService } from '@services/auth.service';
 
 import { KcJwtToken } from '@models/auth.model';
+import { GenericKeyValueString } from '@models/generics/generic.model';
 
 @Component({
     selector: 'app-navbar',
@@ -24,12 +25,28 @@ import { KcJwtToken } from '@models/auth.model';
 })
 export class NavbarComponent {
     public username!: string;
+    public currentPage = "Homepage";
+
+    private _routeList: GenericKeyValueString = {
+        'homepage': 'Homepage',
+        'customers': 'Clienti',
+        'terminal': 'Terminali',
+        'stamps': 'Timbrature',
+        'settings': 'Impostazioni'
+    }
 
     constructor(
         public authService: AuthService,
+        private _ar: ActivatedRoute,
         private _router: Router,
     ) {
         this.username = jwt_decode<KcJwtToken>(this.authService.oAuthService.getAccessToken()).given_name;
+
+        this._router.events.subscribe(data => {
+            if (data instanceof (NavigationEnd)) {
+                this.currentPage = data.url.match(/\/([^/]+)/) ? this._routeList[data.url.match(/\/([^/]+)/)[1]] as string : this.currentPage;
+            }
+        });
     }
 
     public gotoCredits(): void {

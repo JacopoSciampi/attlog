@@ -42,7 +42,7 @@ import { TerminalService } from "@services/terminal.service";
 })
 export class StampsComponent implements OnInit {
     public isLoading = true;
-    public displayedColumns = ["attlog_terminal_sn", "attlog_user_id", "customer_name", "attlog_date", "clock_location", "attlog_time", "attlog_access_type", "attlog_reason_code", "attlog_sent_timestamp", "_actions"];
+    public displayedColumns = ["attlog_terminal_sn", "attlog_user_id", "customer_name", "attlog_date", "clock_location", "attlog_time", "attlog_access_type", "attlog_reason_code", "attlog_work_code", "attlog_sent_timestamp", "_actions"];
     public dataSource!: MatTableDataSource<StampListDetails>;
     public f_customer_name!: string;
     public f_terminalSN!: string;
@@ -147,6 +147,7 @@ export class StampsComponent implements OnInit {
         ).subscribe({
             next: () => {
                 this._toastService.generic("Aggiornamento effettuato", "Operazione avvenuta con successo");
+                this.onFilterApplyClicked();
             }, error: (err) => {
                 this._toastService.errorGeneric(err.error.title, err.error.message)
             }
