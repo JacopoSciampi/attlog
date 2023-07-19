@@ -755,13 +755,17 @@ fastify.register(require('@fastify/cors'), {
                         if (!jekoEmailer.snList.find(sn => sn === terminal.c_sn)) {
                             jekoEmailer.snList.push(terminal.c_sn);
 
-                            jekoEmailer.sendMailTerminalOffline(terminal).then(() => {
-                                console.log(`Terminal ${terminal.c_sn} offline. Mail sent.`);
-                                pgAdapter.updateClockMailSent(terminal.c_sn, true).then(() => { }).catch(() => { });
-                                const idx = jekoEmailer.snList.indexOf(terminal.c_sn);
-                                jekoEmailer.snList = jekoEmailer.snList.splice(idx, 1);
-                            });
-
+                            try {
+                                jekoEmailer.sendMailTerminalOffline(terminal).then(() => {
+                                    console.log(`Terminal ${terminal.c_sn} offline. Mail sent.`);
+                                    pgAdapter.updateClockMailSent(terminal.c_sn, true).then(() => { }).catch(() => { });
+                                    const idx = jekoEmailer.snList.indexOf(terminal.c_sn);
+                                    jekoEmailer.snList = jekoEmailer.snList.splice(idx, 1);
+                                });
+                            } catch (e) {
+                                console.error("There was an error sending the emails")
+                                console.log(e);
+                            }
                         }
                     });
 
