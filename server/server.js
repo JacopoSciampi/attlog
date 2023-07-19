@@ -850,7 +850,7 @@ fastify.register(require('@fastify/cors'), {
 
                     string += _;
                 } else if (key.startsWith('V')) {
-                    if (!int_attlog_access_type) {
+                    if (!item?.int_attlog_access_type) {
                         string += item.attlog_access_type.padStart(length, '0');
                     } else {
                         string += item.int_attlog_access_type.padStart(length, '0');
