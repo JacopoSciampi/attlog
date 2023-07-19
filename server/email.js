@@ -42,7 +42,7 @@ class JekoEmailer {
     sendMailTerminalOffline(terminal) {
         return new Promise((resolve, reject) => {
             try {
-                resolve(this.transporter.sendMail({
+                this.transporter.sendMail({
                     from: `"Rilevazione presenze" <${this.config.set_mail_sender}>`,
                     to: this.config.set_mail_receiver_list, // mail, mail2, mail3, ...
                     subject: `Report terminale: ${terminal.c_sn} offline`,
@@ -82,7 +82,9 @@ class JekoEmailer {
                         </body>
                     </html>
                     `
-                }));
+                }, () => {
+                    resolve();
+                });
             } catch (e) {
                 console.log('error' + e);
                 reject();
