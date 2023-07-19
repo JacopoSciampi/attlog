@@ -78,6 +78,7 @@ export class SettingsComponent implements OnInit {
 
                 if (data?.data) {
                     data.data.set_mail_ssl = data.data.set_mail_ssl === "false" ? false : true;
+                    data.data.set_ftp_enabled = data.data.set_ftp_enabled === "true" ? true : false;
                     this.settings = data.data;
                 }
 
