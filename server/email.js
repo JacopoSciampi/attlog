@@ -9,15 +9,20 @@ class JekoEmailer {
         this.config = data;
         this.transporter = null;
 
-        this.transporter = nodemailer.createTransport({
-            host: this.config.set_mail_smtp,
-            port: this.config.set_mail_port,
-            secure: this.config.set_mail_ssl === "true" ? true : false,
-            auth: {
-                user: this.config.set_mail_user,
-                pass: this.config.set_mail_pass,
-            }
-        });
+        try {
+            this.transporter = nodemailer.createTransport({
+                host: this.config.set_mail_smtp,
+                port: this.config.set_mail_port,
+                secure: this.config.set_mail_ssl === "true" ? true : false,
+                auth: {
+                    user: this.config.set_mail_user,
+                    pass: this.config.set_mail_pass,
+                }
+            });
+        } catch (e) {
+            console.log("Error while setting up the transporter for the email");
+            console.log(e);
+        }
     }
 
     _formatDate(dateString) {
