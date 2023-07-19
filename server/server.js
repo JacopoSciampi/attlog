@@ -676,7 +676,7 @@ fastify.register(require('@fastify/cors'), {
     }
 
     function _upsertFtpChecker() {
-        if (!jekoEmailer.config.set_ftp_enabled) {
+        if (jekoEmailer.config.set_ftp_enabled !== true || jekoEmailer.config.set_ftp_enabled !== "true") {
             return;
         }
 
