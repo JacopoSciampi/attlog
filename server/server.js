@@ -694,41 +694,46 @@ fastify.register(require('@fastify/cors'), {
             console.log("Checking terminal status for FTP...");
             pgAdapter.getLogsForFtp().then(data => {
                 if (data && data?.rows) {
-                    ftpClient.access({
-                        host: jekoEmailer.config.set_ftp_server_ip,
-                        port: jekoEmailer.config.set_ftp_server_port,
-                        user: jekoEmailer.config.set_ftp_server_user,
-                        password: jekoEmailer.config.set_ftp_server_password,
-                        secure: false
-                    }).then(() => {
-                        const stringToReadable = (str) => {
-                            const readableStream = new Readable();
-                            readableStream._read = () => { };
-                            readableStream.push(str);
-                            readableStream.push(null);
-                            return readableStream;
-                        };
+                    try {
+                        ftpClient.access({
+                            host: jekoEmailer.config.set_ftp_server_ip,
+                            port: jekoEmailer.config.set_ftp_server_port,
+                            user: jekoEmailer.config.set_ftp_server_user,
+                            password: jekoEmailer.config.set_ftp_server_password,
+                            secure: false
+                        }).then(() => {
+                            const stringToReadable = (str) => {
+                                const readableStream = new Readable();
+                                readableStream._read = () => { };
+                                readableStream.push(str);
+                                readableStream.push(null);
+                                return readableStream;
+                            };
 
-                        const remoteFolder = jekoEmailer.config.set_ftp_server_folder;
-                        pgAdapter.downloadLogs('', null, null, null, null, true).then(data => {
-                            const _ = data;
-                            data = generateFilContentForStamps(data.rows, fileFormat, '');
-                            fileName = generateGenericFileName();
-                            const fileContent = stringToReadable(data);
-                            ftpClient.uploadFrom(fileContent, `${remoteFolder} ${fileName}`).then(() => {
-                                console.log("FTP stamps uploaded");
-                                pgAdapter.batchUpdateStamps(_);
-                            }).catch(err => {
-                                console.log("Error while uploading to the FTP server");
-                                console.error(err);
+                            const remoteFolder = jekoEmailer.config.set_ftp_server_folder;
+                            pgAdapter.downloadLogs('', null, null, null, null, true).then(data => {
+                                const _ = data;
+                                data = generateFilContentForStamps(data.rows, fileFormat, '');
+                                fileName = generateGenericFileName();
+                                const fileContent = stringToReadable(data);
+                                ftpClient.uploadFrom(fileContent, `${remoteFolder} ${fileName}`).then(() => {
+                                    console.log("FTP stamps uploaded");
+                                    pgAdapter.batchUpdateStamps(_);
+                                }).catch(err => {
+                                    console.log("Error while uploading to the FTP server");
+                                    console.error(err);
+                                });
+
+                                console.log("Check done");
                             });
-
-                            console.log("Check done");
+                        }).catch(err => {
+                            console.log("Error while connecting to the FTP server");
+                            console.error(err);
                         });
-                    }).catch(err => {
+                    } catch (e) {
                         console.log("Error while connecting to the FTP server");
-                        console.error(err);
-                    });
+                        console.error(e);
+                    }
 
                 }
             }).catch(() => {
