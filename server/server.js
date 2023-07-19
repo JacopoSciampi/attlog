@@ -360,30 +360,21 @@ fastify.register(require('@fastify/cors'), {
             return;
         }
 
-        console.log(request.body);
-
         const sn = request.body.sn || "";
         const userId = request.body.userId || "";
         const startDate = request.body.startDate || "";
         const endDate = request.body.endDate || "";
         let customerName = request.body.customerName || "";
 
-        console.log(sn);
         if (sn) {
             pgAdapter.getClockBySn(sn).then(data => {
                 customerName = data.rows[0].customer_name;
                 const customer_code = data.rows[0].customer_code;
 
-                console.log(data);
 
                 pgAdapter.downloadLogs(sn, userId, startDate, endDate, customerName).then(data => {
-                    console.log(data);
                     let fileName = jekoEmailer.config.set_terminal_file_name;
                     const fileFormat = jekoEmailer.config.set_terminal_file_format;
-
-                    console.log(fileName);
-                    console.log(fileFormat);
-                    console.log(customer_code);
 
                     const newArray = __getDataInArrayForLogs__(data, customer_code)
 
@@ -796,7 +787,6 @@ fastify.register(require('@fastify/cors'), {
     }
 
     function generateFilContentForStamps(data, path, customer_code) {
-        console.log("gento")
         const parts = path.split('_');
         const dataToSendAsArray = [];
 
@@ -817,7 +807,11 @@ fastify.register(require('@fastify/cors'), {
                         string += customer_code.slice(0, length);
                     }
                 } else if (key.startsWith('B')) {
-                    string += (item.user_badge || '').slice(0, length);
+                    if (!item.user_badge) {
+                        string += "0".padStart(length, '0');
+                    } else {
+                        string += (item.user_badge || '').slice(0, length);
+                    }
                 } else if (key.startsWith('A') || key.startsWith('M') || key.startsWith('G')) {
                     const year = key.replace(/[^A]/g, "").length;
                     const month = key.replace(/[^M]/g, "").length;
