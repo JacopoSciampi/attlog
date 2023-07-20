@@ -863,10 +863,18 @@ fastify.register(require('@fastify/cors'), {
 
                     string += _;
                 } else if (key.startsWith('V')) {
-                    if (!item?.int_attlog_access_type) {
-                        string += item.attlog_access_type.padStart(length, '0');
+                    if (!item?.int_attlog_reason_code) {
+                        if (+item.attlog_reason_code === 1) {
+                            string += "U".padStart(length, '0');
+                        } else {
+                            string += "E".padStart(length, '0');
+                        }
                     } else {
-                        string += item.int_attlog_access_type.padStart(length, '0');
+                        if (+item.int_attlog_reason_code === 1) {
+                            string += "U".padStart(length, '0');
+                        } else {
+                            string += "E".padStart(length, '0');
+                        }
                     }
                 } else if (key.startsWith('C')) {
                     string += '<c>' + (item.attlog_work_code || "").padStart(length, '0') + '</c>';
