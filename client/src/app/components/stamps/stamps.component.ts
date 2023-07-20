@@ -133,11 +133,11 @@ export class StampsComponent implements OnInit {
         const _ = new DatePipe('it-IT');
 
         let startDate = this.f_date?.startDate?.$d;
-        let endDate = this.f_date?.endDate?.$d;
+        let endDate = `${this.f_date?.endDate?.$M + 1}/${this.f_date?.endDate?.$D}/${this.f_date?.endDate?.$y}`
 
         if (startDate && endDate) {
             startDate = _.transform(startDate, "yyyy/MM/dd");
-            endDate = _.transform(endDate, "yyyy/MM/dd");
+            endDate = _.transform(new Date(endDate), "yyyy/MM/dd");
         }
 
         let take = true;
@@ -174,11 +174,11 @@ export class StampsComponent implements OnInit {
         const _ = new DatePipe('it-IT');
 
         let startDate = this.f_date?.startDate?.$d;
-        let endDate = this.f_date?.endDate?.$d;
+        let endDate = `${this.f_date?.endDate?.$M + 1}/${this.f_date?.endDate?.$D}/${this.f_date?.endDate?.$y}`
 
         if (startDate && endDate) {
             startDate = _.transform(startDate, "yyyy/MM/dd");
-            endDate = _.transform(endDate, "yyyy/MM/dd");
+            endDate = _.transform(new Date(endDate), "yyyy/MM/dd");
         }
 
         if (this.f_terminalSN || this.f_userId.nativeElement.value || startDate || endDate || this.f_customer_name || this.f_clock_location || this.f_c_model) {
@@ -191,11 +191,11 @@ export class StampsComponent implements OnInit {
         const _ = new DatePipe('it-IT');
 
         let startDate = this.f_date?.startDate?.$d;
-        let endDate = this.f_date?.endDate?.$d;
+        let endDate = `${this.f_date?.endDate?.$M + 1}/${this.f_date?.endDate?.$D}/${this.f_date?.endDate?.$y}`
 
         if (startDate && endDate) {
             startDate = _.transform(startDate, "yyyy/MM/dd");
-            endDate = _.transform(endDate, "yyyy/MM/dd");
+            endDate = _.transform(new Date(endDate), "yyyy/MM/dd");
         }
 
         this._stampService.downloadStamps(this.f_terminalSN, this.f_userId.nativeElement.value, startDate, endDate, this.f_customer_name).pipe(
@@ -204,6 +204,7 @@ export class StampsComponent implements OnInit {
         ).subscribe({
             next: (data: any) => {
                 saveAs(new Blob([String(data.body.data)], { type: 'text/plain;charset=utf-8' }), data.body.fileName);
+                this.onFilterApplyClicked();
             }, error: (err) => {
                 this._toastService.errorGeneric(err.error.title, err.error.message)
             }

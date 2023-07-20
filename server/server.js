@@ -389,7 +389,9 @@ fastify.register(require('@fastify/cors'), {
                         );
                     }
 
+                    const _ = JSON.parse(JSON.stringify(data.rows));
                     data = generateFilContentForStamps(data.rows, fileFormat, customer_code);
+                    pgAdapter.batchUpdateStamps({ rows: _ });
 
                     reply.status(200).send({ data: data || '', fileName: fileName });
                 }).catch((e) => {
@@ -406,8 +408,10 @@ fastify.register(require('@fastify/cors'), {
             pgAdapter.downloadLogs(sn, userId, startDate, endDate, customerName).then(data => {
                 const fileName = generateGenericFileName();
                 const fileFormat = jekoEmailer.config.set_terminal_file_format;
+                const _ = JSON.parse(JSON.stringify(data.rows));
                 data = generateFilContentForStamps(data.rows, fileFormat, '');
 
+                pgAdapter.batchUpdateStamps({ rows: _ });
                 reply.status(200).send({ data: data || '', fileName: fileName });
             }).catch((e) => {
                 console.log(e);
@@ -630,6 +634,7 @@ fastify.register(require('@fastify/cors'), {
         }
 
         pgAdapter.updateSettingsStamps(request.body).then(data => {
+            upsertEmailStuff();
             reply.status(200).send({ data: data?.rows && data.rows[0] || null });
         }).catch((e) => {
             console.log(e);
@@ -805,18 +810,20 @@ fastify.register(require('@fastify/cors'), {
                 item.c_custom_id = item.c_custom_id || '';
 
                 if (key.startsWith('T')) {
-                    string += item.c_custom_id.slice(0, length).padStart(0, length);
+                    string += item.c_custom_id.slice(0, length).padStart(length, '0');
                 } else if (key.startsWith('F')) {
                     if (!customer_code) {
-                        string += (item.cu_code || '').slice(0, length).padStart(0, length);
+                        string += (item.cu_code || '').slice(0, length).padStart(length, '0');
                     } else {
-                        string += customer_code.slice(0, length).padStart(0, length);
+                        string += customer_code.slice(0, length).padStart(length, '0');
                     }
                 } else if (key.startsWith('B')) {
-                    if (!item.user_badge || item.user_badge === "null") {
+                    if (item.attlog_user_id) {
+                        string += item.attlog_user_id.slice(0, length).padStart(length, '0');
+                    } else if (!item.user_badge || item.user_badge === "null") {
                         string += "0".padStart(length, '0');
                     } else {
-                        string += (item.user_badge || '').slice(0, length).padStart(0, length);
+                        string += (item.user_badge || '').slice(0, length).padStart(length, '0');
                     }
                 } else if (key.startsWith('A') || key.startsWith('M') || key.startsWith('G')) {
                     const year = key.replace(/[^A]/g, "").length;

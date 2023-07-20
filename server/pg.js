@@ -152,6 +152,8 @@ class JekoPgInit {
             }
 
             if (startDate && endDate) {
+                startDate = startDate.replaceAll('/', '-');
+                endDate = endDate.replaceAll('/', '-');
                 query += ` AND attlogs.attlog_date BETWEEN '${startDate}' AND '${endDate}'`;
             }
 
@@ -294,6 +296,8 @@ class JekoPgInit {
             }
 
             if (startDate && endDate) {
+                startDate = startDate.replaceAll('/', '-');
+                endDate = endDate.replaceAll('/', '-');
                 query += ` AND attlogs.attlog_date BETWEEN '${startDate}' AND '${endDate}'`;
             }
 
