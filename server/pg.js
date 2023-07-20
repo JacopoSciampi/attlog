@@ -137,7 +137,7 @@ class JekoPgInit {
 
     downloadLogs(sn, userId, startDate, endDate, customerName, toBeSent) {
         return new Promise((r, j) => {
-            let query = `SELECT attlogs.*, clocks.c_name AS clock_name, COALESCE(customers.c_name, '-') AS customer_name, users.user_badge, customers.cu_code, clocks.c_custom_id
+            let query = `SELECT DISTINCT attlogs.*, clocks.c_name AS clock_name, COALESCE(customers.c_name, '-') AS customer_name, users.user_badge, customers.cu_code, clocks.c_custom_id
             FROM public.attlogs
             LEFT JOIN public.clocks ON attlogs.attlog_terminal_sn = clocks.c_sn
             LEFT JOIN public.customers ON clocks.fk_customer_id = customers.customer_id
@@ -281,7 +281,7 @@ class JekoPgInit {
 
     getLogs(sn, userId, startDate, endDate, customerName, clockLocation, clockModel) {
         return new Promise((r, j) => {
-            let query = `SELECT attlogs.*, clocks.c_name AS clock_name, clocks.c_location AS clock_location, COALESCE(customers.c_name, '-') AS customer_name, clocks.c_model
+            let query = `SELECT DISTINCT attlogs.*, clocks.c_name AS clock_name, clocks.c_location AS clock_location, COALESCE(customers.c_name, '-') AS customer_name, clocks.c_model
             FROM public.attlogs
             LEFT JOIN public.clocks ON attlogs.attlog_terminal_sn = clocks.c_sn
             LEFT JOIN public.customers ON clocks.fk_customer_id = customers.customer_id
