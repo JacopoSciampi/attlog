@@ -204,7 +204,10 @@ export class StampsComponent implements OnInit {
         ).subscribe({
             next: (data: any) => {
                 saveAs(new Blob([String(data.body.data)], { type: 'text/plain;charset=utf-8' }), data.body.fileName);
-                this.onFilterApplyClicked();
+
+                if (this.dataSource?.filteredData?.length) {
+                    this.onFilterApplyClicked();
+                }
             }, error: (err) => {
                 this._toastService.errorGeneric(err.error.title, err.error.message)
             }
