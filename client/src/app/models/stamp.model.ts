@@ -1,5 +1,6 @@
 export interface StampList {
     data: StampListDetails[];
+    hasNext: boolean;
 }
 
 export interface StampListDetails {

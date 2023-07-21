@@ -2,7 +2,12 @@
     <div class="filter-container">
         <div class="field">
             <div class="title">Terminale SN</div>
-            <input type="text" [(ngModel)]="f_terminalSN">
+            <mat-select [(ngModel)]="f_terminalSN">
+                <input class="filterSearch" placeholder="Cerca terminale" (keyup)="onClockListFilter($event.target)">
+                <mat-option *ngFor="let c of clockList" [value]="c.c_sn">
+                    {{c.c_sn}}
+                </mat-option>
+            </mat-select>
         </div>
         <div class="field">
             <div class="title">Badge</div>
@@ -30,6 +35,14 @@
             <mat-select [(ngModel)]="f_c_model">
                 <mat-option *ngFor="let c of clockModelList" [value]="c.cm_name">
                     {{c.cm_name}}
+                </mat-option>
+            </mat-select>
+        </div>
+        <div class="field-material f-field f-field-long">
+            <div class="title">Stato</div>
+            <mat-select [(ngModel)]="f_sent">
+                <mat-option *ngFor="let c of f_sent_list" [value]="c.id">
+                    {{c.value}}
                 </mat-option>
             </mat-select>
         </div>
@@ -107,4 +120,13 @@
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
         </table>
     </div>
-</div>
+    <div class="paginator">
+        <div class="button" matTooltip="Pagina precedente"
+            [ngClass]="[prevEnabled ? 'button-primary' : 'button-disabled']"
+            (click)="prevEnabled && onPaginatorClicked('prev')">
+            < </div>
+                <div class="button" matTooltip="Pagina successiva"
+                    [ngClass]="[nextEnabled ? 'button-primary' : 'button-disabled']"
+                    (click)="nextEnabled && onPaginatorClicked('next')">></div>
+        </div>
+    </div>

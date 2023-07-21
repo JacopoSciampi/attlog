@@ -433,8 +433,25 @@ fastify.register(require('@fastify/cors'), {
         const customerName = request.headers['x-customer-name'] || "";
         const clockLocation = request.headers['x-clock-location'] || "";
         const clockModel = request.headers['x-c-model'] || "";
+        const fSent = request.headers['x-f-sent'] || "";
+        const __offset__ = +request.headers['x-offset'] || 0;
 
-        pgAdapter.getLogs(sn, userId, startDate, endDate, customerName, clockLocation, clockModel).then(data => {
+        pgAdapter.getLogs(sn, userId, startDate, endDate, customerName, clockLocation, clockModel, fSent, __offset__).then(data => {
+            reply.status(200).send({ data: data?.data?.rows || [], hasNext: data?.hasNext });
+        }).catch((e) => {
+            console.log(e);
+            reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
+            return;
+        });
+    });
+
+
+    fastify.get('/v1/clocks/all', (request, reply) => {
+        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
+            return;
+        }
+
+        pgAdapter.getAllClocks().then(data => {
             reply.status(200).send({ data: data?.rows || [] });
         }).catch((e) => {
             console.log(e);

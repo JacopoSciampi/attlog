@@ -6,6 +6,7 @@ import { Observable } from "rxjs";
 import { BE_PATH } from "src/urls";
 
 import { StampList } from "@models/stamp.model";
+import { AllClockModelList } from "@models/clock.model";
 
 @Injectable()
 export class StampService {
@@ -13,7 +14,11 @@ export class StampService {
         private _http: HttpClient
     ) { }
 
-    public getStampList(sn: string, userId: string, startDate: string, endDate: string, customerName: string, clockLocation: string, c_model: string): Observable<StampList> {
+    public getAllClocks() {
+        return this._http.get<AllClockModelList>(`${BE_PATH.basePath}clocks/all`);
+    }
+
+    public getStampList(sn: string, userId: string, startDate: string, endDate: string, customerName: string, clockLocation: string, c_model: string, f_sent: string, __offset__: string): Observable<StampList> {
         return this._http.get<StampList>(`${BE_PATH.basePath}attlog`, {
             headers: {
                 'x-sn': sn || "",
@@ -23,6 +28,8 @@ export class StampService {
                 'x-customer-name': customerName || "",
                 'x-clock-location': clockLocation || "",
                 'x-c-model': c_model || "",
+                'x-f-sent': f_sent || "",
+                'x-offset': __offset__ || "0",
             }
         });
     }

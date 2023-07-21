@@ -107,6 +107,19 @@ class JekoPgInit {
         });
     }
 
+    getAllClocks() {
+        return new Promise((r, j) => {
+            pool.query(`SELECT * FROM clocks`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    j();
+                }
+
+                r(data);
+            });
+        });
+    }
+
     getCustomerDetailByName(name) {
         return new Promise((r, j) => {
             pool.query(`SELECT * FROM customers WHERE customers.c_name = '${name}'`, (err, data) => {
@@ -279,16 +292,16 @@ class JekoPgInit {
         });
     }
 
-    getLogs(sn, userId, startDate, endDate, customerName, clockLocation, clockModel) {
+    getLogs(sn, userId, startDate, endDate, customerName, clockLocation, clockModel, fSent, __offset__) {
         return new Promise((r, j) => {
             let query = `SELECT DISTINCT attlogs.*, clocks.c_name AS clock_name, clocks.c_location AS clock_location, COALESCE(customers.c_name, '-') AS customer_name, clocks.c_model
             FROM public.attlogs
             LEFT JOIN public.clocks ON attlogs.attlog_terminal_sn = clocks.c_sn
             LEFT JOIN public.customers ON clocks.fk_customer_id = customers.customer_id
-            WHERE attlogs.attlog_terminal_sn LIKE '${sn}%' AND attlogs.attlog_user_id LIKE '${userId}%'`;
+            WHERE attlogs.attlog_terminal_sn LIKE '%${sn}%' AND attlogs.attlog_user_id LIKE '%${userId}%'`;
 
             if (clockModel) {
-                query += ` AND clocks.c_model = '${clockModel}'`;
+                query += ` AND clocks.c_model LIKE '%${clockModel}%'`;
             }
 
             if (customerName) {
@@ -305,7 +318,12 @@ class JekoPgInit {
                 query += ` AND clocks.c_location LIKE '%${clockLocation}%'`;
             }
 
+            if (fSent === 'true' || fSent === 'false') {
+                query += ` AND attlogs.attlog_sent = '${fSent}'`;
+            }
+
             query += ' ORDER BY attlogs.attlog_id DESC';
+            query += ` LIMIT 25 OFFSET ${__offset__}`
             pool.query(query, (err, data) => {
                 if (err) {
                     console.log(err);
@@ -317,7 +335,7 @@ class JekoPgInit {
                     log.attlog_access_type = accessType[log.attlog_access_type];
                 });
 
-                r(data);
+                r({ data: data, hasNext: data?.rows?.length === 25 });
             });
         });
     }

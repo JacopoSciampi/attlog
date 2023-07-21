@@ -22,6 +22,7 @@ import { CustomerService } from "@services/customer.service";
 import { MatSelectModule } from "@angular/material/select";
 import { ClockModelListDetails } from "@models/clock-model.model";
 import { TerminalService } from "@services/terminal.service";
+import { AllClockModelListDetails } from "@models/clock.model";
 
 @Component({
     selector: 'app-stamps',
@@ -49,12 +50,29 @@ export class StampsComponent implements OnInit {
     public f_clock_location!: string;
     public f_c_model!: string;
     public f_date;
+    public f_sent;
+    public f_sent_list = [
+        {
+            id: "true",
+            value: "Inviate"
+        }, {
+            id: "false",
+            value: "Da inviare"
+        },
+    ];
     public customerList: CustomerListDetails[] = [];
     public _initCustomerList: CustomerListDetails[] = [];
     public clockModelList!: ClockModelListDetails[];
 
+    public currentPage = 0;
+    public prevEnabled = false;
+    public nextEnabled = false;
+
     @ViewChild('f_userId') f_userId!: ElementRef<HTMLInputElement>;
     @ViewChild(DaterangepickerDirective, { static: false }) pickerDirective: DaterangepickerDirective;
+
+    public clockList: AllClockModelListDetails[] = [];
+    public _initClockList: AllClockModelListDetails[] = [];
 
     constructor(
         private _stampService: StampService,
@@ -71,7 +89,8 @@ export class StampsComponent implements OnInit {
 
         zip(
             this._c.getCustomerList(this.f_customer_name),
-            this._t.getClockModelList()
+            this._t.getClockModelList(),
+            this._stampService.getAllClocks()
         )
             .pipe(
                 takeWhile(() => take),
@@ -81,6 +100,9 @@ export class StampsComponent implements OnInit {
                     this.customerList = data[0].data;
                     this._initCustomerList = JSON.parse(JSON.stringify(data[0].data));
                     this.clockModelList = data[1].data;
+
+                    this.clockList = data[2].data;
+                    this._initClockList = JSON.parse(JSON.stringify(data[2].data));
 
                     if (this._ar.snapshot.params.clockSn !== "all") {
                         this.f_terminalSN = this._ar.snapshot.params.clockSn;
@@ -93,15 +115,16 @@ export class StampsComponent implements OnInit {
             });
     }
 
-    private _getData(sn?: string, userId?: string, startDate?: string, endDate?: string, f_customer_name?: string, f_clock_location?: string, c_model?: string): void {
+    private _getData(sn?: string, userId?: string, startDate?: string, endDate?: string, f_customer_name?: string, f_clock_location?: string, c_model?: string, f_sent?: string, offset?: string): void {
         this.isLoading = true;
         let take = true;
 
-        this._stampService.getStampList(sn, userId, startDate, endDate, f_customer_name, f_clock_location, c_model).pipe(
+        this._stampService.getStampList(sn, userId, startDate, endDate, f_customer_name, f_clock_location, c_model, f_sent, offset).pipe(
             takeWhile(() => take),
             finalize(() => take = false)
         ).subscribe({
             next: (data) => {
+                this.nextEnabled = data?.hasNext;
                 this.dataSource = new MatTableDataSource(data.data);
                 this.isLoading = false;
             }, error: (err) => {
@@ -117,11 +140,15 @@ export class StampsComponent implements OnInit {
         }
 
         const _ = new DatePipe('it-IT');
-        return _.transform(date, 'shortDate');
+        return _.transform(date, 'short');
     }
 
     public onCustomerListFilter(value: any): void {
         this.customerList = this._initCustomerList.filter(i => i.customer_name.indexOf(value.value) !== -1);
+    }
+
+    public onClockListFilter(value: any): void {
+        this.clockList = this._initClockList.filter(i => i.c_sn.indexOf(value.value) !== -1);
     }
 
     public onDateKeypressed(event): void {
@@ -170,6 +197,19 @@ export class StampsComponent implements OnInit {
         })
     }
 
+    public onPaginatorClicked(type: 'prev' | 'next'): void {
+        if (type === 'prev') {
+            this.currentPage--;
+            this.prevEnabled = this.currentPage > 0;
+        } else {
+            this.prevEnabled = true;
+            this.currentPage++;
+        }
+
+        this.onFilterApplyClicked();
+
+    }
+
     public onFilterApplyClicked(): void {
         const _ = new DatePipe('it-IT');
 
@@ -181,8 +221,8 @@ export class StampsComponent implements OnInit {
             endDate = _.transform(new Date(endDate), "yyyy/MM/dd");
         }
 
-        if (this.f_terminalSN || this.f_userId.nativeElement.value || startDate || endDate || this.f_customer_name || this.f_clock_location || this.f_c_model) {
-            this._getData(this.f_terminalSN, this.f_userId?.nativeElement?.value, startDate, endDate, this.f_customer_name, this.f_clock_location, this.f_c_model);
+        if (this.f_terminalSN || this.f_userId.nativeElement.value || startDate || !!new Date(endDate)?.getTime() || this.f_customer_name || this.f_clock_location || this.f_c_model || this.f_sent) {
+            this._getData(this.f_terminalSN, this.f_userId?.nativeElement?.value, startDate, endDate, this.f_customer_name, this.f_clock_location, this.f_c_model, this.f_sent, this.currentPage.toString());
         }
     }
 
@@ -220,6 +260,7 @@ export class StampsComponent implements OnInit {
         this.f_customer_name = '';
         this.f_clock_location = '';
         this.f_c_model = '';
+        this.f_sent = '';
         this.pickerDirective.clear();
 
         this.dataSource = new MatTableDataSource([]);

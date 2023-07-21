@@ -30,3 +30,11 @@ input.filterSearch {
     margin-bottom: 8px;
     font-family: 'font-regular';
 }
+
+.paginator {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 40px;
+    gap: $space-normal;
+}

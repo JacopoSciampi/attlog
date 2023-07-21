@@ -13,7 +13,3 @@ Timbrature: once FTP  | custom page with pwd
     -> Pagina API 0-25
 
 Server: HTTPS? Mi servono in caso i due files da mettere dentro nginx + live config di KC, eccetera per girare sotto https  
-
--> tracciato FTP stuff -> T non è il SN del terminale ma ? l'id del terminale
-        -> vedere se arriva "nome società" durante la GET_INFO o timbrature
-        -> SE non arriva gestire a DB
