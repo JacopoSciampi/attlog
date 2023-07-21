@@ -323,7 +323,7 @@ class JekoPgInit {
             }
 
             query += ' ORDER BY attlogs.attlog_id DESC';
-            query += ` LIMIT 25 OFFSET ${__offset__ * 25}`
+            query += ` LIMIT 25 OFFSET ${__offset__ || 0 * 25}`
             pool.query(query, (err, data) => {
                 if (err) {
                     console.log(err);

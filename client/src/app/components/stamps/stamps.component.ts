@@ -53,6 +53,9 @@ export class StampsComponent implements OnInit {
     public f_sent;
     public f_sent_list = [
         {
+            id: "<null>",
+            value: "Tutte"
+        }, {
             id: "true",
             value: "Inviate"
         }, {
@@ -167,6 +170,10 @@ export class StampsComponent implements OnInit {
             endDate = _.transform(new Date(endDate), "yyyy/MM/dd");
         }
 
+        if (!new Date(endDate)?.getTime()) {
+            endDate = null;
+        }
+
         let take = true;
         this._stampService.setAllStampsToBeSentToFtp(this.f_terminalSN, this.f_userId?.nativeElement?.value, startDate, endDate, this.f_customer_name, this.f_clock_location).pipe(
             takeWhile(() => take),
@@ -190,7 +197,7 @@ export class StampsComponent implements OnInit {
         ).subscribe({
             next: () => {
                 this._toastService.generic("Aggiornamento effettuato", "Operazione avvenuta con successo");
-                this._getData();
+                this.onFilterApplyClicked();
             }, error: (err) => {
                 this._toastService.errorGeneric(err.error.title, err.error.message)
             }

@@ -327,7 +327,7 @@ fastify.register(require('@fastify/cors'), {
         const clockLocation = request.headers['x-clock-location'] || "";
 
         pgAdapter.getLogs(sn, userId, startDate, endDate, customerName, clockLocation).then(data => {
-            pgAdapter.setAllStampToBeSent(data).then(() => {
+            pgAdapter.setAllStampToBeSent(data?.data).then(() => {
                 reply.status(200).send({ message: 'Aggiornamento effettuato con successo' });
             }).catch((e) => {
                 console.log(e);
