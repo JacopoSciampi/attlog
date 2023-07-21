@@ -319,12 +319,12 @@ fastify.register(require('@fastify/cors'), {
             return;
         }
 
-        const sn = request.headers['x-sn'] || "";
-        const userId = request.headers['x-user-id'] || "";
-        const startDate = request.headers['x-start-date'] || "";
-        const endDate = request.headers['x-end-date'] || "";
-        const customerName = request.headers['x-customer-name'] || "";
-        const clockLocation = request.headers['x-clock-location'] || "";
+        const sn = request.body.sn || "";
+        const userId = request.body.userId || "";
+        const startDate = request.body.startDate || "";
+        const endDate = request.body.endDate || "";
+        const customerName = request.body.customerName || "";
+        const clockLocation = request.body.clockLocation || "";
 
         pgAdapter.getLogs(sn, userId, startDate, endDate, customerName, clockLocation).then(data => {
             pgAdapter.setAllStampToBeSent(data?.data).then(() => {
