@@ -196,6 +196,7 @@ class JekoPgInit {
     setAllStampToBeSent(data) {
         return new Promise((resolve, reject) => {
             const updatePromises = data.rows?.map(item => {
+                console.log(`${item.attlog_id} - ${item.attlog_sent}`)
                 return new Promise((resolveItem, rejectItem) => {
                     pool.query(`UPDATE attlogs SET attlog_sent = 'false', attlog_sent_timestamp = '' WHERE attlogs.attlog_id = '${item.attlog_id}'`, (err, data) => {
                         if (err) {
