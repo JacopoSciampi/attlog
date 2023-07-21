@@ -293,6 +293,14 @@ class JekoPgInit {
     }
 
     getLogs(sn, userId, startDate, endDate, customerName, clockLocation, clockModel, fSent, __offset__) {
+        if (!__offset__) {
+            __offset__ = 0;
+        }
+
+        if (!fSent) {
+            fSent = '<null>'
+        }
+
         return new Promise((r, j) => {
             let query = `SELECT DISTINCT attlogs.*, clocks.c_name AS clock_name, clocks.c_location AS clock_location, COALESCE(customers.c_name, '-') AS customer_name, clocks.c_model
             FROM public.attlogs
@@ -323,7 +331,9 @@ class JekoPgInit {
             }
 
             query += ' ORDER BY attlogs.attlog_id DESC';
-            query += ` LIMIT 25 OFFSET ${__offset__ || 0 * 25}`
+            query += ` LIMIT 25 OFFSET ${__offset__ * 25}`
+
+            console.log(query);
             pool.query(query, (err, data) => {
                 if (err) {
                     console.log(err);

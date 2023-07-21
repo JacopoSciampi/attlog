@@ -228,6 +228,10 @@ export class StampsComponent implements OnInit {
             endDate = _.transform(new Date(endDate), "yyyy/MM/dd");
         }
 
+        this.currentPage = 0;
+        this.prevEnabled = false;
+        this.prevEnabled = false;
+
         if (this.f_terminalSN || this.f_userId.nativeElement.value || startDate || !!new Date(endDate)?.getTime() || this.f_customer_name || this.f_clock_location || this.f_c_model || this.f_sent) {
             this._getData(this.f_terminalSN, this.f_userId?.nativeElement?.value, startDate, endDate, this.f_customer_name, this.f_clock_location, this.f_c_model, this.f_sent, this.currentPage.toString());
         }
