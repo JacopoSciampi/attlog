@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, RouterModule } from '@angular/router';
@@ -31,7 +31,7 @@ import { ToastService } from '@services/toast.service';
     ],
     providers: [MetricsService]
 })
-export class HomepageComponent implements OnInit {
+export class HomepageComponent implements OnInit, OnDestroy {
     public initDone = false
     public canShowLogo = true;
     public isGettingMetrics = true;
@@ -39,17 +39,26 @@ export class HomepageComponent implements OnInit {
     private _currentTime = new Date().getTime();
     public clockModelList!: ClockModelListDetails[];
 
+    private _s;
+
     constructor(
         private _dialog: MatDialog,
         private _toastService: ToastService,
         private _t: TerminalService,
         private _metrics: MetricsService
-    ) {
-    }
+    ) { }
 
     public ngOnInit(): void {
-        this._getMetrics();
+        this._getMetrics(true);
         this._getClockModelList();
+
+        this._s = setInterval(() => {
+            this._getMetrics(false);
+        }, 3000);
+    }
+
+    public ngOnDestroy(): void {
+        clearInterval(this._s);
     }
 
     private _getClockModelList(): void {
@@ -62,8 +71,8 @@ export class HomepageComponent implements OnInit {
         });
     }
 
-    private _getMetrics(): void {
-        this.isGettingMetrics = true;
+    private _getMetrics(showSpinner: boolean): void {
+        this.isGettingMetrics = showSpinner;
         this._metrics.getMetrics().subscribe({
             next: (data) => {
                 this.metrics = data?.data;

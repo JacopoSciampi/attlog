@@ -88,3 +88,28 @@
     gap: $space-normal;
     flex-wrap: wrap;
 }
+
+.endpoint {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .box {
+        border: 1px solid;
+        border-radius: $radius;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: $space-normal;
+
+        .left,
+        .right {
+            user-select: all;
+        }
+
+        .right {
+            font-style: italic;
+        }
+    }
+}

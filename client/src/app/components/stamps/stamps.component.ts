@@ -43,7 +43,7 @@ import { AllClockModelListDetails } from "@models/clock.model";
 })
 export class StampsComponent implements OnInit {
     public isLoading = true;
-    public displayedColumns = ["attlog_terminal_sn", "attlog_user_id", "customer_name", "attlog_date", "clock_location", "attlog_time", "attlog_access_type", "attlog_reason_code", "attlog_work_code", "attlog_sent_timestamp", "_actions"];
+    public displayedColumns = ["attlog_terminal_sn", "attlog_user_id", "customer_name", "attlog_date", "attlog_time", "clock_location", "attlog_access_type", "attlog_reason_code", "attlog_work_code", "attlog_sent_timestamp", "_actions"];
     public dataSource!: MatTableDataSource<StampListDetails>;
     public f_customer_name!: string;
     public f_terminalSN!: string;
@@ -109,7 +109,7 @@ export class StampsComponent implements OnInit {
 
                     if (this._ar.snapshot.params.clockSn !== "all") {
                         this.f_terminalSN = this._ar.snapshot.params.clockSn;
-                        this._getData();
+                        this._getData(this.f_terminalSN);
                     }
                 }, error: (err) => {
                     this.isLoading = false;
@@ -143,7 +143,15 @@ export class StampsComponent implements OnInit {
         }
 
         const _ = new DatePipe('it-IT');
-        return _.transform(date, 'short');
+        return _.transform(date, 'shortDate');
+    }
+
+    public formatTime(time: string): string {
+        if (!time) {
+            return '-';
+        }
+
+        return time.substring(0, 5);
     }
 
     public onCustomerListFilter(value: any): void {
@@ -213,7 +221,17 @@ export class StampsComponent implements OnInit {
             this.currentPage++;
         }
 
-        this.onFilterApplyClicked();
+        const _ = new DatePipe('it-IT');
+
+        let startDate = this.f_date?.startDate?.$d;
+        let endDate = `${this.f_date?.endDate?.$M + 1}/${this.f_date?.endDate?.$D}/${this.f_date?.endDate?.$y}`
+
+        if (startDate && endDate) {
+            startDate = _.transform(startDate, "yyyy/MM/dd");
+            endDate = _.transform(new Date(endDate), "yyyy/MM/dd");
+        }
+
+        this._getData(this.f_terminalSN, this.f_userId?.nativeElement?.value, startDate, endDate, this.f_customer_name, this.f_clock_location, this.f_c_model, this.f_sent, this.currentPage.toString());
 
     }
 

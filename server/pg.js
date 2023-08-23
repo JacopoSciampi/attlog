@@ -4,6 +4,7 @@ pool = new pg.Client({
     user: process.env.DB_USER || "keycloak",
     password: process.env.DB_PASS || "xUc5rUj!ZISPos0$&iyaGe7riChAkL",
     host: 'pgsql',
+    //host: 'localhost',
     port: 5432,
     database: 'timbrature'
 });
@@ -357,7 +358,10 @@ class JekoPgInit {
 
     getClocksForMail() {
         return new Promise((r, j) => {
-            pool.query(`SELECT * FROM public.clocks`,
+            pool.query(`
+            SELECT c.*, cu.c_name as customer_name
+            FROM public.clocks c
+            LEFT JOIN public.customers cu ON c.fk_customer_id = cu.customer_id`,
                 (err, data) => {
                     if (err) {
                         console.log(err);
