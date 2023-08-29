@@ -30,10 +30,11 @@ export class AuthService {
         return new Promise((res, rej) => {
             if (!this.oAuthService.hasValidIdToken()) {
                 this.oAuthService.loadDiscoveryDocument();
-                this.oAuthService.loadDiscoveryDocumentAndLogin()
+                this.oAuthService.loadDiscoveryDocumentAndLogin({ customHashFragment: window.location.search })
                     .then(() => {
                         if (this.oAuthService.hasValidIdToken()) {
                             res(true);
+                            return;
                         }
 
                         rej(false);

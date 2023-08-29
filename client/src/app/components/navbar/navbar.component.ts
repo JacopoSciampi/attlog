@@ -47,6 +47,8 @@ export class NavbarComponent {
                 this.currentPage = data.url.match(/\/([^/]+)/) ? this._routeList[data.url.match(/\/([^/]+)/)[1]] as string : this.currentPage;
             }
         });
+
+        this.currentPage = UrlToName[`${localStorage.getItem('semprebon-last-url').split('/')[1]}`];
     }
 
     public gotoCredits(): void {
@@ -54,3 +56,10 @@ export class NavbarComponent {
     }
 }
 
+export enum UrlToName {
+    "terminal" = "Terminali",
+    "homepage" = "Homepage",
+    "customers" = "Clienti",
+    "stamps" = "Timbrature",
+    "settings" = "Impostazioni"
+}

@@ -8,7 +8,7 @@ export const KC_CONF: AuthConfig = {
     scope: "openid profile email roles",
     showDebugInformation: false,
     timeoutFactor: 0.75,
-    clearHashAfterLogin: true,
+    clearHashAfterLogin: false,
     requireHttps: false,
     logoutUrl: "http://localhost/auth/realms/timbrature/protocol/openid-connect/logout"
 }

@@ -46,7 +46,13 @@ export class RootComponent implements OnInit {
         this._auth.__init__().then(() => {
             ConstClass.token = this._auth.oAuthService.getAccessToken();
             this.initDone = true;
-            this._router.navigate([`${localStorage.getItem('semprebon-last-url')}` || 'homepage']);
+            const lastRoute = localStorage.getItem('semprebon-last-url');
+
+            if (lastRoute?.indexOf('/?state') !== -1 || lastRoute === '/') {
+                this._router.navigate(['homepage']);
+                return;
+            }
+            this._router.navigate([lastRoute || 'homepage']);
         });
     }
 
