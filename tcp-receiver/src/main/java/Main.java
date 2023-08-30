@@ -44,7 +44,7 @@ public class Main {
                 Socket socket = serverSocket.accept();
 
                 // Add a delay of 500 milliseconds
-                Thread.sleep(1);
+                Thread.sleep(250);
 
                 byte[] bReceive = new byte[1024 * 1024 * 2];
                 InputStream inputStream = socket.getInputStream();
@@ -484,7 +484,8 @@ public class Main {
         String sHeader = "HTTP/1.1 " + sStatusCode + "\r\n";
         sHeader += "Content-Type: text/plain\r\n";
         sHeader += "Accept-Ranges: bytes\r\n";
-        sHeader += "Date: " + ZonedDateTime.now(ZoneOffset.UTC).minusHours(6).format(DateTimeFormatter.RFC_1123_DATE_TIME) + "\r\n";
+        //sHeader += "Date: " + ZonedDateTime.now(ZoneOffset.UTC).minusHours(6).format(DateTimeFormatter.RFC_1123_DATE_TIME) + "\r\n"; // local
+        sHeader += "Date: " + ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.RFC_1123_DATE_TIME) + "\r\n"; // prod
 
         sHeader += "Content-Length: " + bData.length + "\r\n\r\n";
         System.out.println("Send data to device");
