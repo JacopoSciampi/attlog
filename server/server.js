@@ -81,7 +81,6 @@ fastify.register(require('@fastify/cors'), {
         }
     });
 
-
     fastify.post('/v3/terminal/log/add', (request, reply) => {
         const tkn = request.headers["x-token-ref"];
         queryFromClocks++;

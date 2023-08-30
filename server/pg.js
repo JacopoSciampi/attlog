@@ -547,7 +547,7 @@ class JekoPgInit {
                     const timeStamp = "-1";
                     pool.query(
                         `INSERT INTO "clocks" ("c_sn", "c_name", "c_model", "c_last_timestamp", "fk_customer_id", "c_note", "c_desc", "c_location", "c_local_ip", "c_custom_id", "c_timezone")
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [c_sn, c_name, c_model, timeStamp, customerId, c_note, c_desc, c_location, '', c_custom_id, c_timezone]).then(() => {
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [c_sn, c_name, c_model, timeStamp, customerId, c_note, c_desc, c_location, '', c_custom_id, c_timezone || '1']).then(() => {
                             r()
                         }).catch((err) => {
                             console.log(err);

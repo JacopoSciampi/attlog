@@ -20,7 +20,7 @@ public class Main {
     private static Set<KeyValuePair> deviceSnAndTimeZone = new HashSet<>();
     private static String token_ref = "uQOpixuDj/YtSlXjayO-dNBcsd2fKx14OBqMOmHikiUUXi6Zhg2UxufCQDg7ic=y/yn6i2VSV9K2EMxcGYpzrQSgDNgbbBBaWlc4Xlhc2mOhNAPAF?Y929cAUHXEj6GL5jzxhASk4Z6u?s/gdEjGXjP/PpQqDZvelyGnbhrZocCyYRxy!P5WXS!eu053XhUJV5zLl121glT?g54HPVX2kvvkyqENk1tWl3E/Otz-ErK7SItzubR59ElypGOPwm?f";
 
-    //private static int port = 7777;
+    //private static int port = 7778; // <- 7777 NGINX <-> 7778 Java
     private static int port = 50000;
     private static InetAddress addr;
 
