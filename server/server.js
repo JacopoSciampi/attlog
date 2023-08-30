@@ -6,7 +6,6 @@ const fastify = require('fastify')({ logger: true });
 const jwt_decode = require('jwt-decode');
 const pgAdapter = new JekoPgInit();
 const jekoEmailer = new JekoEmailer();
-const cron = require('node-cron');
 
 var osu = require('node-os-utils');
 const __cpu = osu.cpu;
@@ -33,13 +32,6 @@ function validatePrismaToken(token, reply) {
     }
 }
 
-function updateTimestampCron() {
-    pgAdapter.syncAllClocksCron();
-}
-
-cron.schedule('0 4 * * *', updateTimestampCron);
-process.stdin.resume();
-
 fastify.register(require('@fastify/cors'), {
     origin: (origin, cb) => {
         cb(null, true);
@@ -57,30 +49,6 @@ fastify.register(require('@fastify/cors'), {
         cb(new Error("Not allowed"), false)
     },
 }).then(() => {
-    fastify.post('/v3/terminal/timezone', (request, reply) => {
-        const tkn = request.headers["x-token-ref"];
-        queryFromClocks++;
-
-        if (!tkn || tkn !== internal_token) {
-            reply.status(401).message({ msg: "Unauthorized" });
-            return;
-        }
-
-        try {
-            pgAdapter.getClocksTimezone().then(data => {
-                reply.status(200).send({ data: data?.rows });
-            }).catch(() => {
-                console.log(`Error while getting the clocks timezone for Java server`);
-                reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
-                return;
-            })
-        } catch (e) {
-            console.log(e);
-            reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
-            return;
-        }
-    });
-
     fastify.post('/v3/terminal/log/add', (request, reply) => {
         const tkn = request.headers["x-token-ref"];
         queryFromClocks++;
@@ -477,21 +445,6 @@ fastify.register(require('@fastify/cors'), {
         });
     });
 
-    fastify.post('/v1/clocks/sync', (request, reply) => {
-        if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
-            return;
-        }
-
-        pgAdapter.syncClocks(request.body.f_customer_name || '', request.body.f_status).then(data => {
-            reply.status(200).send({ msg: "ok" });
-        }).catch((e) => {
-            console.log(e);
-            reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
-            return;
-        });
-    });
-
-
     fastify.get('/v1/clocks/all', (request, reply) => {
         if (!validatePrismaToken(request.headers['x-prisma-token'], reply)) {
             return;
@@ -528,7 +481,7 @@ fastify.register(require('@fastify/cors'), {
             return;
         }
 
-        pgAdapter.addClock(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name, request.body.c_note, request.body.c_desc, request.body.c_location, request.body.c_custom_id, request.body.c_timezone).then(data => {
+        pgAdapter.addClock(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name, request.body.c_note, request.body.c_desc, request.body.c_location, request.body.c_custom_id).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
         }).catch((e) => {
             console.log(e);
@@ -542,7 +495,7 @@ fastify.register(require('@fastify/cors'), {
             return;
         }
 
-        pgAdapter.updateClockInfo(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name, request.body.c_note, request.body.c_desc, request.body.c_location, request.body.c_timezone).then(data => {
+        pgAdapter.updateClockInfo(request.body.c_sn, request.body.c_name, request.body.c_model, request.body.fk_customer_name, request.body.c_note, request.body.c_desc, request.body.c_location).then(data => {
             reply.status(200).send({ data: data?.rows || [] });
         }).catch((e) => {
             console.log(e);

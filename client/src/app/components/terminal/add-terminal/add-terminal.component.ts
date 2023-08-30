@@ -60,7 +60,6 @@ export class AddTerminalModalComponent implements OnInit {
             c_location: string;
             fk_cm_name: string;
             c_custom_id: string;
-            c_timezone: string;
         }
     ) { }
 
@@ -89,8 +88,7 @@ export class AddTerminalModalComponent implements OnInit {
                     'c_note': [this.data?.c_note || '', Validators.required],
                     'c_desc': [this.data?.c_desc || '', Validators.required],
                     'c_location': [this.data?.c_location || '', Validators.required],
-                    'c_fk_cst': ['_'],
-                    'c_timezone': [this.data?.c_timezone || '1']
+                    'c_fk_cst': ['_']
                 });
 
                 Object.keys(this.form.controls).forEach(key => {
@@ -115,7 +113,7 @@ export class AddTerminalModalComponent implements OnInit {
     }
 
     private _validateButton(): void {
-        this.canSendRequest = Object.keys(this.form.controls).filter(e => e !== 'c_timezone').every(k => this.form.controls[k].value) && !!this.selectedCustomer && !!this.selectedModel;
+        this.canSendRequest = Object.keys(this.form.controls).every(k => this.form.controls[k].value) && !!this.selectedCustomer && !!this.selectedModel;
     }
 
     public onUpdateTerminal(): void {
@@ -128,7 +126,6 @@ export class AddTerminalModalComponent implements OnInit {
             this.form.controls['c_note'].value,
             this.form.controls['c_desc'].value,
             this.form.controls['c_location'].value,
-            this.form.controls['c_timezone'].value
         ).pipe(
             takeWhile(() => take),
             finalize(() => take = false)
@@ -162,7 +159,6 @@ export class AddTerminalModalComponent implements OnInit {
             this.form.controls['c_desc'].value,
             this.form.controls['c_location'].value,
             this.form.controls['c_custom_id'].value,
-            this.form.controls['c_timezone'].value
         ).pipe(
             takeWhile(() => take),
             finalize(() => take = false)

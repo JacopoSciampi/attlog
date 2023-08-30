@@ -3,8 +3,8 @@ const pg = require('pg');
 pool = new pg.Client({
     user: process.env.DB_USER || "keycloak",
     password: process.env.DB_PASS || "xUc5rUj!ZISPos0$&iyaGe7riChAkL",
-    host: 'pgsql',
-    //host: 'localhost',
+    //host: 'pgsql',
+    host: 'localhost',
     port: 5432,
     database: 'timbrature'
 });
@@ -104,62 +104,6 @@ class JekoPgInit {
 
             });
 
-        });
-    }
-
-    getClocksTimezone() {
-        return new Promise((r, j) => {
-            pool.query(`SELECT c_sn, c_timezone FROM public.clocks`, (err, data) => {
-                if (err) {
-                    console.log(err);
-                    j();
-                }
-
-                r(data);
-            });
-        });
-
-    }
-
-    syncAllClocksCron() {
-        let query = `
-                UPDATE public.clocks
-                SET c_timezone = '1'`;
-
-        pool.query(query, (err, result) => {
-            if (err) {
-                console.log(err);
-                return;
-            }
-
-            console.log("Updated clocks timezone from CRON job");
-        });
-    }
-
-    syncClocks(customerName, status) {
-        return new Promise((r, j) => {
-            let statusCondition = "";
-
-            if (status === "Online") {
-                statusCondition = "new Date().getTime() - c_last_timestamp < 60000";
-            } else if (status === "Offline") {
-                statusCondition = "new Date().getTime() - c_last_timestamp > 60000";
-            }
-
-            let query = `
-                UPDATE public.clocks
-                SET c_timezone = '1'
-                WHERE c_name LIKE '${customerName}%'
-                ${statusCondition ? `AND ${statusCondition}` : ""};`;
-
-            pool.query(query, (err, result) => {
-                if (err) {
-                    console.log(err);
-                    j();
-                } else {
-                    r();
-                }
-            });
         });
     }
 
@@ -453,7 +397,7 @@ class JekoPgInit {
         let mustFilterStatus = status !== "Tutti";
 
         return new Promise((r, j) => {
-            pool.query(`SELECT c.c_id, c.c_custom_id, c.c_sn, c.c_timezone, c.c_name, c.c_local_ip, c.c_mail_sent, c.c_model, c.c_note, c.c_desc, c.c_location, c.c_last_timestamp, cu.c_name AS customer_name
+            pool.query(`SELECT c.c_id, c.c_custom_id, c.c_sn, c.c_name, c.c_local_ip, c.c_mail_sent, c.c_model, c.c_note, c.c_desc, c.c_location, c.c_last_timestamp, cu.c_name AS customer_name
             FROM public.clocks c
             LEFT JOIN public.customers cu ON c.fk_customer_id = cu.customer_id
             WHERE cu.c_name LIKE '${customerName}%'
@@ -490,7 +434,7 @@ class JekoPgInit {
         });
     }
 
-    updateClockInfo(c_sn, c_name, c_model, fk_customer_name, c_note, c_desc, c_location, c_timezone) {
+    updateClockInfo(c_sn, c_name, c_model, fk_customer_name, c_note, c_desc, c_location) {
         return new Promise((r, j) => {
             pool.query(`SELECT * FROM public.customers WHERE customers.c_name = '${fk_customer_name}'`, (err, data) => {
                 if (err) {
@@ -504,7 +448,7 @@ class JekoPgInit {
                 }
 
                 const customerId = data.rows[0].customer_id;
-                pool.query(`UPDATE clocks SET c_name = '${c_name}', c_model = '${c_model}', fk_customer_id = '${customerId}', c_note = '${c_note}' , c_desc = '${c_desc}', c_location = '${c_location}', c_timezone = '${c_timezone}' WHERE clocks.c_sn  = '${c_sn}'`, (err, data) => {
+                pool.query(`UPDATE clocks SET c_name = '${c_name}', c_model = '${c_model}', fk_customer_id = '${customerId}', c_note = '${c_note}' , c_desc = '${c_desc}', c_location = '${c_location}' WHERE clocks.c_sn  = '${c_sn}'`, (err, data) => {
                     if (err) {
                         console.log(err);
                         j();
@@ -518,7 +462,7 @@ class JekoPgInit {
         });
     }
 
-    addClock(c_sn, c_name, c_model, fk_customer_name, c_note, c_desc, c_location, c_custom_id, c_timezone) {
+    addClock(c_sn, c_name, c_model, fk_customer_name, c_note, c_desc, c_location, c_custom_id) {
         return new Promise((r, j) => {
             pool.query(`SELECT * FROM public.customers WHERE customers.c_name = '${fk_customer_name}'`, (err, data) => {
                 if (err) {
@@ -546,8 +490,8 @@ class JekoPgInit {
 
                     const timeStamp = "-1";
                     pool.query(
-                        `INSERT INTO "clocks" ("c_sn", "c_name", "c_model", "c_last_timestamp", "fk_customer_id", "c_note", "c_desc", "c_location", "c_local_ip", "c_custom_id", "c_timezone")
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [c_sn, c_name, c_model, timeStamp, customerId, c_note, c_desc, c_location, '', c_custom_id, c_timezone || '1']).then(() => {
+                        `INSERT INTO "clocks" ("c_sn", "c_name", "c_model", "c_last_timestamp", "fk_customer_id", "c_note", "c_desc", "c_location", "c_local_ip", "c_custom_id")
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [c_sn, c_name, c_model, timeStamp, customerId, c_note, c_desc, c_location, '', c_custom_id]).then(() => {
                             r()
                         }).catch((err) => {
                             console.log(err);

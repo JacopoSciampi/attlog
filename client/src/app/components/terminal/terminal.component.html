@@ -37,7 +37,7 @@
                         <div class="icon-list">
                             <plus-circle-outline-icon class="field clickable"
                                 (click)="onAddTerminal()"></plus-circle-outline-icon>
-                            <clock-outline-icon class="field clickable" (click)="onSyncClocks()"></clock-outline-icon>
+                            <!-- <clock-outline-icon class="field clickable" (click)="onSyncClocks()"></clock-outline-icon> -->
                         </div>
                     </th>
                     <td mat-cell *matCellDef="let element">
@@ -87,11 +87,6 @@
                 <ng-container matColumnDef="c_local_ip">
                     <th mat-header-cell *matHeaderCellDef> IP Locale </th>
                     <td mat-cell *matCellDef="let element"> {{element.c_local_ip}} </td>
-                </ng-container>
-                <ng-container matColumnDef="c_timezone">
-                    <th mat-header-cell *matHeaderCellDef> Timezone GMT </th>
-                    <td mat-cell *matCellDef="let element"> GMT {{formatTimezone(element.c_timezone)}}
-                        {{element.c_timezone}} </td>
                 </ng-container>
                 <ng-container matColumnDef="status">
                     <th class="th-div-center" mat-header-cell *matHeaderCellDef> Stato </th>

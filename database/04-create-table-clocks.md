@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS public.clocks
     c_local_ip character varying(150) COLLATE pg_catalog."default" NOT NULL,
     c_mail_sent character varying(10) COLLATE pg_catalog."default",
     c_custom_id character varying(50) COLLATE pg_catalog."default",
-    c_timezone character varying(50) COLLATE pg_catalog."default",
     "fk_customer_id" bigint NOT NULL,
     CONSTRAINT clocks_pkey PRIMARY KEY (c_id)
 )
