@@ -12,6 +12,13 @@ export class TerminalService {
         private _http: HttpClient
     ) { }
 
+    public syncTerminal(f_customer_name: string, f_status: string) {
+        return this._http.post(`${BE_PATH.basePath}clocks/sync`, {
+            f_customer_name: f_customer_name,
+            f_status: f_status
+        });
+    }
+
     public getTerminalList(customerName: string, status: string): Observable<TerminalList> {
         return this._http.get<TerminalList>(`${BE_PATH.basePath}clocks`, {
             headers: {
@@ -21,7 +28,7 @@ export class TerminalService {
         });
     }
 
-    public addTerminal(c_sn: string, c_name: string, c_model: string, fk_customer_name: string, c_note: string, c_desc: string, c_location: string, c_custom_id: string) {
+    public addTerminal(c_sn: string, c_name: string, c_model: string, fk_customer_name: string, c_note: string, c_desc: string, c_location: string, c_custom_id: string, c_timezone: string) {
         return this._http.put(`${BE_PATH.basePath}clocks`, {
             "c_sn": c_sn,
             "c_name": c_name,
@@ -31,10 +38,11 @@ export class TerminalService {
             "c_desc": c_desc,
             "c_location": c_location,
             "c_custom_id": c_custom_id,
+            "c_timezone": c_timezone
         });
     }
 
-    public updateTerminal(c_sn: string, c_name: string, c_model: string, fk_customer_name: string, c_note: string, c_desc: string, c_location: string) {
+    public updateTerminal(c_sn: string, c_name: string, c_model: string, fk_customer_name: string, c_note: string, c_desc: string, c_location: string, c_timezone: string) {
         return this._http.post(`${BE_PATH.basePath}clocks`, {
             "c_sn": c_sn,
             "c_name": c_name,
@@ -42,7 +50,8 @@ export class TerminalService {
             "fk_customer_name": fk_customer_name,
             "c_note": c_note,
             "c_desc": c_desc,
-            "c_location": c_location
+            "c_location": c_location,
+            "c_timezone": c_timezone
         })
     }
 

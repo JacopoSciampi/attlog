@@ -18,6 +18,7 @@ import { DeleteTerminal } from './delete-terminal/delete-terminal.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CustomerListDetails } from '@models/customer.model';
 import { CustomerService } from '@services/customer.service';
+import { SyncClockModal } from './sync-clock-modal/sync-clock-modal.component';
 
 @Component({
     selector: 'app-terminal',
@@ -39,7 +40,7 @@ import { CustomerService } from '@services/customer.service';
 export class TerminalComponent implements OnInit, OnDestroy {
     public isInError = false;
     public isLoading = true;
-    public displayedColumns = ["_actions", "c_custom_id", "c_sn", "c_name", "c_model", "c_note", "c_desc", "c_location", "customer_name", "c_local_ip", "status"];
+    public displayedColumns = ["_actions", "c_custom_id", "c_sn", "c_name", "c_model", "c_note", "c_desc", "c_location", "customer_name", "c_local_ip", "c_timezone", "status"];
     public dataSource!: MatTableDataSource<TerminalListDetails>;
     public f_customer_name!: string;
     public f_status = "Tutti";
@@ -108,6 +109,21 @@ export class TerminalComponent implements OnInit, OnDestroy {
         this._getData();
     }
 
+    public onSyncClocks(): void {
+        this._dialog.open(SyncClockModal, {
+            height: MODAL_SIZE.HALFER,
+            width: MODAL_SIZE.HALF,
+            data: {
+                f_customer_name: this.f_customer_name,
+                f_status: this.f_status
+            }
+        }).afterClosed().subscribe({
+            next: (update) => {
+                update && this._getData();
+            }
+        });
+    }
+
     private _getData(): void {
         this.isLoading = true;
         let take = true;
@@ -147,6 +163,10 @@ export class TerminalComponent implements OnInit, OnDestroy {
         });
     }
 
+    public formatTimezone(gmt: string): string {
+        return +gmt > 0 ? '+' : '';
+    }
+
     public onEditClock(clock: TerminalListDetails): void {
         this._dialog.open(AddTerminalModalComponent, {
             height: MODAL_SIZE.HALFER,
@@ -160,7 +180,8 @@ export class TerminalComponent implements OnInit, OnDestroy {
                 c_location: clock.c_location,
                 fk_customer_name: clock.customer_name,
                 fk_cm_name: clock.c_model,
-                c_custom_id: clock.c_custom_id
+                c_custom_id: clock.c_custom_id,
+                c_timezone: clock.c_timezone
             }
         }).afterClosed().subscribe({
             next: (update) => {

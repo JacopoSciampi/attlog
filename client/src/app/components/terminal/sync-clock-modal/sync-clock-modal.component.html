@@ -1,0 +1,16 @@
+<div class="modal-container">
+    <div class="modal-header">
+        <div class="modal-title">
+            Sincronizzazione orologi
+        </div>
+        <div class="modal-close">
+            <x-circle-outline-icon class="clickable" (click)="closeMe()"></x-circle-outline-icon>
+        </div>
+    </div>
+    <form class="modal-content modal-content-flex-v-center">
+        Conferma sincronizzazione orologi con l'orario server
+    </form>
+    <div class="modal-footer">
+        <div class="button button-primary" (click)="onConfirm()">Conferma</div>
+    </div>
+</div>

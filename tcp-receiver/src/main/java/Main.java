@@ -5,29 +5,70 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Scanner;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONArray;
+
+class KeyValuePair {
+    private String key;
+    private String value;
+
+    public KeyValuePair(String key, String value) {
+        this.key = key;
+        this.value = value;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(key, value);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        KeyValuePair other = (KeyValuePair) obj;
+        return key == other.key && Objects.equals(value, other.value);
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+}
 
 public class Main {
     private static Set<String> clientSN = new HashSet<>();
+    private static Set<KeyValuePair> deviceSnAndTimeZone = new HashSet<>();
     private static String token_ref = "uQOpixuDj/YtSlXjayO-dNBcsd2fKx14OBqMOmHikiUUXi6Zhg2UxufCQDg7ic=y/yn6i2VSV9K2EMxcGYpzrQSgDNgbbBBaWlc4Xlhc2mOhNAPAF?Y929cAUHXEj6GL5jzxhASk4Z6u?s/gdEjGXjP/PpQqDZvelyGnbhrZocCyYRxy!P5WXS!eu053XhUJV5zLl121glT?g54HPVX2kvvkyqENk1tWl3E/Otz-ErK7SItzubR59ElypGOPwm?f";
-    //int port = 7777;
-    // private static int port = 50000;
+
+    //private static int port = 7777;
     private static int port = 50000;
     private static InetAddress addr;
 
-    // private static String serverAddr = "http://node:8081";
+    //private static String serverAddr = "http://node:8081";
     private static String serverAddr = "http://localhost:8081";
 
     //C:385:INFO
     public static void main(String[] args) throws UnknownHostException {
+        CompletableFuture<Void> terminalTimezoneFuture = CompletableFuture.runAsync(() -> {
+            getTerminalTimezone();
+        });
+
+        terminalTimezoneFuture.join();
+
         try {
             addr = InetAddress.getByName("10.0.0.11");
             //addr = InetAddress.getByName("localhost");
@@ -35,10 +76,9 @@ public class Main {
             e.printStackTrace();
         }
 
-
         try (ServerSocket serverSocket = new ServerSocket(port, 50, addr)) {
 
-            System.out.println("Server is listening on port " + port);
+            System.out.println("TCP Server is listening on port " + port);
             System.out.println("Addr " + addr);
 
             while (true) {
@@ -67,9 +107,75 @@ public class Main {
         }
     }
 
+    private static void getTerminalTimezone() {
+        try {
+            URL url = new URL(serverAddr + "/v3/terminal/timezone");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setRequestProperty("x-token-ref", token_ref);
+            String requestBody = "{\"sn\":\"" + 0 + "\"}";
+
+            con.setDoOutput(true);
+            DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
+            outputStream.writeBytes(requestBody);
+            outputStream.flush();
+            outputStream.close();
+
+            int responseCode = con.getResponseCode();
+
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                deviceSnAndTimeZone.clear();
+                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                String inputLine;
+                StringBuffer response = new StringBuffer();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                String responseBody = response.toString();
+
+                try {
+                    JSONObject jsonResponse = new JSONObject(responseBody);
+                    JSONArray dataArray = jsonResponse.getJSONArray("data");
+
+                    for (int i = 0; i < dataArray.length(); i++) {
+                        JSONObject dataObject = dataArray.getJSONObject(i);
+                        String key = dataObject.getString("c_sn");
+                        String value = dataObject.getString("c_timezone");
+                        KeyValuePair pair = new KeyValuePair(key, value);
+                        deviceSnAndTimeZone.add(pair);
+                    }
+
+                    System.out.println("Updated timezones");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("There was an error getting the terminals timezone");
+        }
+    }
+
+    public static boolean isValidLong(String input) {
+        try {
+            Long.parseLong(input);
+            return true; // Parsing successful
+        } catch (NumberFormatException e) {
+            return false; // Parsing failed
+        }
+    }
+
     private static void Analysis(byte[] bReceive, Socket socket) throws IOException {
-        //System.out.println(socket.getLocalSocketAddress());
-        //System.out.println(socket.getRemoteSocketAddress());
+        CompletableFuture<Void> terminalTimezoneFuture = CompletableFuture.runAsync(() -> {
+            getTerminalTimezone();
+        });
+
+        terminalTimezoneFuture.join();
+
+
         String strReceive = new String(bReceive, Charset.forName("US-ASCII"));
         //System.out.println(strReceive);
 
@@ -78,7 +184,14 @@ public class Main {
         } else if (strReceive.contains("getrequest?")) {
             //getrequestProcess(bReceive, socket);
             sendDataInGet(bReceive);
-            sendDataToDevice("200 OK", "C:385:INFO", socket);
+            String sBuffer = new String(bReceive, Charset.forName("US-ASCII"));
+            String machineSN = sBuffer.substring(sBuffer.indexOf("SN=") + 3);
+            String match = machineSN.split("&")[0];
+
+            if(!isValidLong(match)) {
+                match = machineSN.split(" ")[0];
+            }
+            sendDataToDevice("200 OK", "C:385:INFO", socket, match);
         } else if (strReceive.contains("devicecmd?")) {
             devicecmdProcess(bReceive, socket);
         }
@@ -285,7 +398,7 @@ public class Main {
         getNumber(machineSN, SN); // GET OPTION FROM: Serial Number of iclock Device
 
         int index = strReceive.indexOf("ID=");
-        sendDataToDevice("200 OK", "OK", remoteSocket);
+        sendDataToDevice("200 OK", "OK", remoteSocket, machineSN.split(" ")[0]);
 
         Pattern pattern = Pattern.compile("IPAddress=(\\d+\\.\\d+\\.\\d+\\.\\d+)");
         Matcher matcher = pattern.matcher(strReceive);
@@ -326,32 +439,6 @@ public class Main {
         }
     }
 
-    private static void getrequestProcess(byte[] bReceive, Socket remoteSocket) {
-        String sBuffer = new String(bReceive, StandardCharsets.ISO_8859_1);
-        String cmdString = "OK";
-        String SN = getValueByNameInPushHeader(sBuffer, "SN");
-        String ReplyCode = "200 OK";
-
-        if (!clientSN.contains(SN)) {
-            clientSN.add(SN);
-        }
-
-        String strDevInfo = getValueByNameInPushHeader(sBuffer, "INFO");
-        if (strDevInfo == null || strDevInfo.isEmpty()) {
-            cmdString = "OK";
-        } else {
-            //updateDeviceInfo(device, strDevInfo);
-            cmdString = "OK";
-        }
-
-        sendDataToDevice(ReplyCode, cmdString, remoteSocket);
-        try {
-            remoteSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private static void cdataProcess(byte[] bReceive, Socket remoteSocket) throws IOException {
         String sBuffer = new String(bReceive, Charset.forName("US-ASCII"));
         String SN = getValueByNameInPushHeader(sBuffer, "SN");
@@ -361,13 +448,13 @@ public class Main {
         if (sBuffer.substring(0, 3).equals("GET")) { // iclock option
             if (sBuffer.indexOf("options=all", 0) > 0) {
                 ReplyCode = initDeviceConnect(SN, strReply);
-                sendDataToDevice(ReplyCode, strReply, remoteSocket);
+                sendDataToDevice(ReplyCode, strReply, remoteSocket, SN);
                 remoteSocket.close();
                 return;
             } else {
                 ReplyCode = "400 Bad Request";
                 strReply = "Unknown Command";
-                sendDataToDevice(ReplyCode, strReply, remoteSocket);
+                sendDataToDevice(ReplyCode, strReply, remoteSocket, SN);
                 remoteSocket.close();
                 return;
             }
@@ -396,7 +483,7 @@ public class Main {
             workcodeLog(sBuffer);
         }*/
 
-            sendDataToDevice(ReplyCode, strReply, remoteSocket);
+            sendDataToDevice(ReplyCode, strReply, remoteSocket, SN);
             remoteSocket.close();
         }
     }
@@ -493,13 +580,53 @@ public class Main {
         return "200 OK"; // Return the generated reply code
     }
 
-    private static void sendDataToDevice(String sStatusCode, String sDataStr, Socket mySocket) {
+    private static String _getTimestampFromSN(String SN) {
+        System.out.println("SN?: " + SN);
+        //return "Wed, 30 Aug 2021 02:36:29 GMT";
+        if (SN != null && !SN.isEmpty()) {
+            // For them GMT is GMT + 8
+
+            String offsetValue = null;
+            for (KeyValuePair pair : deviceSnAndTimeZone) {
+                if (pair.getKey().equals(SN)) {
+                    offsetValue = pair.getValue();
+                    break; // Assuming c_sn is unique, exit the loop once the pair is found
+                }
+            }
+
+            if (offsetValue != null) {
+                // Convert offsetValue to an integer (replace this with your parsing logic)
+                int offsetHours = Integer.parseInt(offsetValue);
+
+                // Create a Calendar instance and set the TimeZone to GMT
+                Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+                calendar.setTime(new Date());
+                calendar.add(Calendar.HOUR_OF_DAY, -7);
+                calendar.add(Calendar.HOUR_OF_DAY, offsetHours); // Add offsetHours
+
+                // Format the final date as GMT
+                SimpleDateFormat sdf = new SimpleDateFormat("E, d MMM yyyy HH:mm:ss z");
+                sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+                System.out.println("Timezone: " + sdf.format(calendar.getTime()));
+                return sdf.format(calendar.getTime()).toString();
+            } else {
+                return "";
+            }
+        }
+
+        return "";
+    }
+
+    private static void sendDataToDevice(String sStatusCode, String sDataStr, Socket mySocket, String SN) {
         byte[] bData = sDataStr.getBytes(StandardCharsets.UTF_8);
         String sHeader = "HTTP/1.1 " + sStatusCode + "\r\n";
         sHeader += "Content-Type: text/plain\r\n";
         sHeader += "Accept-Ranges: bytes\r\n";
-        sHeader += "Date: " + ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.RFC_1123_DATE_TIME) + "\r\n";
+        sHeader += "Date: " + _getTimestampFromSN(SN); //;
+
         sHeader += "Content-Length: " + bData.length + "\r\n\r\n";
+
+        System.out.println("Send data to device");
 
         sendToBrowser(sHeader.getBytes(StandardCharsets.UTF_8), mySocket);
         sendToBrowser(bData, mySocket);
