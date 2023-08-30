@@ -484,8 +484,8 @@ public class Main {
         String sHeader = "HTTP/1.1 " + sStatusCode + "\r\n";
         sHeader += "Content-Type: text/plain\r\n";
         sHeader += "Accept-Ranges: bytes\r\n";
-        //sHeader += "Date: " + ZonedDateTime.now(ZoneOffset.UTC).minusHours(6).format(DateTimeFormatter.RFC_1123_DATE_TIME) + "\r\n"; // local
-        sHeader += "Date: " + ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.RFC_1123_DATE_TIME) + "\r\n"; // prod
+        sHeader += "Date: " + ZonedDateTime.now(ZoneOffset.UTC).minusHours(6).format(DateTimeFormatter.RFC_1123_DATE_TIME) + "\r\n";
+        System.out.println(ZonedDateTime.now(ZoneOffset.UTC).minusHours(6).format(DateTimeFormatter.RFC_1123_DATE_TIME));
 
         sHeader += "Content-Length: " + bData.length + "\r\n\r\n";
         System.out.println("Send data to device");
