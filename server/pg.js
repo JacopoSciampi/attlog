@@ -3,8 +3,8 @@ const pg = require('pg');
 pool = new pg.Client({
     user: process.env.DB_USER || "keycloak",
     password: process.env.DB_PASS || "xUc5rUj!ZISPos0$&iyaGe7riChAkL",
-    //host: 'pgsql',
-    host: 'localhost',
+    host: 'pgsql',
+    //host: 'localhost',
     port: 5432,
     database: 'timbrature'
 });
