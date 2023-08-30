@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import org.json.JSONException;
 import org.json.JSONArray;
 
+// mvn clean package -> build
 public class Main {
     private static Set<String> clientSN = new HashSet<>();
     private static Set<KeyValuePair> deviceSnAndTimeZone = new HashSet<>();
