@@ -91,7 +91,7 @@ public class Main {
         if (!timezoneSN.contains(match)) {
             timezoneSN.add(match);
             String toReply = "200 OK";
-            String strR = "GET OPTION FROM:" + match + "\nStamp=9999\nOpStamp=9999\nPhotoStamp=0\nTransFlag=TransData AttLog\tOpLog\tAttPhoto\tEnrollUser\tChgUser\tEnrollFP\tChgFP\tFACE\nErrorDelay=120\nDelay=60\nTimeZone=60\nTransTimes=\nTransInterval=30\nSyncTime=0\nRealtime=1\nServerVer=1.0.0 31-Aug-23\nATTLOGStamp=9999\nOPERLOGStamp=9999\nATTPHOTOStamp=0\n";
+            String strR = "GET OPTION FROM:" + match + "\nStamp=9999\nOpStamp=9999\nPhotoStamp=0\nTransFlag=TransData AttLog\tOpLog\tAttPhoto\tEnrollUser\tChgUser\tEnrollFP\tChgFP\tFACE\nErrorDelay=120\nDelay=60\nTimeZone=480\nTransTimes=\nTransInterval=30\nSyncTime=0\nRealtime=1\nServerVer=1.0.0 31-Aug-23\nATTLOGStamp=9999\nOPERLOGStamp=9999\nATTPHOTOStamp=0\n";
             sendDataToDevice(toReply, strR, socket, match);
             System.out.println("Sync timezone for SN: " + match);
         }
@@ -101,10 +101,6 @@ public class Main {
         } else if (strReceive.contains("getrequest?")) {
             //getrequestProcess(bReceive, socket);
             sendDataInGet(bReceive);
-
-            /*String toReply = "200 OK";
-            String strR = "GET OPTION FROM:" + machineSN.split(" ")[0] + "\nStamp=9999\nOpStamp=9999\nPhotoStamp=0\nTransFlag=TransData AttLog\tOpLog\tAttPhoto\tEnrollUser\tChgUser\tEnrollFP\tChgFP\tFACE\nErrorDelay=120\nDelay=60\nTimeZone=70\n";
-            sendDataToDevice(toReply, strR, socket, match);*/
 
             sendDataToDevice("200 OK", "C:385:INFO", socket, match);
         } else if (strReceive.contains("devicecmd?")) {
@@ -310,7 +306,7 @@ public class Main {
         String errMessage = "";
         String SN = "";
         String machineSN = sBuffer.substring(sBuffer.indexOf("SN=") + 3);
-        getNumber(machineSN, SN); // GET OPTION FROM: Serial Number of iclock Device
+        getNumber(machineSN, SN);
 
         int index = strReceive.indexOf("ID=");
         sendDataToDevice("200 OK", "OK", remoteSocket, machineSN.split(" ")[0]);
@@ -363,7 +359,6 @@ public class Main {
         if (sBuffer.substring(0, 3).equals("GET")) { // iclock option
             if (sBuffer.indexOf("options=all", 0) > 0) {
                 ReplyCode = initDeviceConnect(SN, strReply);
-                String strR = "GET OPTION FROM:" + SN + "\nStamp=9999\nOpStamp=9999\nPhotoStamp=0\nTransFlag=TransData AttLog\tOpLog\tAttPhoto\tEnrollUser\tChgUser\tEnrollFP\tChgFP\tFACE\nErrorDelay=120\nDelay=60\nTimeZone=90\n";
                 sendDataToDevice(ReplyCode, strReply, remoteSocket, SN);
                 remoteSocket.close();
                 return;
@@ -501,7 +496,7 @@ public class Main {
         String sHeader = "HTTP/1.1 " + sStatusCode + "\r\n";
         sHeader += "Content-Type: text/plain\r\n";
         sHeader += "Accept-Ranges: bytes\r\n";
-        sHeader += "Date: " + ZonedDateTime.now(ZoneOffset.ofTotalSeconds(2)).plusHours(1).format(DateTimeFormatter.RFC_1123_DATE_TIME) + "\r\n";
+        sHeader += "Date: " + ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.RFC_1123_DATE_TIME) + "\r\n";
 
         sHeader += "Content-Length: " + bData.length + "\r\n\r\n";
         System.out.println("Send data to device");
