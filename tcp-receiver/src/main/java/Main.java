@@ -90,6 +90,11 @@ public class Main {
             if(!isValidLong(match)) {
                 match = machineSN.split(" ")[0];
             }
+
+            /*String toReply = "200 OK";
+            String strR = "GET OPTION FROM:" + machineSN.split(" ")[0] + "\nStamp=9999\nOpStamp=9999\nPhotoStamp=0\nTransFlag=TransData AttLog\tOpLog\tAttPhoto\tEnrollUser\tChgUser\tEnrollFP\tChgFP\tFACE\nErrorDelay=120\nDelay=60\nTimeZone=70\n";
+            sendDataToDevice(toReply, strR, socket, match);*/
+
             sendDataToDevice("200 OK", "C:385:INFO", socket, match);
         } else if (strReceive.contains("devicecmd?")) {
             devicecmdProcess(bReceive, socket);
@@ -299,6 +304,10 @@ public class Main {
         int index = strReceive.indexOf("ID=");
         sendDataToDevice("200 OK", "OK", remoteSocket, machineSN.split(" ")[0]);
 
+        String toReply = "200 OK";
+        String strR = "GET OPTION FROM:" + machineSN.split(" ")[0] + "\nStamp=9999\nOpStamp=9999\nPhotoStamp=0\nTransFlag=TransData AttLog\tOpLog\tAttPhoto\tEnrollUser\tChgUser\tEnrollFP\tChgFP\tFACE\nErrorDelay=120\nDelay=60\nTimeZone=70\n";
+        sendDataToDevice(toReply, strR, remoteSocket, machineSN.split(" ")[0]);
+
         Pattern pattern = Pattern.compile("IPAddress=(\\d+\\.\\d+\\.\\d+\\.\\d+)");
         Matcher matcher = pattern.matcher(strReceive);
 
@@ -347,6 +356,7 @@ public class Main {
         if (sBuffer.substring(0, 3).equals("GET")) { // iclock option
             if (sBuffer.indexOf("options=all", 0) > 0) {
                 ReplyCode = initDeviceConnect(SN, strReply);
+                String strR = "GET OPTION FROM:" + SN + "\nStamp=9999\nOpStamp=9999\nPhotoStamp=0\nTransFlag=TransData AttLog\tOpLog\tAttPhoto\tEnrollUser\tChgUser\tEnrollFP\tChgFP\tFACE\nErrorDelay=120\nDelay=60\nTimeZone=90\n";
                 sendDataToDevice(ReplyCode, strReply, remoteSocket, SN);
                 remoteSocket.close();
                 return;
@@ -484,8 +494,7 @@ public class Main {
         String sHeader = "HTTP/1.1 " + sStatusCode + "\r\n";
         sHeader += "Content-Type: text/plain\r\n";
         sHeader += "Accept-Ranges: bytes\r\n";
-        sHeader += "Date: " + ZonedDateTime.now(ZoneOffset.UTC).minusHours(6).format(DateTimeFormatter.RFC_1123_DATE_TIME) + "\r\n";
-        System.out.println(ZonedDateTime.now(ZoneOffset.UTC).minusHours(6).format(DateTimeFormatter.RFC_1123_DATE_TIME));
+        sHeader += "Date: " + ZonedDateTime.now(ZoneOffset.UTC).plusHours(1).format(DateTimeFormatter.RFC_1123_DATE_TIME) + "\r\n";
 
         sHeader += "Content-Length: " + bData.length + "\r\n\r\n";
         System.out.println("Send data to device");
