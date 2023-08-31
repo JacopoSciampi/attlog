@@ -16,7 +16,9 @@ import java.util.regex.Pattern;
 
 // mvn clean package -> build
 public class Main {
+    private static int a = 0;
     private static Set<String> clientSN = new HashSet<>();
+    private static Set<String> timezoneSN = new HashSet<>();
     private static String token_ref = "uQOpixuDj/YtSlXjayO-dNBcsd2fKx14OBqMOmHikiUUXi6Zhg2UxufCQDg7ic=y/yn6i2VSV9K2EMxcGYpzrQSgDNgbbBBaWlc4Xlhc2mOhNAPAF?Y929cAUHXEj6GL5jzxhASk4Z6u?s/gdEjGXjP/PpQqDZvelyGnbhrZocCyYRxy!P5WXS!eu053XhUJV5zLl121glT?g54HPVX2kvvkyqENk1tWl3E/Otz-ErK7SItzubR59ElypGOPwm?f";
 
     //private static int port = 7778; // <- 7777 NGINX <-> 7778 Java
@@ -78,18 +80,27 @@ public class Main {
     private static void Analysis(byte[] bReceive, Socket socket) throws IOException {
         String strReceive = new String(bReceive, Charset.forName("US-ASCII"));
 
+        String sBuffer = new String(bReceive, Charset.forName("US-ASCII"));
+        String machineSN = sBuffer.substring(sBuffer.indexOf("SN=") + 3);
+        String match = machineSN.split("&")[0];
+
+        if(!isValidLong(match)) {
+            match = machineSN.split(" ")[0];
+        }
+
+        if (!timezoneSN.contains(match)) {
+            timezoneSN.add(match);
+            String toReply = "200 OK";
+            String strR = "GET OPTION FROM:" + match + "\nStamp=9999\nOpStamp=9999\nPhotoStamp=0\nTransFlag=TransData AttLog\tOpLog\tAttPhoto\tEnrollUser\tChgUser\tEnrollFP\tChgFP\tFACE\nErrorDelay=120\nDelay=60\nTimeZone=60\nTransTimes=\nTransInterval=30\nSyncTime=0\nRealtime=1\nServerVer=1.0.0 31-Aug-23\nATTLOGStamp=9999\nOPERLOGStamp=9999\nATTPHOTOStamp=0\n";
+            sendDataToDevice(toReply, strR, socket, match);
+            System.out.println("Sync timezone for SN: " + match);
+        }
+
         if (strReceive.contains("cdata?")) {
             cdataProcess(bReceive, socket);
         } else if (strReceive.contains("getrequest?")) {
             //getrequestProcess(bReceive, socket);
             sendDataInGet(bReceive);
-            String sBuffer = new String(bReceive, Charset.forName("US-ASCII"));
-            String machineSN = sBuffer.substring(sBuffer.indexOf("SN=") + 3);
-            String match = machineSN.split("&")[0];
-
-            if(!isValidLong(match)) {
-                match = machineSN.split(" ")[0];
-            }
 
             /*String toReply = "200 OK";
             String strR = "GET OPTION FROM:" + machineSN.split(" ")[0] + "\nStamp=9999\nOpStamp=9999\nPhotoStamp=0\nTransFlag=TransData AttLog\tOpLog\tAttPhoto\tEnrollUser\tChgUser\tEnrollFP\tChgFP\tFACE\nErrorDelay=120\nDelay=60\nTimeZone=70\n";
@@ -304,10 +315,6 @@ public class Main {
         int index = strReceive.indexOf("ID=");
         sendDataToDevice("200 OK", "OK", remoteSocket, machineSN.split(" ")[0]);
 
-        String toReply = "200 OK";
-        String strR = "GET OPTION FROM:" + machineSN.split(" ")[0] + "\nStamp=9999\nOpStamp=9999\nPhotoStamp=0\nTransFlag=TransData AttLog\tOpLog\tAttPhoto\tEnrollUser\tChgUser\tEnrollFP\tChgFP\tFACE\nErrorDelay=120\nDelay=60\nTimeZone=70\n";
-        sendDataToDevice(toReply, strR, remoteSocket, machineSN.split(" ")[0]);
-
         Pattern pattern = Pattern.compile("IPAddress=(\\d+\\.\\d+\\.\\d+\\.\\d+)");
         Matcher matcher = pattern.matcher(strReceive);
 
@@ -494,7 +501,7 @@ public class Main {
         String sHeader = "HTTP/1.1 " + sStatusCode + "\r\n";
         sHeader += "Content-Type: text/plain\r\n";
         sHeader += "Accept-Ranges: bytes\r\n";
-        sHeader += "Date: " + ZonedDateTime.now(ZoneOffset.UTC).plusHours(1).format(DateTimeFormatter.RFC_1123_DATE_TIME) + "\r\n";
+        sHeader += "Date: " + ZonedDateTime.now(ZoneOffset.ofTotalSeconds(2)).plusHours(1).format(DateTimeFormatter.RFC_1123_DATE_TIME) + "\r\n";
 
         sHeader += "Content-Length: " + bData.length + "\r\n\r\n";
         System.out.println("Send data to device");
