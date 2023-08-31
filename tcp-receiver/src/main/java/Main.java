@@ -77,6 +77,25 @@ public class Main {
         }
     }
 
+    private static void forceTimezone(String sn, Socket socket) {
+        String toReply = "200 OK";
+        String strR = "GET OPTION FROM:" + sn + "\nStamp=9999\nOpStamp=9999\nPhotoStamp=0\nTransFlag=TransData AttLog\tOpLog\tAttPhoto\tEnrollUser\tChgUser\tEnrollFP\tChgFP\tFACE\nErrorDelay=120\nDelay=60\nTimeZone=480\nTransTimes=\nTransInterval=30\nSyncTime=0\nRealtime=1\nServerVer=1.0.0 31-Aug-23\nATTLOGStamp=9999\nOPERLOGStamp=9999\nATTPHOTOStamp=0\n";
+        sendDataToDevice(toReply, strR, socket, sn);
+        System.out.println("Sync timezone for SN: " + sn);
+
+        byte[] bData = strR.getBytes(StandardCharsets.UTF_8);
+        String sHeader = "HTTP/1.1 " + toReply + "\r\n";
+        sHeader += "Content-Type: text/plain\r\n";
+        sHeader += "Accept-Ranges: bytes\r\n";
+        sHeader += "Date: " + ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.RFC_1123_DATE_TIME) + "\r\n";
+
+        sHeader += "Content-Length: " + bData.length + "\r\n\r\n";
+        System.out.println("Send data to device");
+
+        sendToBrowser(sHeader.getBytes(StandardCharsets.UTF_8), socket);
+        sendToBrowser(bData, socket);
+    }
+
     private static void Analysis(byte[] bReceive, Socket socket) throws IOException {
         String strReceive = new String(bReceive, Charset.forName("US-ASCII"));
 
@@ -90,10 +109,11 @@ public class Main {
 
         if (!timezoneSN.contains(match)) {
             timezoneSN.add(match);
-            String toReply = "200 OK";
-            String strR = "GET OPTION FROM:" + match + "\nStamp=9999\nOpStamp=9999\nPhotoStamp=0\nTransFlag=TransData AttLog\tOpLog\tAttPhoto\tEnrollUser\tChgUser\tEnrollFP\tChgFP\tFACE\nErrorDelay=120\nDelay=60\nTimeZone=480\nTransTimes=\nTransInterval=30\nSyncTime=0\nRealtime=1\nServerVer=1.0.0 31-Aug-23\nATTLOGStamp=9999\nOPERLOGStamp=9999\nATTPHOTOStamp=0\n";
-            sendDataToDevice(toReply, strR, socket, match);
-            System.out.println("Sync timezone for SN: " + match);
+            forceTimezone(match, socket);
+            // String toReply = "200 OK";
+            // String strR = "GET OPTION FROM:" + match + "\nStamp=9999\nOpStamp=9999\nPhotoStamp=0\nTransFlag=TransData AttLog\tOpLog\tAttPhoto\tEnrollUser\tChgUser\tEnrollFP\tChgFP\tFACE\nErrorDelay=120\nDelay=60\nTimeZone=480\nTransTimes=\nTransInterval=30\nSyncTime=0\nRealtime=1\nServerVer=1.0.0 31-Aug-23\nATTLOGStamp=9999\nOPERLOGStamp=9999\nATTPHOTOStamp=0\n";
+            // sendDataToDevice(toReply, strR, socket, match);
+            // System.out.println("Sync timezone for SN: " + match);
         }
 
         if (strReceive.contains("cdata?")) {
@@ -344,6 +364,7 @@ public class Main {
             System.out.println("Error parsing the IP Address. Update skipped.");
         }
         try {
+            forceTimezone(match, socket);
             remoteSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
