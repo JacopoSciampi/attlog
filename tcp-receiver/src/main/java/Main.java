@@ -364,7 +364,7 @@ public class Main {
             System.out.println("Error parsing the IP Address. Update skipped.");
         }
         try {
-            forceTimezone(match, socket);
+            forceTimezone(machineSN.split(" ")[0], remoteSocket);
             remoteSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
