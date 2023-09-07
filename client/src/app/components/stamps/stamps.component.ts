@@ -236,6 +236,11 @@ export class StampsComponent implements OnInit {
     }
 
     public onFilterApplyClicked(): void {
+        const datePickerValueRef = (document.querySelector('.f_date') as any).value;
+        if (!datePickerValueRef) {
+            this.pickerDirective.clear();
+        }
+
         const _ = new DatePipe('it-IT');
 
         let startDate = this.f_date?.startDate?.$d;
