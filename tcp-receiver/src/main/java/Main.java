@@ -10,6 +10,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.time.*;  
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,18 +22,18 @@ public class Main {
     private static Set<String> timezoneSN = new HashSet<>();
     private static String token_ref = "uQOpixuDj/YtSlXjayO-dNBcsd2fKx14OBqMOmHikiUUXi6Zhg2UxufCQDg7ic=y/yn6i2VSV9K2EMxcGYpzrQSgDNgbbBBaWlc4Xlhc2mOhNAPAF?Y929cAUHXEj6GL5jzxhASk4Z6u?s/gdEjGXjP/PpQqDZvelyGnbhrZocCyYRxy!P5WXS!eu053XhUJV5zLl121glT?g54HPVX2kvvkyqENk1tWl3E/Otz-ErK7SItzubR59ElypGOPwm?f";
 
-    //private static int port = 7778; // <- 7777 NGINX <-> 7778 Java
-    private static int port = 50000;
+    private static int port = 7778; // <- 7777 NGINX <-> 7778 Java
+    //private static int port = 50000;
     private static InetAddress addr;
 
-    //private static String serverAddr = "http://node:8081";
-    private static String serverAddr = "http://localhost:8081";
+    private static String serverAddr = "http://node:8081";
+    //private static String serverAddr = "http://localhost:8081";
 
     //C:385:INFO
     public static void main(String[] args) throws UnknownHostException {
         try {
-            addr = InetAddress.getByName("10.0.0.11");
-            //addr = InetAddress.getByName("localhost");
+            //addr = InetAddress.getByName("10.0.0.11");
+            addr = InetAddress.getByName("localhost");
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
@@ -78,11 +79,16 @@ public class Main {
     }
 
     private static void sendDataToDevice(String sStatusCode, String sDataStr, Socket mySocket, String SN) {
+        ZoneId italyZone = ZoneId.of("Europe/Rome");
+        ZonedDateTime nowInItaly = ZonedDateTime.now(italyZone);
+        DateTimeFormatter rfc1123Formatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
+        String rfc1123DateTimeItaly = nowInItaly.format(rfc1123Formatter);
+
         byte[] bData = sDataStr.getBytes(StandardCharsets.UTF_8);
         String sHeader = "HTTP/1.1 " + sStatusCode + "\r\n";
         sHeader += "Content-Type: text/plain\r\n";
         sHeader += "Accept-Ranges: bytes\r\n";
-        sHeader += "Date: " + ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.RFC_1123_DATE_TIME) + "\r\n";
+        sHeader += "Date: " + rfc1123DateTimeItaly + "\r\n";
 
         sHeader += "Content-Length: " + bData.length + "\r\n\r\n";
         System.out.println("Send data to device");
