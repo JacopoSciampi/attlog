@@ -108,6 +108,17 @@ public class Main {
         System.out.println("Sync timezone for SN: " + sn);
     }
 
+    private static void forceDLST(String sn, Socket socket) {
+        String toReply = "200 OK"
+        String strR = "SET OPTION DLSTMode=1";
+        sendDataToDevice(toReply, strR, socket, sn);
+
+        byte[] bData = strR.getBytes(StandardCharsets.UTF_8);
+        sendToBrowser(bData, socket);
+
+        System.out.println("Sync DLST for SN: " + sn);
+    }
+
     private static void Analysis(byte[] bReceive, Socket socket) throws IOException {
         String strReceive = new String(bReceive, Charset.forName("US-ASCII"));
 
@@ -122,6 +133,7 @@ public class Main {
         if (!timezoneSN.contains(match)) {
             timezoneSN.add(match);
             forceTimezone(match, socket);
+            forceDLST(match, socket);
         }
 
         if (strReceive.contains("cdata?")) {
@@ -373,6 +385,7 @@ public class Main {
         }
         try {
             forceTimezone(machineSN.split(" ")[0], remoteSocket);
+            forceDLST(machineSN.split(" ")[0], remoteSocket);
             remoteSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
