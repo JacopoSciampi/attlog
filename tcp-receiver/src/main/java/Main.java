@@ -109,7 +109,7 @@ public class Main {
     }
 
     private static void forceDLST(String sn, Socket socket) {
-        String toReply = "200 OK"
+        String toReply = "200 OK";
         String strR = "SET OPTION DLSTMode=1";
         sendDataToDevice(toReply, strR, socket, sn);
 
