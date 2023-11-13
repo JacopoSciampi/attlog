@@ -88,7 +88,7 @@ public class Main {
         String sHeader = "HTTP/1.1 " + sStatusCode + "\r\n";
         sHeader += "Content-Type: text/plain\r\n";
         sHeader += "Accept-Ranges: bytes\r\n";
-        sHeader += "Date: " + rfc1123DateTimeItaly + "\r\n";
+        //sHeader += "Date: " + rfc1123DateTimeItaly + "\r\n";
 
         sHeader += "Content-Length: " + bData.length + "\r\n\r\n";
         System.out.println("Send data to device");
