@@ -79,8 +79,18 @@ public class Main {
     }
 
     private static void sendDataToDevice(String sStatusCode, String sDataStr, Socket mySocket, String SN) {
+
         ZoneId italyZone = ZoneId.of("Europe/Rome");
         ZonedDateTime nowInItaly = ZonedDateTime.now(italyZone);
+        ZonedDateTime now = ZonedDateTime.now(italyZone);
+        boolean isOraLegale = now.getZone().getRules().isDaylightSavings(now.toInstant());
+
+        if (isOraLegale) {
+            nowInItaly.minusHours(1);
+        } else {
+            nowInItaly.minusHours(2);
+        }
+
         DateTimeFormatter rfc1123Formatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
         String rfc1123DateTimeItaly = nowInItaly.format(rfc1123Formatter);
 
@@ -88,7 +98,7 @@ public class Main {
         String sHeader = "HTTP/1.1 " + sStatusCode + "\r\n";
         sHeader += "Content-Type: text/plain\r\n";
         sHeader += "Accept-Ranges: bytes\r\n";
-        //sHeader += "Date: " + rfc1123DateTimeItaly + "\r\n";
+        sHeader += "Date: " + rfc1123DateTimeItaly + "\r\n";
 
         sHeader += "Content-Length: " + bData.length + "\r\n\r\n";
         System.out.println("Send data to device");
@@ -108,17 +118,6 @@ public class Main {
         System.out.println("Sync timezone for SN: " + sn);
     }
 
-    private static void forceDLST(String sn, Socket socket) {
-        String toReply = "200 OK";
-        String strR = "SET OPTION DLSTMode=1";
-        sendDataToDevice(toReply, strR, socket, sn);
-
-        byte[] bData = strR.getBytes(StandardCharsets.UTF_8);
-        sendToBrowser(bData, socket);
-
-        System.out.println("Sync DLST for SN: " + sn);
-    }
-
     private static void Analysis(byte[] bReceive, Socket socket) throws IOException {
         String strReceive = new String(bReceive, Charset.forName("US-ASCII"));
 
@@ -133,7 +132,6 @@ public class Main {
         if (!timezoneSN.contains(match)) {
             timezoneSN.add(match);
             forceTimezone(match, socket);
-            forceDLST(match, socket);
         }
 
         if (strReceive.contains("cdata?")) {
@@ -385,7 +383,6 @@ public class Main {
         }
         try {
             forceTimezone(machineSN.split(" ")[0], remoteSocket);
-            forceDLST(machineSN.split(" ")[0], remoteSocket);
             remoteSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
