@@ -22,7 +22,7 @@ public class Main {
     private static Set<String> timezoneSN = new HashSet<>();
     private static String token_ref = "uQOpixuDj/YtSlXjayO-dNBcsd2fKx14OBqMOmHikiUUXi6Zhg2UxufCQDg7ic=y/yn6i2VSV9K2EMxcGYpzrQSgDNgbbBBaWlc4Xlhc2mOhNAPAF?Y929cAUHXEj6GL5jzxhASk4Z6u?s/gdEjGXjP/PpQqDZvelyGnbhrZocCyYRxy!P5WXS!eu053XhUJV5zLl121glT?g54HPVX2kvvkyqENk1tWl3E/Otz-ErK7SItzubR59ElypGOPwm?f";
 
-    private static int port = 7778; // <- 7777 NGINX <-> 7778 Java
+    private static int port = 7777; // <- 7777 NGINX <-> 7778 Java
     //private static int port = 50000;
     private static InetAddress addr;
 
@@ -32,8 +32,8 @@ public class Main {
     //C:385:INFO
     public static void main(String[] args) throws UnknownHostException {
         try {
-            //addr = InetAddress.getByName("10.0.0.11");
-            addr = InetAddress.getByName("localhost");
+            addr = InetAddress.getByName("10.0.0.11");
+            //addr = InetAddress.getByName("localhost");
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
@@ -79,19 +79,20 @@ public class Main {
     }
 
     private static void sendDataToDevice(String sStatusCode, String sDataStr, Socket mySocket, String SN) {
-
         ZoneId italyZone = ZoneId.of("Europe/Rome");
         ZonedDateTime nowInItaly = ZonedDateTime.now(italyZone);
         ZonedDateTime now = ZonedDateTime.now(italyZone);
         boolean isOraLegale = now.getZone().getRules().isDaylightSavings(now.toInstant());
 
         if (isOraLegale) {
-            nowInItaly.minusHours(1);
+            nowInItaly = nowInItaly.minusHours(1);
         } else {
-            nowInItaly.minusHours(2);
+            nowInItaly = nowInItaly.minusHours(2);
         }
 
-        DateTimeFormatter rfc1123Formatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
+        nowInItaly = nowInItaly.plusMinutes(10);
+
+        DateTimeFormatter rfc1123Formatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'").withLocale(Locale.ENGLISH);
         String rfc1123DateTimeItaly = nowInItaly.format(rfc1123Formatter);
 
         byte[] bData = sDataStr.getBytes(StandardCharsets.UTF_8);
@@ -103,13 +104,15 @@ public class Main {
         sHeader += "Content-Length: " + bData.length + "\r\n\r\n";
         System.out.println("Send data to device");
 
+        System.out.println(rfc1123DateTimeItaly);
+
         sendToBrowser(sHeader.getBytes(StandardCharsets.UTF_8), mySocket);
         sendToBrowser(bData, mySocket);
     }
 
     private static void forceTimezone(String sn, Socket socket) {
         String toReply = "200 OK";
-        String strR = "GET OPTION FROM:" + sn + "\nStamp=9999\nOpStamp=9999\nPhotoStamp=0\nTransFlag=TransData AttLog\tOpLog\tAttPhoto\tEnrollUser\tChgUser\tEnrollFP\tChgFP\tFACE\nErrorDelay=120\nDelay=60\nTimeZone=120\nTransTimes=\nTransInterval=30\nSyncTime=0\nRealtime=1\nServerVer=1.0.0 31-Aug-23\nATTLOGStamp=9999\nOPERLOGStamp=9999\nATTPHOTOStamp=0\n";
+        String strR = "GET OPTION FROM:" + sn + "\nStamp=9999\nOpStamp=9999\nPhotoStamp=0\nTransFlag=TransData AttLog\tOpLog\tAttPhoto\tEnrollUser\tChgUser\tEnrollFP\tChgFP\tFACE\nErrorDelay=120\nDelay=60\nTimeZone=110\nTransTimes=\nTransInterval=30\nSyncTime=0\nRealtime=1\nServerVer=1.0.0 31-Aug-23\nATTLOGStamp=9999\nOPERLOGStamp=9999\nATTPHOTOStamp=0\n";
         sendDataToDevice(toReply, strR, socket, sn);
 
         byte[] bData = strR.getBytes(StandardCharsets.UTF_8);
