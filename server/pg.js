@@ -557,29 +557,32 @@ class JekoPgInit {
             const otherData = _f[1].split('-').filter(e => !!e);
 
             pool.query(`SELECT * FROM attlogs WHERE 
-                attlogs.attlog_terminal_sn = '${sn}' AND
-                attlogs.attlog_user_id = '${userId_date[0]}' AND
-                attlogs.attlog_date = '${userId_date[1]}' AND
-                attlogs.attlog_time = '${otherData[0]}'`, (err, data) => {
+                    attlogs.attlog_terminal_sn = '${sn}' AND
+                    attlogs.attlog_user_id = '${userId_date[0]}' AND
+                    attlogs.attlog_date = '${userId_date[1]}' AND
+                    attlogs.attlog_time = '${otherData[0]}'`, (err, result) => {
                 if (err) {
                     console.log(err);
                     j();
+                    return;
                 }
-            });
 
-            if (data?.rowCount) {
-                j(null);
-                return;
-            }
+                if (result.rowCount) {
+                    console.log("Row found, not adding the log: " + _f[0] + ' - ' + f[1]);
+                    j(null);
+                    return;
+                }
 
-            pool.query(
-                `INSERT INTO "attlogs" ("attlog_terminal_sn", "attlog_user_id", "attlog_date", "attlog_time", "attlog_reason_code", "attlog_access_type", "attlog_sent", "attlog_sent_timestamp", "attlog_work_code")
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, [sn, userId_date[0], userId_date[1], otherData[0], otherData[1], otherData[2], 'false', '', otherData[3]]).then(() => {
+                pool.query(
+                    `INSERT INTO "attlogs" ("attlog_terminal_sn", "attlog_user_id", "attlog_date", "attlog_time", "attlog_reason_code", "attlog_access_type", "attlog_sent", "attlog_sent_timestamp", "attlog_work_code")
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, [sn, userId_date[0], userId_date[1], otherData[0], otherData[1], otherData[2], 'false', '', otherData[3]]
+                ).then(() => {
                     r();
                 }).catch((err) => {
                     console.log(err);
                     j();
                 });
+            });
         });
     }
 
