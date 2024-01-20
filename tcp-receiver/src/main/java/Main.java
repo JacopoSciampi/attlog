@@ -299,31 +299,41 @@ public class Main {
             File tempFile = new File(workingDirectory, "temp.txt");
             BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
 
+            boolean processSequentially = true;
+
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
-                try {
-                    URL url = new URL(serverAddr + "/v3/terminal/log/add");
-                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                    con.setRequestMethod("POST");
-                    con.setRequestProperty("Content-Type", "application/json");
-                    con.setRequestProperty("x-token-ref", token_ref);
-                    String requestBody = line;
 
-                    con.setDoOutput(true);
-                    DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
-                    outputStream.writeBytes(requestBody);
-                    outputStream.flush();
-                    outputStream.close();
+                if (processSequentially) {
+                    try {
+                        URL url = new URL(serverAddr + "/v3/terminal/log/add");
+                        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                        con.setRequestMethod("POST");
+                        con.setRequestProperty("Content-Type", "application/json");
+                        con.setRequestProperty("x-token-ref", token_ref);
+                        String requestBody = line;
 
-                    int responseCode = con.getResponseCode();
-                    System.out.println("::" + line + ":: > update attLog request status: " + responseCode);
+                        con.setDoOutput(true);
+                        DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
+                        outputStream.writeBytes(requestBody);
+                        outputStream.flush();
+                        outputStream.close();
 
-                    if(responseCode != 200) {
+                        int responseCode = con.getResponseCode();
+                        System.out.println("::" + line + ":: > update attLog request status: " + responseCode);
+
+                        if (responseCode != 200) {
+                            writer.write(line);
+                            writer.newLine();
+                        }
+                    } catch (Exception e) {
+                        System.out.println("::" + line + ":: > Error uploading the attlog. Is the server online?");
                         writer.write(line);
                         writer.newLine();
+                    } finally {
+                        processSequentially = false;
                     }
-                } catch (Exception e) {
-                    System.out.println("::" + line + ":: > Error uploading the attlog. Is the server online?");
+                } else {
                     writer.write(line);
                     writer.newLine();
                 }
@@ -340,6 +350,7 @@ public class Main {
             e.printStackTrace();
         }
     }
+
 
     private static void  devicecmdProcess(byte[] bReceive, Socket remoteSocket) throws IOException {
         String sBuffer = new String(bReceive, StandardCharsets.US_ASCII).trim();
@@ -589,6 +600,11 @@ public class Main {
 
                 int responseCode = con.getResponseCode();
                 System.out.println("::" + snValue + ":: > update attLog request status: " + responseCode);
+
+                if(responseCode != 200) {
+                    saveAttlogForLater(requestBody);    
+                }
+
                 checkStampsToSend();
             } catch (Exception e) {
                 System.out.println("::" + snValue + ":: > Error uploading the attlog. Is the server online? Saving the log for later.");

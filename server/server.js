@@ -49,6 +49,9 @@ fastify.register(require('@fastify/cors'), {
         cb(new Error("Not allowed"), false)
     },
 }).then(() => {
+    //request.body.log
+    //N tiumbrature offline then online -> 99-2024-01-20 12:58:06-255-1-0-0-0-0-0-0-251-2024-01-20 12:58:08-255-2-0-0-0-0-0-0-253-2024-01-20 12:58:10-255-2-0-0-0-0-0-0-252-2024-01-20 12:58:11-255-2-0-0-0-0-0-0-
+    //Timbratura classica ->               99-2024-01-20 13:00:20-255-1-0-0-0-0-0-0-
     fastify.post('/v3/terminal/log/add', (request, reply) => {
         const tkn = request.headers["x-token-ref"];
         queryFromClocks++;
@@ -58,19 +61,53 @@ fastify.register(require('@fastify/cors'), {
             return;
         }
 
+        console.log("Request for ADD LOG with payload: " + request.body.log);
+
+        const currentYear = new Date().getFullYear();
+        const split = request.body.log.split(currentYear);
+
+        const logs = [];
+
+        if (split?.length === 2) {
+            logs.push(request.body.log);
+            // Single stamp
+        } else {
+            split?.forEach((s, idx) => {
+                if (idx !== 0) {
+                    const prev = split[idx - 1].split('-').filter(e => e);
+                    const prevValue = prev[prev.length - 1];
+                    const current = s.split('-').filter(e => e);
+
+                    if (current[current.length - 1] !== 0) {
+                        current.pop();
+                    }
+
+                    const currentValue = current.join('-');
+                    const toPush = `${prevValue}-${currentYear}-${currentValue}-`
+
+                    logs.push(toPush);
+                }
+            });
+
+            logs[logs.length - 1] += '0-';
+        }
+
         try {
-            pgAdapter.addLogIfNotExist(request.body.sn, request.body.log).then(data => {
-                reply.status(200).send({ msg: "ok" });
-                console.log(`Log add for SN: ${request.body.sn}. Data: ${request.body.log}`);
-            }).catch(() => {
-                console.log(`Error while adding the log. Log details -> SN: ${request.body.sn}. Data: ${request.body.log}`);
-                reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
-                return;
-            })
+
+            logs.forEach(log => {
+                pgAdapter.addLogIfNotExist(request.body.sn, log)
+                    .then(data => {
+                        console.log(`Log add for SN: ${request.body.sn}. Data: ${log}`);
+                    })
+                    .catch(() => {
+                        console.log(`Error while adding the log. Log details -> SN: ${request.body.sn}. Data: ${log}`);
+                    });
+            });
+
+            reply.status(200).send({ msg: "ok" });
         } catch (e) {
             console.log(e);
             reply.status(500).send({ title: "Errore", message: "Si è verificato un errore" });
-            return;
         }
     });
 
